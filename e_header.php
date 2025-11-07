@@ -1,0 +1,114 @@
+<?php
+/**
+ * e107 website system
+ *
+ * Copyright (C) 2008-2016 e107 Inc (e107.org)
+ * Released under the terms and conditions of the
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)
+ *
+ */
+
+// Enable debug mode for vstore (comment out in production)
+// define('e_DEBUG_VSTORE', true);
+
+// Cargar idiomas siempre (necesario para las constantes)
+e107::lan('vstore', false, true); // e107_plugins/vstore/languages/English_front.php
+
+// Verificar que las constantes estén disponibles, si no, definir fallbacks
+if (!defined('LAN_VSTORE_001')) {
+    define('LAN_VSTORE_001', 'Add to cart');
+}
+if (!defined('LAN_VSTORE_002')) {
+    define('LAN_VSTORE_002', 'In Stock');
+}
+if (!defined('LAN_VSTORE_003')) {
+    define('LAN_VSTORE_003', 'Out of Stock');
+}
+
+if(deftrue('USER_AREA'))
+{
+	// prevents inclusion of JS/CSS/meta in the admin area.
+	e107::css('vstore', 'vstore.css');
+	e107::js('vstore', 'js/vstore.js');
+
+	$vstore_prefs = e107::pref('vstore');
+
+	e107::js('settings', array('vstore' => array(
+		'url'       => e107::url('vstore', 'index'),
+		'cart'      => array(
+			'url'        => e107::url('vstore', 'cart'),
+			'addtocart'  => LAN_VSTORE_001, // 'Add to cart',
+			'outofstock' => empty($vstore_prefs['caption_outofstock'][e_LANGUAGE])
+				? 'Out of stock'
+				: $vstore_prefs['caption_outofstock'][e_LANGUAGE],
+			'available'  => 'In stock',
+		),
+		'ImageZoom' => array('url' => '')
+	)
+	));
+
+
+	if(!empty($vstore_prefs['custom_css']))
+	{
+		// Add any custom css to the page
+		e107::css('inline', "
+            /* vstore custom css */
+            " . $vstore_prefs['custom_css']);
+	}
+}
+
+// TODO move this into vstore.class.php as a static method. 
+if(!class_exists('vstore_cart_icon'))
+{
+	class vstore_cart_icon
+	{
+
+		function __construct()
+		{
+
+			//  require_once(e_PLUGIN.'vstore/vstore.class.php');
+
+			if(e_ADMIN_AREA !== true)
+			{
+
+				$vst = e107::getSingleton('vstore', e_PLUGIN . 'vstore/vstore.class.php');
+
+				$data = $vst->getCartData();
+
+				//$count = count($data);
+				// Sum up cart quantity for badge instead of only number of different products (items)
+				$count = 0;
+				if($data && count($data))
+				{
+					foreach($data as $row)
+					{
+						$count += $row['cart_qty'];
+					}
+				}
+
+
+			}
+			else
+			{
+				$count = 5;
+			}
+
+			$style = empty($count) ? '' : "class='active'";
+
+			$text = '<span id="vstore-cart-icon" ' . $style . '>' . e107::getParser()->toGlyph("fa-shopping-cart") . '<span class="badge">' . $count . '</span></span>';
+
+			if(!defined('LAN_PLUGIN_VSTORE_CARTICON'))
+			{
+				define('LAN_PLUGIN_VSTORE_CARTICON', $text);
+			}
+
+		}
+
+	}
+}
+
+new vstore_cart_icon;
+
+
+
+

@@ -1,0 +1,417 @@
+<!DOCTYPE html><html><head>
+      <title>TESTING_GUIDE</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      
+      <link rel="stylesheet" href="file:///c:\Users\e-sla\.vscode\extensions\shd101wyy.markdown-preview-enhanced-0.8.20\crossnote\dependencies\katex\katex.min.css">
+      
+      
+      
+      
+      
+      <style>
+      code[class*=language-],pre[class*=language-]{color:#333;background:0 0;font-family:Consolas,"Liberation Mono",Menlo,Courier,monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.4;-moz-tab-size:8;-o-tab-size:8;tab-size:8;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:.8em;overflow:auto;border-radius:3px;background:#f5f5f5}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal;background:#f5f5f5}.token.blockquote,.token.comment{color:#969896}.token.cdata{color:#183691}.token.doctype,.token.macro.property,.token.punctuation,.token.variable{color:#333}.token.builtin,.token.important,.token.keyword,.token.operator,.token.rule{color:#a71d5d}.token.attr-value,.token.regex,.token.string,.token.url{color:#183691}.token.atrule,.token.boolean,.token.code,.token.command,.token.constant,.token.entity,.token.number,.token.property,.token.symbol{color:#0086b3}.token.prolog,.token.selector,.token.tag{color:#63a35c}.token.attr-name,.token.class,.token.class-name,.token.function,.token.id,.token.namespace,.token.pseudo-class,.token.pseudo-element,.token.url-reference .token.variable{color:#795da3}.token.entity{cursor:help}.token.title,.token.title .token.punctuation{font-weight:700;color:#1d3e81}.token.list{color:#ed6a43}.token.inserted{background-color:#eaffea;color:#55a532}.token.deleted{background-color:#ffecec;color:#bd2c00}.token.bold{font-weight:700}.token.italic{font-style:italic}.language-json .token.property{color:#183691}.language-markup .token.tag .token.punctuation{color:#333}.language-css .token.function,code.language-css{color:#0086b3}.language-yaml .token.atrule{color:#63a35c}code.language-yaml{color:#183691}.language-ruby .token.function{color:#333}.language-markdown .token.url{color:#795da3}.language-makefile .token.symbol{color:#795da3}.language-makefile .token.variable{color:#183691}.language-makefile .token.builtin{color:#0086b3}.language-bash .token.keyword{color:#0086b3}pre[data-line]{position:relative;padding:1em 0 1em 3em}pre[data-line] .line-highlight-wrapper{position:absolute;top:0;left:0;background-color:transparent;display:block;width:100%}pre[data-line] .line-highlight{position:absolute;left:0;right:0;padding:inherit 0;margin-top:1em;background:hsla(24,20%,50%,.08);background:linear-gradient(to right,hsla(24,20%,50%,.1) 70%,hsla(24,20%,50%,0));pointer-events:none;line-height:inherit;white-space:pre}pre[data-line] .line-highlight:before,pre[data-line] .line-highlight[data-end]:after{content:attr(data-start);position:absolute;top:.4em;left:.6em;min-width:1em;padding:0 .5em;background-color:hsla(24,20%,50%,.4);color:#f4f1ef;font:bold 65%/1.5 sans-serif;text-align:center;vertical-align:.3em;border-radius:999px;text-shadow:none;box-shadow:0 1px #fff}pre[data-line] .line-highlight[data-end]:after{content:attr(data-end);top:auto;bottom:.4em}html body{font-family:'Helvetica Neue',Helvetica,'Segoe UI',Arial,freesans,sans-serif;font-size:16px;line-height:1.6;color:#333;background-color:#fff;overflow:initial;box-sizing:border-box;word-wrap:break-word}html body>:first-child{margin-top:0}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{line-height:1.2;margin-top:1em;margin-bottom:16px;color:#000}html body h1{font-size:2.25em;font-weight:300;padding-bottom:.3em}html body h2{font-size:1.75em;font-weight:400;padding-bottom:.3em}html body h3{font-size:1.5em;font-weight:500}html body h4{font-size:1.25em;font-weight:600}html body h5{font-size:1.1em;font-weight:600}html body h6{font-size:1em;font-weight:600}html body h1,html body h2,html body h3,html body h4,html body h5{font-weight:600}html body h5{font-size:1em}html body h6{color:#5c5c5c}html body strong{color:#000}html body del{color:#5c5c5c}html body a:not([href]){color:inherit;text-decoration:none}html body a{color:#08c;text-decoration:none}html body a:hover{color:#00a3f5;text-decoration:none}html body img{max-width:100%}html body>p{margin-top:0;margin-bottom:16px;word-wrap:break-word}html body>ol,html body>ul{margin-bottom:16px}html body ol,html body ul{padding-left:2em}html body ol.no-list,html body ul.no-list{padding:0;list-style-type:none}html body ol ol,html body ol ul,html body ul ol,html body ul ul{margin-top:0;margin-bottom:0}html body li{margin-bottom:0}html body li.task-list-item{list-style:none}html body li>p{margin-top:0;margin-bottom:0}html body .task-list-item-checkbox{margin:0 .2em .25em -1.8em;vertical-align:middle}html body .task-list-item-checkbox:hover{cursor:pointer}html body blockquote{margin:16px 0;font-size:inherit;padding:0 15px;color:#5c5c5c;background-color:#f0f0f0;border-left:4px solid #d6d6d6}html body blockquote>:first-child{margin-top:0}html body blockquote>:last-child{margin-bottom:0}html body hr{height:4px;margin:32px 0;background-color:#d6d6d6;border:0 none}html body table{margin:10px 0 15px 0;border-collapse:collapse;border-spacing:0;display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}html body table th{font-weight:700;color:#000}html body table td,html body table th{border:1px solid #d6d6d6;padding:6px 13px}html body dl{padding:0}html body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:700}html body dl dd{padding:0 16px;margin-bottom:16px}html body code{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;font-size:.85em;color:#000;background-color:#f0f0f0;border-radius:3px;padding:.2em 0}html body code::after,html body code::before{letter-spacing:-.2em;content:'\00a0'}html body pre>code{padding:0;margin:0;word-break:normal;white-space:pre;background:0 0;border:0}html body .highlight{margin-bottom:16px}html body .highlight pre,html body pre{padding:1em;overflow:auto;line-height:1.45;border:#d6d6d6;border-radius:3px}html body .highlight pre{margin-bottom:0;word-break:normal}html body pre code,html body pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}html body pre code:after,html body pre code:before,html body pre tt:after,html body pre tt:before{content:normal}html body blockquote,html body dl,html body ol,html body p,html body pre,html body ul{margin-top:0;margin-bottom:16px}html body kbd{color:#000;border:1px solid #d6d6d6;border-bottom:2px solid #c7c7c7;padding:2px 4px;background-color:#f0f0f0;border-radius:3px}@media print{html body{background-color:#fff}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{color:#000;page-break-after:avoid}html body blockquote{color:#5c5c5c}html body pre{page-break-inside:avoid}html body table{display:table}html body img{display:block;max-width:100%;max-height:100%}html body code,html body pre{word-wrap:break-word;white-space:pre}}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview ul{list-style:disc}.markdown-preview ul ul{list-style:circle}.markdown-preview ul ul ul{list-style:square}.markdown-preview ol{list-style:decimal}.markdown-preview ol ol,.markdown-preview ul ol{list-style-type:lower-roman}.markdown-preview ol ol ol,.markdown-preview ol ul ol,.markdown-preview ul ol ol,.markdown-preview ul ul ol{list-style-type:lower-alpha}.markdown-preview .newpage,.markdown-preview .pagebreak{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center!important}.markdown-preview:not([data-for=preview]) .code-chunk .code-chunk-btn-group{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .status{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .output-div{margin-bottom:16px}.markdown-preview .md-toc{padding:0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link div,.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}.markdown-preview .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0;min-height:100vh}@media screen and (min-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px + 2em)}}@media screen and (max-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{font-size:14px!important;padding:1em}}@media print{html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc{padding:0 16px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link div,html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% - 300px);padding:2em calc(50% - 457px - 300px / 2);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}
+/* Please visit the URL below for more information: */
+/*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
+
+      </style>
+      <!-- The content below will be included at the end of the <head> element. --><script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function () {
+    // your code here
+  });
+</script></head><body for="html-export">
+    
+    
+      <div class="crossnote markdown-preview  ">
+      <div>
+<h1 id="-correcciones-aplicadas---testing-required">✅ Correcciones Aplicadas - Testing Required </h1>
+<p><strong>Fecha:</strong> 6 de noviembre de 2025<br>
+<strong>Estado:</strong> ✅ COMPLETADO - Correcciones aplicadas con éxito</p>
+<hr>
+<h2 id="-resumen-de-correcciones-aplicadas">🎯 Resumen de Correcciones Aplicadas </h2>
+<h3 id="-1-método-calccouponamount---aplicado">✅ 1. Método calcCouponAmount() - APLICADO </h3>
+<p><strong>Archivo:</strong> <code>vstore.class.php</code> línea ~3827<br>
+<strong>Estado:</strong> ✅ Reemplazado completamente<br>
+<strong>Sintaxis PHP:</strong> ✅ Sin errores</p>
+<p><strong>Mejoras implementadas:</strong></p>
+<ul>
+<li>✅ Usa métodos helper <code>getCouponUsageCount()</code> y <code>getCouponUsageCountByUser()</code></li>
+<li>✅ Valida exclusiones de categorías ANTES que inclusiones</li>
+<li>✅ Previene que descuentos fijos excedan el precio del item</li>
+<li>✅ Casting explícito a int/float para seguridad</li>
+<li>✅ Logging detallado con <code>e_DEBUG_VSTORE</code></li>
+<li>✅ Garantiza que resultado sea siempre &lt;= 0.0</li>
+</ul>
+<p><strong>Cambios clave:</strong></p>
+<ol>
+<li>Línea ~3862: Usa <code>self::getCouponUsageCount()</code> en lugar de consulta SQL directa</li>
+<li>Línea ~3873: Usa <code>self::getCouponUsageCountByUser()</code> con verificación de USERID</li>
+<li>Línea ~3889: Verifica exclusiones de categorías PRIMERO (alta prioridad)</li>
+<li>Línea ~3898: Verifica exclusiones de items</li>
+<li>Línea ~3930: Limita descuento fijo al precio del item</li>
+</ol>
+<h3 id="-2-método-gettaxrate---aplicado">✅ 2. Método getTaxRate() - APLICADO </h3>
+<p><strong>Archivo:</strong> <code>vstore.class.php</code> línea ~3990<br>
+<strong>Estado:</strong> ✅ Reemplazado completamente<br>
+<strong>Sintaxis PHP:</strong> ✅ Sin errores</p>
+<p><strong>Mejoras implementadas:</strong></p>
+<ul>
+<li>❌ <strong>ELIMINADO:</strong> Geolocalización por IP (<code>e107::getIPHandler()-&gt;getIP()</code>)</li>
+<li>❌ <strong>ELIMINADO:</strong> Variable estática <code>$customerCountry</code></li>
+<li>✅ <strong>AGREGADO:</strong> Obtiene país del formulario vía <code>$_data['customer_country']</code></li>
+<li>✅ <strong>AGREGADO:</strong> Soporte reverse charge B2B (VAT ID válido = 0% IVA)</li>
+<li>✅ <strong>AGREGADO:</strong> Validación VAT ID usando <code>validateVATID()</code></li>
+<li>✅ <strong>AGREGADO:</strong> Logging detallado de escenarios</li>
+</ul>
+<p><strong>Cambios clave:</strong></p>
+<ol>
+<li>Línea ~4025: Obtiene país de sesión <code>e107::getSession('vstore')-&gt;get('_data')</code></li>
+<li>Línea ~4094: Verifica VAT ID para reverse charge B2B</li>
+<li>Línea ~4099: Aplica 0% IVA si VAT ID es válido</li>
+<li>Línea ~4070: Debug logging de escenario (same_country, reverse_charge, etc.)</li>
+</ol>
+<hr>
+<h2 id="-plan-de-testing---crítico">🧪 Plan de Testing - CRÍTICO </h2>
+<h3 id="paso-1-activar-debug-mode">Paso 1: Activar Debug Mode </h3>
+<p><strong>Archivo:</strong> <code>e107_config.php</code> o crear <code>e_header.php</code> en raíz del plugin</p>
+<pre data-role="codeBlock" data-info="php" class="language-php php"><code><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token comment">// Activar debug mode temporal</span>
+<span class="token keyword keyword-if">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">defined</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'e_DEBUG_VSTORE'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token function">define</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'e_DEBUG_VSTORE'</span><span class="token punctuation">,</span> <span class="token constant boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</span></code></pre><h3 id="paso-2-testing-de-cupones">Paso 2: Testing de Cupones </h3>
+<h4 id="escenario-1-cupón-con-fecha-futura">Escenario 1: Cupón con Fecha Futura </h4>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>Crear cupón:
+- Código: TEST_FUTURE
+- Tipo: 10% descuento
+- Fecha inicio: Mañana
+- Fecha fin: En 1 semana
+
+Resultado esperado:
+❌ Error: "Coupon is not yet available!"
+</code></pre><h4 id="escenario-2-cupón-expirado">Escenario 2: Cupón Expirado </h4>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>Crear cupón:
+- Código: TEST_EXPIRED
+- Tipo: 10% descuento
+- Fecha inicio: Hace 1 semana
+- Fecha fin: Ayer
+
+Resultado esperado:
+❌ Error: "Coupon is no longer available!"
+</code></pre><h4 id="escenario-3-límite-global-alcanzado">Escenario 3: Límite Global Alcanzado </h4>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>Crear cupón:
+- Código: TEST_LIMIT_GLOBAL
+- Tipo: 10% descuento
+- Límite global: 1 uso
+
+Paso 1: Completar 1 orden con este cupón
+Paso 2: Intentar usar nuevamente
+
+Resultado esperado:
+✅ Primera orden: Cupón aplicado
+❌ Segunda orden: Error "Coupon has exceeded its allowed number of usage!"
+</code></pre><h4 id="escenario-4-límite-por-usuario">Escenario 4: Límite por Usuario </h4>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>Crear cupón:
+- Código: TEST_LIMIT_USER
+- Tipo: 10% descuento
+- Límite por usuario: 1 uso
+
+Login como User A:
+- Completar orden con cupón → ✅ OK
+- Intentar usar nuevamente → ❌ Error "You have exceeded the allowed number of usage!"
+
+Login como User B:
+- Usar mismo cupón → ✅ OK (primer uso de User B)
+</code></pre><h4 id="escenario-5-categoría-excluida">Escenario 5: Categoría Excluida </h4>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>Crear categoría "Ofertas" (ID: 5)
+Crear cupón:
+- Código: TEST_CAT_EXCLUDED
+- Tipo: 20% descuento
+- Categorías excluidas: 5
+
+Agregar producto de categoría 5 al carrito
+Aplicar cupón
+
+Resultado esperado:
+✅ Sin descuento aplicado
+✅ Debug log: "Coupon excluded: item category 5 in exclusion list"
+</code></pre><h4 id="escenario-6-item-excluido">Escenario 6: Item Excluido </h4>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>Crear producto "iPhone 15" (ID: 10)
+Crear cupón:
+- Código: TEST_ITEM_EXCLUDED
+- Tipo: 15% descuento
+- Items excluidos: 10
+
+Agregar iPhone 15 al carrito
+Aplicar cupón
+
+Resultado esperado:
+✅ Sin descuento aplicado
+✅ Debug log: "Coupon excluded: item 10 in exclusion list"
+</code></pre><h4 id="escenario-7-descuento-fijo--precio">Escenario 7: Descuento Fijo &gt; Precio </h4>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>Crear producto "Calcetines" - Precio: €5
+Crear cupón:
+- Código: TEST_FIXED_OVERFLOW
+- Tipo: Descuento fijo €10
+
+Agregar calcetines al carrito
+Aplicar cupón
+
+Resultado esperado:
+✅ Descuento limitado a €5 (precio del producto)
+⚠️ Warning: "Coupon discount has been capped to item price for: Calcetines"
+</code></pre><h4 id="escenario-8-cupón-porcentual-válido">Escenario 8: Cupón Porcentual Válido </h4>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>Crear producto "Laptop" - Precio: €100
+Crear cupón:
+- Código: TEST_PCT_VALID
+- Tipo: 20% descuento
+- Sin restricciones
+
+Agregar laptop al carrito (cantidad: 2)
+Aplicar cupón
+
+Resultado esperado:
+✅ Subtotal: €200
+✅ Descuento: -€40 (20% de €200)
+✅ Total: €160
+</code></pre><h3 id="paso-3-testing-de-iva">Paso 3: Testing de IVA </h3>
+<h4 id="escenario-1-cliente-mismo-país-es--es">Escenario 1: Cliente Mismo País (ES → ES) </h4>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>Configuración:
+- País negocio: España (ES)
+- IVA estándar España: 21%
+
+Checkout:
+- País facturación: España
+- Producto: €100
+
+Resultado esperado:
+✅ IVA (21%): €21.00
+✅ Total: €121.00
+✅ Debug log: scenario: "same_country", tax_rate: 0.21
+</code></pre><h4 id="escenario-2-intra-ue-b2c-es--fr-sin-vat">Escenario 2: Intra-UE B2C (ES → FR sin VAT) </h4>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>Configuración:
+- País negocio: España (ES)
+
+Checkout:
+- País facturación: Francia (FR)
+- VAT ID: (vacío o inválido)
+- Producto: €100
+
+Resultado esperado:
+✅ IVA Francia (20%): €20.00
+✅ Total: €120.00
+✅ Debug log: scenario: "intra_eu_b2c", tax_rate: 0.20
+</code></pre><h4 id="escenario-3-reverse-charge-b2b-es--de-con-vat-válido">Escenario 3: Reverse Charge B2B (ES → DE con VAT válido) </h4>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>Configuración:
+- País negocio: España (ES)
+- tax_check_vat: ACTIVADO
+
+Checkout:
+- País facturación: Alemania (DE)
+- VAT ID: DE123456789 (válido en VIES)
+- Producto: €100
+
+Resultado esperado:
+✅ IVA: €0.00 (reverse charge)
+✅ Total: €100.00
+✅ Debug log: scenario: "reverse_charge_b2b", vat_id: "DE123456789", valid: true, tax_rate: 0.0
+⚠️ Nota en factura: "Reverse Charge - Art. 196 EU VAT Directive"
+</code></pre><h4 id="escenario-4-intra-ue-con-vat-inválido-es--de">Escenario 4: Intra-UE con VAT Inválido (ES → DE) </h4>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>Configuración:
+- País negocio: España (ES)
+
+Checkout:
+- País facturación: Alemania (DE)
+- VAT ID: DE999999999 (INVÁLIDO)
+- Producto: €100
+
+Resultado esperado:
+✅ IVA Alemania (19%): €19.00
+✅ Total: €119.00
+❌ Error VAT: "Invalid VAT ID"
+</code></pre><h4 id="escenario-5-cliente-fuera-ue-es--us">Escenario 5: Cliente Fuera UE (ES → US) </h4>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>Configuración:
+- País negocio: España (ES)
+
+Checkout:
+- País facturación: Estados Unidos (US)
+- Producto: €100
+
+Resultado esperado:
+✅ IVA: €0.00 (export)
+✅ Total: €100.00
+✅ Debug log: "Customer outside EU, no tax"
+</code></pre><h4 id="escenario-6-negocio-fuera-ue-us--gb">Escenario 6: Negocio Fuera UE (US → GB) </h4>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>Configuración:
+- País negocio: Estados Unidos (US)
+
+Checkout:
+- País facturación: Reino Unido (GB)
+- Producto: $100
+
+Resultado esperado:
+✅ IVA: $0.00
+✅ Total: $100.00
+✅ Debug log: "Business outside EU, no tax"
+</code></pre><h3 id="paso-4-verificar-debug-logs">Paso 4: Verificar Debug Logs </h3>
+<p><strong>Ubicación:</strong> Footer del sitio (cuando <code>e_DEBUG_VSTORE</code> está activo)</p>
+<p><strong>Buscar:</strong></p>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>[VSTORE_COUPON] Coupon excluded: item category 5 in exclusion list
+[VSTORE_COUPON] coupon_code: "TEST_PCT_VALID", item_id: 10, qty: 2, discount_amount: -40
+
+[VSTORE_TAX] scenario: "same_country", tax_class: "standard", tax_rate: 0.21
+[VSTORE_TAX] scenario: "reverse_charge_b2b", vat_id: "DE123456789", valid: true, tax_rate: 0.0
+[VSTORE_TAX] Customer outside EU, no tax
+</code></pre><h3 id="paso-5-testing-de-flujo-completo">Paso 5: Testing de Flujo Completo </h3>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>1. Agregar productos al carrito (€100 + €50 = €150)
+2. Aplicar cupón 10% → Descuento: -€15
+3. Subtotal después de cupón: €135
+4. Seleccionar envío: €10
+5. País: Francia (IVA 20%)
+6. IVA sobre (€135 + €10) = €145 * 0.20 = €29.00
+7. Total final: €174.00
+
+Verificar:
+✅ Cupón aplicado correctamente
+✅ IVA calculado después del cupón
+✅ Envío incluido en base imponible
+✅ Total correcto
+</code></pre><hr>
+<h2 id="-verificación-de-errores-comunes">🔍 Verificación de Errores Comunes </h2>
+<h3 id="error-1-call-to-undefined-method-vstoregetcouponusagecount">Error 1: "Call to undefined method vstore::getCouponUsageCount()" </h3>
+<p><strong>Causa:</strong> Métodos helper no están en el archivo<br>
+<strong>Solución:</strong> Verificar que los métodos están al final del archivo (línea ~5220)</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token function">grep</span> <span class="token parameter variable">-n</span> <span class="token string">"getCouponUsageCount"</span> vstore.class.php
+<span class="token comment"># Debe mostrar: 5220:public static function getCouponUsageCount($couponCode)</span>
+</code></pre><h3 id="error-2-undefined-index-customer_country">Error 2: "Undefined index: customer_country" </h3>
+<p><strong>Causa:</strong> País no se guarda en sesión durante checkout<br>
+<strong>Solución:</strong> Verificar que el formulario de checkout guarda <code>customer_country</code> en <code>$_data</code></p>
+<pre data-role="codeBlock" data-info="php" class="language-php php"><code><span class="token comment">// En proceso de checkout</span>
+<span class="token variable">$_data</span> <span class="token operator">=</span> <span class="token scope">e107<span class="token punctuation">::</span></span><span class="token function">getSession</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'vstore'</span><span class="token punctuation">)</span><span class="token operator">-&gt;</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'_data'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token variable">$_data</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'customer_country'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token global">$_POST</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'customer_country'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token scope">e107<span class="token punctuation">::</span></span><span class="token function">getSession</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'vstore'</span><span class="token punctuation">)</span><span class="token operator">-&gt;</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'_data'</span><span class="token punctuation">,</span> <span class="token variable">$_data</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><h3 id="error-3-invalid-vat-id-siempre-incluso-con-ids-válidos">Error 3: "Invalid VAT ID" siempre (incluso con IDs válidos) </h3>
+<p><strong>Causa:</strong> Servicio VIES no responde o credenciales incorrectas<br>
+<strong>Solución:</strong> El código tiene failsafe - acepta VAT ID si VIES falla</p>
+<pre data-role="codeBlock" data-info="php" class="language-php php"><code><span class="token comment">// Verificar en debug log</span>
+<span class="token punctuation">[</span><span class="token constant">VSTORE_VAT</span><span class="token punctuation">]</span> <span class="token constant">VIES</span> service unavailable<span class="token punctuation">:</span> Connection timeout
+<span class="token comment">// VAT ID aceptado automáticamente</span>
+</code></pre><hr>
+<h2 id="-checklist-de-verificación-final">📋 Checklist de Verificación Final </h2>
+<h3 id="pre-testing">Pre-Testing </h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" checked=""> Correcciones aplicadas en <code>vstore.class.php</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" checked=""> Sintaxis PHP verificada (<code>php -l</code>)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Debug mode activado</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Backup de base de datos creado</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Ambiente de staging preparado</li>
+</ul>
+<h3 id="testing-cupones">Testing Cupones </h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Cupón fecha futura rechazado</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Cupón expirado rechazado</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Límite global funciona</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Límite por usuario funciona</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Exclusión de categorías funciona</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Exclusión de items funciona</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Descuento fijo limitado a precio</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Cupón porcentual calculado correctamente</li>
+</ul>
+<h3 id="testing-iva">Testing IVA </h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Mismo país aplica IVA local</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Intra-UE B2C aplica IVA destino</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Reverse charge B2B aplica 0%</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> VAT ID inválido aplica IVA normal</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Cliente fuera UE aplica 0%</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Negocio fuera UE aplica 0%</li>
+</ul>
+<h3 id="debug-logs">Debug Logs </h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Logs de cupones visibles</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Logs de IVA visibles</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Escenarios identificados correctamente</li>
+</ul>
+<h3 id="post-testing">Post-Testing </h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Todos los tests pasados</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Debug mode desactivado</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Documentar issues encontrados</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Deploy a staging OK</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox"> Monitoreo 24h sin errores</li>
+</ul>
+<hr>
+<h2 id="-deploy-a-producción">🚀 Deploy a Producción </h2>
+<h3 id="paso-1-desactivar-debug">Paso 1: Desactivar Debug </h3>
+<pre data-role="codeBlock" data-info="php" class="language-php php"><code><span class="token comment">// En e107_config.php o e_header.php</span>
+<span class="token comment">// Comentar o eliminar:</span>
+<span class="token comment">// define('e_DEBUG_VSTORE', true);</span>
+</code></pre><h3 id="paso-2-backup">Paso 2: Backup </h3>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># Base de datos</span>
+mysqldump <span class="token parameter variable">-u</span> usuario <span class="token parameter variable">-p</span> database_name <span class="token operator">&gt;</span> backup_vstore_<span class="token variable"><span class="token variable">$(</span><span class="token function">date</span> +%Y%m%d<span class="token variable">)</span></span>.sql
+
+<span class="token comment"># Archivos</span>
+<span class="token function">cp</span> vstore.class.php vstore.class.php.bak
+<span class="token function">cp</span> <span class="token parameter variable">-r</span> e107_plugins/vstore e107_plugins/vstore_backup_<span class="token variable"><span class="token variable">$(</span><span class="token function">date</span> +%Y%m%d<span class="token variable">)</span></span>
+</code></pre><h3 id="paso-3-deploy">Paso 3: Deploy </h3>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># Subir archivo corregido</span>
+<span class="token function">scp</span> vstore.class.php user@server:/path/to/e107_plugins/vstore/
+
+<span class="token comment"># Verificar permisos</span>
+<span class="token function">chmod</span> <span class="token number">644</span> vstore.class.php
+</code></pre><h3 id="paso-4-monitoreo">Paso 4: Monitoreo </h3>
+<p><strong>24 horas después del deploy:</strong></p>
+<ul>
+<li>✅ Verificar logs de errores: <code>/logs/error.log</code></li>
+<li>✅ Verificar órdenes procesadas correctamente</li>
+<li>✅ Verificar cálculos de IVA correctos</li>
+<li>✅ Verificar cupones aplicados correctamente</li>
+<li>✅ Verificar no hay errores 500</li>
+</ul>
+<hr>
+<h2 id="-soporte">📞 Soporte </h2>
+<h3 id="si-hay-problemas">Si hay problemas: </h3>
+<ol>
+<li>
+<p><strong>Rollback inmediato:</strong></p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token function">mv</span> vstore.class.php.bak vstore.class.php
+</code></pre></li>
+<li>
+<p><strong>Revisar logs:</strong></p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token function">tail</span> <span class="token parameter variable">-f</span> /path/to/e107/logs/error.log
+</code></pre></li>
+<li>
+<p><strong>Contactar:</strong></p>
+<ul>
+<li>Gitter: <a href="https://gitter.im/e107inc/vstore">https://gitter.im/e107inc/vstore</a></li>
+<li>Forum: <a href="https://e107.org/forum">https://e107.org/forum</a></li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="-documentación-relacionada">📊 Documentación Relacionada </h2>
+<ul>
+<li><strong>Plan completo:</strong> <code>docs/PLAN_DE_TRABAJO.md</code></li>
+<li><strong>Código corregido:</strong> <code>docs/CORRECCIONES_APLICADAS.md</code></li>
+<li><strong>Manual usuario:</strong> <code>docs/user-manual.html</code></li>
+<li><strong>Resumen sesión:</strong> <code>docs/RESUMEN_SESION.md</code></li>
+<li><strong>Guía IA:</strong> <code>.github/copilot-instructions.md</code></li>
+</ul>
+<hr>
+<p><strong>Generado:</strong> 6 de noviembre de 2025<br>
+<strong>Estado:</strong> ✅ CORRECCIONES APLICADAS - TESTING REQUERIDO<br>
+<strong>Prioridad:</strong> 🔴 ALTA - Verificar antes de producción</p>
+<p>🎉 <strong>¡Las correcciones están aplicadas! Solo falta testing exhaustivo antes de deploy.</strong></p>
+</div>
+      </div>
+      
+      
+    
+    
+    
+    
+    
+    
+  
+    </body></html>
