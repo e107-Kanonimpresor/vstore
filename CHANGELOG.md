@@ -52,6 +52,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added type checking before iterating over `$text` variable
   - Handles both array and string input types gracefully
 
+- **Output Buffer**: Fixed "ob_*() level 2 at end instead of (1)" error
+  - Properly closes output buffer after PDF generation when saving to disk
+  - Prevents buffer leak during invoice creation on order completion
+  - Buffer opened by vstore_pdf.class.php is now correctly cleaned up
+
 #### Admin Panel
 - **Orders Management**: Corrected array key access errors
   - Added validation for `$_GET['filter_options']` before comparison
