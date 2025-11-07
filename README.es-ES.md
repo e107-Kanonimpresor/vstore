@@ -121,11 +121,16 @@ Ya sea que vendas productos físicos, descargas digitales o servicios, Vstore se
    git clone https://github.com/Kanonimpresor/vstore.git
    ```
 
-2. **Instalar Dependencias** (si instalas desde código fuente):
+2. **Instalar Dependencias** ⚠️ **OBLIGATORIO**:
    ```bash
    cd vstore
-   composer install
+   composer install --no-dev
    ```
+   
+   > **⚠️ IMPORTANTE**: El directorio `vendor/` NO está incluido en el repositorio.  
+   > **DEBES** ejecutar `composer install` después de clonar para descargar todas las dependencias.  
+   > Sin este paso, el plugin NO funcionará y verás errores como:  
+   > `Fatal error: Failed opening required 'vendor/autoload.php'`
 
 3. **Instalar vía Admin de e107**:
    - Navegar a: **Admin → Plugins → Gestionar Plugins**

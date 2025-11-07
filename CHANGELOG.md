@@ -5,7 +5,13 @@ All notable changes to the Vstore e-commerce plugin will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2025-11-07
+## [1.1.0] - 2025-11-07
+
+### Added
+- **Documentation**: Enhanced installation instructions in README (EN/ES/PT)
+  - Added prominent warning about required `composer install` step
+  - Clarified that `vendor/` directory is not included in repository
+  - Added troubleshooting section for common installation errors
 
 ### Fixed
 
