@@ -4731,6 +4731,13 @@ class vstore
 
 		$pdf->makePDF($text, $footer, $creator, $author, $title, $subject, $keywords, $url, $logo);
 
+		// Clean up output buffer opened by vstore_pdf.class.php (line 26)
+		// This prevents "ob_*() level 2 at end instead of (1)" error
+		if(ob_get_level() > 0)
+		{
+			ob_end_clean();
+		}
+
 		return;
 	}
 
