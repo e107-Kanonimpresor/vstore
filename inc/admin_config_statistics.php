@@ -38,53 +38,73 @@ class vstore_statistics_ui extends e_admin_ui
 			$text =  '
 				<div class="row">
 					<div class="col-6 col-md-6 col-lg-3">
-					<div class="panel panel-default">
-						
-						<div class="panel-body">
-						<a href="admin_config.php?filter_options=order_status__open&mode=orders&action=list">
-						<div class="pull-left" style="height:60px; padding-right:20px"><i class="fa fa-shopping-cart fa-fw fa-3x"></i></div>
-							Open orders
-							<h4>'.number_format($count_open).'</h4>
-							</a>
-						</div>
-						
-					</div>	
+						<div class="panel panel-default">
+							<div class="panel-body">
+								<a href="admin_config.php?filter_options=order_status__open&mode=orders&action=list" style="text-decoration:none; color:inherit;">
+									<div class="row">
+										<div class="col-xs-3 text-center">
+											<i class="fa fa-folder-open fa-4x text-info"></i>
+										</div>
+										<div class="col-xs-9 text-right">
+											<div class="text-muted">Open orders</div>
+											<h3 class="m-t-0">'.number_format($count_open).'</h3>
+										</div>
+									</div>
+								</a>
+							</div>
+						</div>	
 					</div>			
 					<div class="col-6 col-md-6 col-lg-3">
 						<div class="panel panel-default">
-						<a href="admin_config.php?filter_options=datestamp__order_date__week&mode=orders&action=list">
 							<div class="panel-body">
-							<div class="pull-left" style="height:60px; padding-right:20px"><i class="fa fa-shopping-cart fa-fw fa-3x"></i></div>
-								Orders last 7 days
-								<h4>'.number_format($count_orders_7).'</h4>
+								<a href="admin_config.php?filter_options=datestamp__order_date__week&mode=orders&action=list" style="text-decoration:none; color:inherit;">
+									<div class="row">
+										<div class="col-xs-3 text-center">
+											<i class="fa fa-calendar fa-4x text-success"></i>
+										</div>
+										<div class="col-xs-9 text-right">
+											<div class="text-muted">Orders last 7 days</div>
+											<h3 class="m-t-0">'.number_format($count_orders_7).'</h3>
+										</div>
+									</div>
+								</a>
 							</div>
-						</a>
-					</div>	
+						</div>	
 					</div>
 					<div class="col-6 col-md-6 col-lg-3">		
-					<div class="panel panel-default">
-					<a href="admin_config.php?filter_options=datestamp__order_date__week&mode=orders&action=list">
-						<div class="panel-body">
-						<div class="pull-left" style="height:60px; padding-right:20px"><i class="fa fa-line-chart fa-fw fa-3x"></i></div>
-							Gross sales last 7 days
-							<h4>'.$sc->getCurrencySymbol() . number_format($gross_7, 2).'</h4>
-						</div>
-					</a>
-					</div>	
+						<div class="panel panel-default">
+							<div class="panel-body">
+								<a href="admin_config.php?filter_options=datestamp__order_date__week&mode=orders&action=list" style="text-decoration:none; color:inherit;">
+									<div class="row">
+										<div class="col-xs-3 text-center">
+											<i class="fa fa-money fa-4x text-warning"></i>
+										</div>
+										<div class="col-xs-9 text-right">
+											<div class="text-muted">Gross sales last 7 days</div>
+											<h3 class="m-t-0">'.$sc->getCurrencySymbol() . number_format($gross_7, 2).'</h3>
+										</div>
+									</div>
+								</a>
+							</div>
+						</div>	
 					</div>	
 					<div class="col-6 col-md-6 col-lg-3">		
-					<div class="panel panel-default">
-					<a href="admin_config.php?filter_options=datestamp__order_date__month&mode=orders&action=list">
-						<div class="panel-body">
-						<div class="pull-left" style="height:60px; padding-right:20px"><i class="fa fa-line-chart fa-fw fa-3x"></i></div>
-							Gross sales last 31 days
-							<h4>'.$sc->getCurrencySymbol() . number_format($gross_31, 2).'</h4>
-						</div>
-					</a>
-					</div>	
+						<div class="panel panel-default">
+							<div class="panel-body">
+								<a href="admin_config.php?filter_options=datestamp__order_date__month&mode=orders&action=list" style="text-decoration:none; color:inherit;">
+									<div class="row">
+										<div class="col-xs-3 text-center">
+											<i class="fa fa-line-chart fa-4x text-primary"></i>
+										</div>
+										<div class="col-xs-9 text-right">
+											<div class="text-muted">Gross sales last 31 days</div>
+											<h3 class="m-t-0">'.$sc->getCurrencySymbol() . number_format($gross_31, 2).'</h3>
+										</div>
+									</div>
+								</a>
+							</div>
+						</div>	
 					</div>			
-				</div>	
-				</div>
 				</div>	
 				';
 
