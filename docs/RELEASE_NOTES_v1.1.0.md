@@ -156,7 +156,7 @@ This release focuses on **modernization**, **stability**, and **PHP 8.x compatib
 
 ## 🐛 Known Issues
 
-None at this time. If you encounter any issues, please [open an issue](https://github.com/Kanonimpresor/vstore/issues) on GitHub.
+None at this time. If you encounter any issues, please [open an issue](https://github.com/e107-Kanonimpresor/vstore/issues) on GitHub.
 
 ---
 
@@ -164,7 +164,7 @@ None at this time. If you encounter any issues, please [open an issue](https://g
 
 - **Gitter Chat**: https://gitter.im/e107inc/vstore
 - **e107 Forums**: https://e107.org/forum
-- **GitHub Issues**: https://github.com/Kanonimpresor/vstore/issues
+- **GitHub Issues**: https://github.com/e107-Kanonimpresor/vstore/issues
 
 ---
 

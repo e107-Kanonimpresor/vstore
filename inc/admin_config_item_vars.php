@@ -1,9 +1,13 @@
 <?php
+e107::lan('vstore', 'admin_catalog', true);
+
 /**
  * Adminarea module item vars
  */
 class vstore_items_vars_ui extends e_admin_ui
 {
+	use vstore_admin_common;
+
 
 		protected $pluginTitle		= 'Vstore';
 		protected $pluginName		= 'vstore';
@@ -28,9 +32,9 @@ class vstore_items_vars_ui extends e_admin_ui
 		protected $fields 		= array (
 		  'checkboxes'          =>   array ( 'title' => '', 'type' => null, 'data' => null, 'width' => '5%', 'thclass' => 'center', 'forced' => '1', 'class' => 'center', 'toggle' => 'e-multiselect',  ),
 		  'item_var_id'         =>   array ( 'title' => LAN_ID, 'data' => 'int', 'width' => '5%', 'help' => '', 'readParms' => array(), 'writeParms' => array(), 'class' => 'left', 'thclass' => 'left',  ),
-		  'item_var_name'       =>   array ( 'title' => LAN_NAME, 'type' => 'text', 'data' => 'str', 'width' => 'auto', 'inline' => true, 'help' => 'Enter a name for this category of variations.', 'readParms' => array(), 'writeParms'  => array('size'=>'xxlarge', 'placeholder'=>'Variation name. eg. Colors'), 'class' => 'left', 'thclass' => 'left',  ),
-		  'item_var_attributes' =>   array ( 'title' => 'Price Modification', 'type' => 'method', 'data' => 'json', 'width' => 'auto', 'help' => 'Enter a name for each variation. Optionally increase or decrease the price of this product variation by a fixed amount (+/-). Or, adjust the price as a percentage (%) of the original price.', 'readParms' => array(), 'writeParms' => array(), 'class' => 'left', 'thclass' => 'left',  ),
-		  'item_var_compulsory' =>   array ( 'title' => 'Track inventory', 'type' => 'boolean', 'data' => 'int', 'width' => 'auto', 'batch' => true, 'inline' => true, 'help' => 'When enabled, the inventory of this product variation will be tracked separately.', 'readParms' => array(), 'writeParms' => array('default' => 1), 'class' => 'left', 'thclass' => 'left',  ),
+		  'item_var_name'       =>   array ( 'title' => LAN_NAME, 'type' => 'text', 'data' => 'str', 'width' => 'auto', 'inline' => true, 'help' => LAN_VSTORE_ADMIN_VAR_NAME_H, 'readParms' => array(), 'writeParms'  => array('size'=>'xxlarge', 'placeholder'=>LAN_VSTORE_ADMIN_VAR_NAME_PH), 'class' => 'left', 'thclass' => 'left',  ),
+		  'item_var_attributes' =>   array ( 'title' => LAN_VSTORE_ADMIN_VAR_ATTR, 'type' => 'method', 'data' => 'json', 'width' => 'auto', 'help' => LAN_VSTORE_ADMIN_VAR_ATTR_H, 'readParms' => array(), 'writeParms' => array(), 'class' => 'left', 'thclass' => 'left',  ),
+		  'item_var_compulsory' =>   array ( 'title' => LAN_VSTORE_ADMIN_VAR_TRACK, 'type' => 'boolean', 'data' => 'int', 'width' => 'auto', 'batch' => true, 'inline' => true, 'help' => LAN_VSTORE_ADMIN_VAR_TRACK_H, 'readParms' => array(), 'writeParms' => array('default' => 1), 'class' => 'left', 'thclass' => 'left',  ),
 		  'item_var_userclass'  =>   array ( 'title' => LAN_VISIBILITY, 'type' => 'userclass', 'data' => 'int', 'width' => 'auto', 'batch' => true, 'inline' => true, 'help' => '', 'readParms' => array(), 'writeParms' => array(), 'class' => 'left', 'thclass' => 'left',  ),
 		  'options'             =>   array ( 'title' => LAN_OPTIONS, 'type' => null, 'data' => null, 'width' => '10%', 'thclass' => 'center last', 'class' => 'center last', 'forced' => '1',  ),
 		);
@@ -113,16 +117,6 @@ class vstore_items_vars_ui extends e_admin_ui
 			// do something
 		}
 
-		// left-panel help menu area.
-		public function renderHelp()
-		{
-		//	$caption = LAN_HELP;
-		///	$text = 'Some help text';
-
-		//	return array('caption'=>$caption,'text'=> $text);
-
-		}
-
 	/*
 		// optional - a custom page.
 		public function customPage()
@@ -192,8 +186,8 @@ class vstore_items_vars_form_ui extends e_admin_form_ui
 				else
 				{
 					$cur = array(
-						0 => array('name'=>null, 'operator'=>null, 'value'=>null, 'placeholder'=>'eg. Red'),
-						1 => array('name'=>null, 'operator'=>null, 'value'=>null, 'placeholder'=>'eg. Blue')
+						0 => array('name'=>null, 'operator'=>null, 'value'=>null, 'placeholder'=>LAN_VSTORE_ADMIN_VAR_ATTR_EX1),
+						1 => array('name'=>null, 'operator'=>null, 'value'=>null, 'placeholder'=>LAN_VSTORE_ADMIN_VAR_ATTR_EX2)
 					);
 				}
 

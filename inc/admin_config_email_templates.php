@@ -1,9 +1,13 @@
 <?php
+e107::lan('vstore', 'admin_email', true);
+
 /**
- * Adminarea module cart
+ * Adminarea module email templates
  */
 class vstore_email_templates_ui extends e_admin_ui
 {
+	use vstore_admin_common;
+
 			
 		protected $pluginTitle		= 'Vstore';
 		protected $pluginName		= 'vstore';
@@ -21,8 +25,8 @@ class vstore_email_templates_ui extends e_admin_ui
 				$this->preftabs[$type] = $label;
 
 				$this->prefs['email_templates/'.$type.'/active']    = array('title' => LAN_ACTIVE, 'tab' => $type, 'type'=>'bool');
-				$this->prefs['email_templates/'.$type.'/cc']        = array('title' => "CC to yourself", 'tab' => $type, 'type'=>'bool');
-				$this->prefs['email_templates/'.$type.'/template']  = array('title'=>'Email Template', 'tab' => $type, 'type'=>'bbarea', 'writeParms'=>array('default'=>$defaultTemplate[$type], 'size'=>'large'));
+				$this->prefs['email_templates/'.$type.'/cc']        = array('title' => LAN_VSTORE_ADMIN_MAIL_CC, 'tab' => $type, 'type'=>'bool');
+				$this->prefs['email_templates/'.$type.'/template']  = array('title'=>LAN_VSTORE_ADMIN_MAIL_TEMPLATE, 'tab' => $type, 'type'=>'bbarea', 'writeParms'=>array('default'=>$defaultTemplate[$type], 'size'=>'large'));
 				$this->prefs['template_options'.$type]              = array('title' => LAN_OPTIONS, 'method'=>'templateOptions', 'tab' => $type, 'data'=>false,'type'=>'method', 'writeParms'=>array('nolabel'=>true, 'templateType'=>$type, 'template'=>$defaultTemplate[$type]));
 
 			}
@@ -145,8 +149,8 @@ class vstore_email_templates_form_ui extends e_admin_form_ui
 		}
 		$tp = e107::getParser();
 
-		$text = $this->button('', '<span class="fa fa-undo"></span> '. 'Reset template', 'action', '', array('data-template' => rawurlencode($att['template']), 'data-type' => $att['templateType'], 'class' => 'vstore-email-reset btn-sm', 'title' => 'Click & save to reset this template to the default template.'));
-		$text .= " <a class='btn btn-sm btn-default e-expandit' href='#leg'>".$tp->toGlyph('fa-info-circle')." Field Options</a>";
+		$text = $this->button('', '<span class="fa fa-undo"></span> '. LAN_VSTORE_ADMIN_MAIL_RESET, 'action', '', array('data-template' => rawurlencode($att['template']), 'data-type' => $att['templateType'], 'class' => 'vstore-email-reset btn-sm', 'title' => LAN_VSTORE_ADMIN_MAIL_RESET_H));
+		$text .= " <a class='btn btn-sm btn-default e-expandit' href='#leg'>".$tp->toGlyph('fa-info-circle')." ".LAN_VSTORE_ADMIN_MAIL_FIELD_OPTIONS."</a>";
 		$text .= '<div id="leg" class="small" style="display:none">'.$this->renderTemplateKeys().'</div>';
 
 		return $text;
@@ -160,27 +164,27 @@ class vstore_email_templates_form_ui extends e_admin_form_ui
 	private function renderTemplateKeys()
 	{
 		$email_fields = array(
-			'{REF}'                        => 'The order reference number',
-			'{BILLING: firstname}'         => 'The billing firstname',
-			'{BILLING: lastname}'          => 'The billing lastname',
-			'{BILLING: company}'           => 'The billing company name',
-			'{BILLING: address}'           => 'The billing street',
-			'{BILLING: city}'              => 'The billing city',
-			'{BILLING: state}'             => 'The billing state',
-			'{BILLING: zip}'               => 'The billing zip code',
-			'{BILLING: country}'           => 'The billing country',
-			'{SHIPPING: firstname}'        => 'The shipping firstname',
-			'{SHIPPING: lastname}'         => 'The shipping lastname',
-			'{SHIPPING: company}'          => 'The shipping company name',
-			'{SHIPPING: address}'          => 'The shipping street',
-			'{SHIPPING: city}'             => 'The shipping city',
-			'{SHIPPING: state}'            => 'The shipping state',
-			'{SHIPPING: zip}'              => 'The shipping zip code',
-			'{SHIPPING: country}'          => 'The shipping country',
-			'{ORDER_ITEMS}'                => 'The ordered items',
-			'{ORDER_PAYMENT_INSTRUCTIONS}' => 'In case of payment method "bank transfer", the bank transfer details',
-			'{ORDER_MERCHANT_INFO}'        => 'Merchant name & address',
-			'{SENDER_NAME}'                => 'Sender name es defined in the vstore prefs'
+			'{REF}'                        => LAN_VSTORE_ADMIN_MAIL_FLD_REF,
+			'{BILLING: firstname}'         => LAN_VSTORE_ADMIN_MAIL_FLD_BILL_FIRSTNAME,
+			'{BILLING: lastname}'          => LAN_VSTORE_ADMIN_MAIL_FLD_BILL_LASTNAME,
+			'{BILLING: company}'           => LAN_VSTORE_ADMIN_MAIL_FLD_BILL_COMPANY,
+			'{BILLING: address}'           => LAN_VSTORE_ADMIN_MAIL_FLD_BILL_ADDRESS,
+			'{BILLING: city}'              => LAN_VSTORE_ADMIN_MAIL_FLD_BILL_CITY,
+			'{BILLING: state}'             => LAN_VSTORE_ADMIN_MAIL_FLD_BILL_STATE,
+			'{BILLING: zip}'               => LAN_VSTORE_ADMIN_MAIL_FLD_BILL_ZIP,
+			'{BILLING: country}'           => LAN_VSTORE_ADMIN_MAIL_FLD_BILL_COUNTRY,
+			'{SHIPPING: firstname}'        => LAN_VSTORE_ADMIN_MAIL_FLD_SHIP_FIRSTNAME,
+			'{SHIPPING: lastname}'         => LAN_VSTORE_ADMIN_MAIL_FLD_SHIP_LASTNAME,
+			'{SHIPPING: company}'          => LAN_VSTORE_ADMIN_MAIL_FLD_SHIP_COMPANY,
+			'{SHIPPING: address}'          => LAN_VSTORE_ADMIN_MAIL_FLD_SHIP_ADDRESS,
+			'{SHIPPING: city}'             => LAN_VSTORE_ADMIN_MAIL_FLD_SHIP_CITY,
+			'{SHIPPING: state}'            => LAN_VSTORE_ADMIN_MAIL_FLD_SHIP_STATE,
+			'{SHIPPING: zip}'              => LAN_VSTORE_ADMIN_MAIL_FLD_SHIP_ZIP,
+			'{SHIPPING: country}'          => LAN_VSTORE_ADMIN_MAIL_FLD_SHIP_COUNTRY,
+			'{ORDER_ITEMS}'                => LAN_VSTORE_ADMIN_MAIL_FLD_ORDER_ITEMS,
+			'{ORDER_PAYMENT_INSTRUCTIONS}' => LAN_VSTORE_ADMIN_MAIL_FLD_PAYMENT_INSTR,
+			'{ORDER_MERCHANT_INFO}'        => LAN_VSTORE_ADMIN_MAIL_FLD_MERCHANT_INFO,
+			'{SENDER_NAME}'                => LAN_VSTORE_ADMIN_MAIL_FLD_SENDER_NAME
 
 		);
 

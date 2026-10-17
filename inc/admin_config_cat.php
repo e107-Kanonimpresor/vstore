@@ -1,9 +1,13 @@
 <?php
+e107::lan('vstore', 'admin_catalog', true);
+
 /**
  * Adminarea module categories
  */
  class vstore_cat_ui extends e_admin_ui
 {
+	use vstore_admin_common;
+
 			
 		protected $pluginTitle		= 'Vstore';
 		protected $pluginName		= 'vstore';
@@ -26,17 +30,17 @@
 			'checkboxes' 		=>   array ( 'title' => '', 'type' => null, 'data' => null, 'width' => '5%', 'thclass' => 'center', 'forced' => '1', 'class' => 'center', 'toggle' => 'e-multiselect',  ),
 		  	'cat_id' 			=>   array ( 'title' => LAN_ID, 'data' => 'int', 'width' => '5%', 'help' => '', 'readParms' => 'url=category&target=dialog', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
 	//	  	'cat_active' 		=>   array ( 'title' => LAN_ACTIVE, 'type'=>'boolean', 'data' => 'int', 'inline'=>true, 'width' => '5%', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
-		  	'cat_name' 			=>   array ( 'title' => LAN_TITLE, 'type' => 'text', 'data' => 'str', 'width' => 'auto', 'inline' => true, 'help' => '', 'readParms' => '', 'writeParms' => array('size'=>'xxlarge'), 'class' => 'left', 'thclass' => 'left',  ),
-		    'cat_description' 	=>   array ( 'title' => LAN_DESCRIPTION, 'type' => 'textarea', 'data' => 'str', 'width' => '40%', 'help' => '', 'readParms' => '', 'writeParms' => array('maxlength' => 220, 'size'=>'xxlarge'), 'class' => 'left', 'thclass' => 'left',  ),
-		  	'cat_sef' 			=>   array ( 'title' => LAN_SEFURL, 'type' => 'text', 'data' => 'str', 'width' => 'auto', 'batch'=>true, 'inline' => true, 'help' => '', 'readParms' => '', 'writeParms' => array('size'=>'xxlarge','sef'=>'cat_name'), 'class' => 'left', 'thclass' => 'left',  ),
-			'cat_parent'        =>   array ( 'title' => "Parent", 'type'=>'dropdown', 'data'=>'int', 'inline'=>true,  'width'=>'auto'),
-		  	'cat_image' 		=>   array ( 'title' => LAN_IMAGE, 'type' => 'image', 'data' => 'str', 'width' => '40%', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),	
-		  	'cat_class' 		=>   array ( 'title' => LAN_VISIBILITY, 'type' => 'userclass', 'data' => 'str', 'width' => 'auto', 'batch' => true, 'filter' => true, 'inline' => true, 'help' => 'Who should this category be visible to?', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
-		  	'cat_order' 		=>   array ( 'title' => LAN_ORDER, 'type' => 'text', 'data' => 'int', 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
+		  	'cat_name' 			=>   array ( 'title' => LAN_TITLE, 'type' => 'text', 'data' => 'str', 'width' => 'auto', 'inline' => true, 'help' => LAN_VSTORE_ADMIN_CAT_NAME_H, 'readParms' => '', 'writeParms' => array('size'=>'xxlarge'), 'class' => 'left', 'thclass' => 'left',  ),
+		    'cat_description' 	=>   array ( 'title' => LAN_DESCRIPTION, 'type' => 'textarea', 'data' => 'str', 'width' => '40%', 'help' => LAN_VSTORE_ADMIN_CAT_DESCRIPTION_H, 'readParms' => '', 'writeParms' => array('maxlength' => 220, 'size'=>'xxlarge'), 'class' => 'left', 'thclass' => 'left',  ),
+		  	'cat_sef' 			=>   array ( 'title' => LAN_SEFURL, 'type' => 'text', 'data' => 'str', 'width' => 'auto', 'batch'=>true, 'inline' => true, 'help' => LAN_VSTORE_ADMIN_CAT_SEF_H, 'readParms' => '', 'writeParms' => array('size'=>'xxlarge','sef'=>'cat_name'), 'class' => 'left', 'thclass' => 'left',  ),
+			'cat_parent'        =>   array ( 'title' => LAN_PARENT, 'type'=>'dropdown', 'data'=>'int', 'inline'=>true,  'width'=>'auto', 'help' => LAN_VSTORE_ADMIN_CAT_PARENT_H),
+		  	'cat_image' 		=>   array ( 'title' => LAN_IMAGE, 'type' => 'image', 'data' => 'str', 'width' => '40%', 'help' => LAN_VSTORE_ADMIN_CAT_IMAGE_H, 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),	
+		  	'cat_class' 		=>   array ( 'title' => LAN_VISIBILITY, 'type' => 'userclass', 'data' => 'str', 'width' => 'auto', 'batch' => true, 'filter' => true, 'inline' => true, 'help' => LAN_VSTORE_ADMIN_CAT_VISIBILITY_H, 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
+		  	'cat_order' 		=>   array ( 'title' => LAN_ORDER, 'type' => 'text', 'data' => 'int', 'width' => 'auto', 'help' => LAN_VSTORE_ADMIN_CAT_ORDER_H, 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
 
-		 	'cat_info' 			=>   array ( 'title' => "Details", 'type' => 'bbarea', 'data' => 'str', 'tab' => 1, 'width' => '40%', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
+		 	'cat_info' 			=>   array ( 'title' => LAN_DETAILS, 'type' => 'bbarea', 'data' => 'str', 'tab' => 1, 'width' => '40%', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
 
-		  	'options' 			=>   array ( 'title' => 'Options', 'type' => null, 'data' => null, 'width' => '10%', 'thclass' => 'center last', 'class' => 'center last', 'forced' => '1', 'sort'=>1  ),
+		  	'options' 			=>   array ( 'title' => LAN_OPTIONS, 'type' => null, 'data' => null, 'width' => '10%', 'thclass' => 'center last', 'class' => 'center last', 'forced' => '1', 'sort'=>1  ),
 		);		
 		
 		protected $fieldpref = array('cat_id',  'cat_name', 'cat_sef', 'cat_class');
@@ -190,7 +194,7 @@
 		$qry = $this->getParentChildQry(true);
 		$sql->gen($qry);
 
-		$this->fields['cat_parent']['writeParms']['optArray'] = array(0=>'(Root)');
+		$this->fields['cat_parent']['writeParms']['optArray'] = array(0=>LAN_VSTORE_ADMIN_C_ROOT);
 
 		while($row = $sql->fetch())
 		{

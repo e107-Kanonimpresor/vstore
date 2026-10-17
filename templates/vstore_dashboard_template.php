@@ -1,5 +1,8 @@
 <?php
 
+e107::lan('vstore', 'front_shop', true);
+e107::lan('vstore', 'front_dashboard', true);
+
 $VSTORE_DASHBOARD_TEMPLATE = array();
 
 
@@ -31,7 +34,7 @@ $VSTORE_DASHBOARD_TEMPLATE['nav']['item'] = '
  * Dashboard
  */
 $VSTORE_DASHBOARD_TEMPLATE['dashboard'] = '
-    <p>From your account dashboard you can view your recent orders, manage your shipping and billing addresses and edit your password and account details.</p>
+    <p>{LAN=LAN_VSTORE_DB_INTRO}</p>
 ';
 
 
@@ -42,12 +45,12 @@ $VSTORE_DASHBOARD_TEMPLATE['order']['list']['header'] = '
     <table class="table table-bordered table-striped">
     <thead>
     <tr>
-        <th>Order info</th>
-        <th>Shipping</th>
-        <th>Items</th>
-        <th>Total</th>
-        <th>Status</th>
-        <th>Actions</th>
+        <th>{LAN=LAN_VSTORE_DB_ORDER_INFO}</th>
+        <th>{LAN=LAN_VSTORE_FR_SHIPPING}</th>
+        <th>{LAN=LAN_VSTORE_FR_ITEMS}</th>
+        <th>{LAN=LAN_VSTORE_FR_TOTAL}</th>
+        <th>{LAN=LAN_VSTORE_DB_STATUS}</th>
+        <th>{LAN=LAN_VSTORE_DB_ACTIONS}</th>
     </tr>
     </thead>
     <tbody>
@@ -63,9 +66,9 @@ $VSTORE_DASHBOARD_TEMPLATE['order']['list']['footer'] = '
 $VSTORE_DASHBOARD_TEMPLATE['order']['list']['item'] = '
     <tr>
         <td>
-            Date: {ORDER_DATA: order_date}<br />
-            Order: {ORDER_DATA: order_ref}<br/>
-            Invoice: {ORDER_DATA: order_invoice_nr}
+            {LAN=LAN_VSTORE_DB_DATE}: {ORDER_DATA: order_date}<br />
+            {LAN=LAN_VSTORE_DB_ORDER}: {ORDER_DATA: order_ref}<br/>
+            {LAN=LAN_VSTORE_DB_INVOICE}: {ORDER_DATA: order_invoice_link}
         </td>
         <td>{ORDER_DATA: order_shipping_full}</td>
         <td>{ORDER_DATA: order_items_short}</td>
@@ -80,42 +83,44 @@ $VSTORE_DASHBOARD_TEMPLATE['order']['list']['item'] = '
  * Order detail
  */
 $VSTORE_DASHBOARD_TEMPLATE['order']['detail'] = '
-    <h4>Order details {ORDER_DATA: order_ref} <span class="pull-right float-right">{ORDER_DATA: order_status_label}</span></h4>
+    <h4>{LAN=LAN_VSTORE_DB_ORDER_DETAILS} {ORDER_DATA: order_ref} <span class="pull-right float-right">{ORDER_DATA: order_status_label}</span></h4>
     <div class="clearfix">
         <div class="col-sm-4">
-            <b>Date</b> {ORDER_DATA: order_date}<br />
-            <b>Order</b> {ORDER_DATA: order_ref}<br/>
-            <b>Invoice</b> {ORDER_DATA: order_invoice_nr}<br/>
-            <b>Payment method</b> {ORDER_DATA: order_gateway}<br/>
-            <b>Payment complete</b> {ORDER_DATA: order_pay_status}<br/>
+            <b>{LAN=LAN_VSTORE_DB_DATE}</b> {ORDER_DATA: order_date}<br />
+            <b>{LAN=LAN_VSTORE_DB_ORDER}</b> {ORDER_DATA: order_ref}<br/>
+            <b>{LAN=LAN_VSTORE_DB_INVOICE}</b> {ORDER_DATA: order_invoice_link}<br/>
+            <b>{LAN=LAN_VSTORE_DB_PAYMENT_METHOD}</b> {ORDER_DATA: order_gateway}<br/>
+            <b>{LAN=LAN_VSTORE_DB_PAYMENT_COMPLETE}</b> {ORDER_DATA: order_pay_status}<br/>
         </div>
 
         <div class="col-sm-4">
-            <b>Shipping address</b> <br />
+            <b>{LAN=LAN_VSTORE_FR_SHIPPING_ADDRESS}</b> <br />
             {ORDER_DATA: order_shipping_full}<br/>
         </div>
 
         <div class="col-sm-4">
-            <b>Billling address</b> <br />
+            <b>{LAN=LAN_VSTORE_FR_BILLING_ADDRESS}</b> <br />
             {ORDER_DATA: order_billing_full}<br/>
+            {ORDER_DATA: order_billing_contact}<br/>
         </div>
     </div>
 
     <br />
 
     <div>
-        <b>Items</b>
+        <b>{LAN=LAN_VSTORE_FR_ITEMS}</b>
         {ORDER_ITEMS}
     </div>
 
     <div>
-        <b>Log</b>
+        <b>{LAN=LAN_VSTORE_DB_LOG}</b>
         {ORDER_DATA: order_log}
     </div>
 
     <hr />
 
     <div class="text-center">
+        {ORDER_ACTIONS: invoice}
         {ORDER_ACTIONS: cancel}
     </div>
 ';
@@ -128,9 +133,9 @@ $VSTORE_DASHBOARD_TEMPLATE['download']['list']['header'] = '
     <table class="table table-bordered table-striped">
     <thead>
     <tr>
-        <th>Order info</th>
-        <th>Items</th>
-        <th>Status</th>
+        <th>{LAN=LAN_VSTORE_DB_ORDER_INFO}</th>
+        <th>{LAN=LAN_VSTORE_FR_ITEMS}</th>
+        <th>{LAN=LAN_VSTORE_DB_STATUS}</th>
     </tr>
     </thead>
     <tbody>
@@ -146,9 +151,9 @@ $VSTORE_DASHBOARD_TEMPLATE['download']['list']['footer'] = '
 $VSTORE_DASHBOARD_TEMPLATE['download']['list']['item'] = '
     <tr>
         <td>
-            Date: {ORDER_DATA: order_date}<br />
-            Order: {ORDER_DATA: order_ref}<br/>
-            Invoice: {ORDER_DATA: order_invoice_nr}
+            {LAN=LAN_VSTORE_DB_DATE}: {ORDER_DATA: order_date}<br />
+            {LAN=LAN_VSTORE_DB_ORDER}: {ORDER_DATA: order_ref}<br/>
+            {LAN=LAN_VSTORE_DB_INVOICE}: {ORDER_DATA: order_invoice_link}
         </td>
         <td>{ORDER_DATA: order_downloads}</td>
         <td>{ORDER_DATA: order_status_label}</td>
@@ -164,7 +169,7 @@ $VSTORE_DASHBOARD_TEMPLATE['address']['view'] = '
 	    <div class="col-12 col-xs-12 col-sm-6">
 	    	<div class="card h-100">
 		        <div class="card-body">
-			        <h4 class="card_title">Billing</h4>
+			        <h4 class="card_title">{LAN=LAN_VSTORE_DB_BILLING}</h4>
 			
 			        {DASHBOARD: billing_address}
 			        
@@ -178,7 +183,7 @@ $VSTORE_DASHBOARD_TEMPLATE['address']['view'] = '
 	    <div class="col-12 col-xs-12 col-sm-6">
 	    <div class="card h-100">
 	    		<div class="card-body">
-		        <h4 class="card_title">Shipping</h4>
+		        <h4 class="card_title">{LAN=LAN_VSTORE_FR_SHIPPING}</h4>
 		
 		        {DASHBOARD: shipping_address}
 			      
@@ -197,72 +202,72 @@ $VSTORE_DASHBOARD_TEMPLATE['address']['view'] = '
  * Shipping details form
  */
 $VSTORE_DASHBOARD_TEMPLATE['address']['edit']['shipping']['body'] = '
-	<h4>Shipping Details</h4>
+	<h4>{LAN=LAN_VSTORE_FR_SHIPPING_DETAILS}</h4>
 
 	<div class="row g-3">
 		<div class="col-12 col-xs-12 col-sm-6">
 			<div class="form-group">
-				<label for="ship_firstname" class="form-label required">First Name</label>
+				<label for="ship_firstname" class="form-label required">{LAN=LAN_VSTORE_FR_FIRSTNAME}</label>
 				{SHIPPING_FIELD: ship_firstname}
 			</div>
 		</div>
 		<div class="col-12 col-xs-12 col-sm-6">
 			<div class="form-group">
-				<label for="ship_lastname" class="form-label required">Last Name</label>
+				<label for="ship_lastname" class="form-label required">{LAN=LAN_VSTORE_FR_LASTNAME}</label>
 				{SHIPPING_FIELD: ship_lastname}
 			</div>
 		</div>
 
 		<div class="col col-xs-12">
 			<div class="form-group">
-				<label for="ship_company" class="form-label">Company</label>
+				<label for="ship_company" class="form-label">{LAN=LAN_VSTORE_FR_COMPANY}</label>
 				{SHIPPING_FIELD: ship_company}
 			</div>
 		</div>
 
 		<div class="col col-xs-12">
 			<div class="form-group">
-				<label for="ship_address" class="form-label required">Address</label>
+				<label for="ship_address" class="form-label required">{LAN=LAN_VSTORE_FR_ADDRESS}</label>
 				{SHIPPING_FIELD: ship_address}
 			</div>
 		</div>
 
 		<div class="col-12 col-xs-12 col-sm-6">
 			<div class="form-group">
-				<label for="ship_city" class="form-label required">Town/City</label>
+				<label for="ship_city" class="form-label required">{LAN=LAN_VSTORE_FR_CITY}</label>
 				{SHIPPING_FIELD: ship_city}
 			</div>
 		</div>
 		<div class="col-12 col-xs-12 col-sm-6">
 			<div class="form-group">
-				<label for="ship_state" class="form-label required">State/Region</label>
+				<label for="ship_state" class="form-label required">{LAN=LAN_VSTORE_FR_STATE}</label>
 				{SHIPPING_FIELD: ship_state}
 			</div>
 		</div>
 
 		<div class="col-12 col-xs-12 col-sm-6">
 			<div class="form-group">
-				<label for="ship_zip" class="form-label required">Zip/Postcode</label>
+				<label for="ship_zip" class="form-label required">{LAN=LAN_VSTORE_FR_ZIP}</label>
 				{SHIPPING_FIELD: ship_zip}
 			</div>
 		</div>
 		<div class="col-12 col-xs-12 col-sm-6">
 			<div class="form-group">
-				<label for="ship_country" class="form-label required">Country</label>
+				<label for="ship_country" class="form-label required">{LAN=LAN_VSTORE_FR_COUNTRY}</label>
 				{SHIPPING_FIELD: ship_country}
 			</div>
 		</div>
 
 		<div class="col col-xs-12">
 			<div class="form-group">
-				<label for="ship_phone" class="form-label">Phone number</label>
+				<label for="ship_phone" class="form-label">{LAN=LAN_VSTORE_FR_PHONE}</label>
 				{SHIPPING_FIELD: ship_phone}
 			</div>
 		</div>
 
 		<div class="col-12 col-xs-12">
 			<div class="form-group">
-				<label class="required"></label> Required field
+				<label class="required"></label> {LAN=LAN_VSTORE_FR_REQUIRED}
 			</div>
 		</div>
 	</div>
@@ -273,91 +278,91 @@ $VSTORE_DASHBOARD_TEMPLATE['address']['edit']['shipping']['body'] = '
  * Customer details form
  */
 $VSTORE_DASHBOARD_TEMPLATE['address']['edit']['billing']['body'] = '
-	<h4>Billing address</h4>
+	<h4>{LAN=LAN_VSTORE_FR_BILLING_ADDRESS}</h4>
 
 	<div class="row g-3">
 		<div class="col-12 col-xs-12 col-sm-6">
 			<div class="form-group">
-				<label for="cust_firstname" class="form-label required">First Name</label>
+				<label for="cust_firstname" class="form-label required">{LAN=LAN_VSTORE_FR_FIRSTNAME}</label>
 				{CUSTOMER_FIELD: cust_firstname}
 			</div>
 		</div>
 		<div class="col-12 col-xs-12 col-sm-6">
 			<div class="form-group">
-				<label for="cust_lastname" class="form-label required">Last Name</label>
+				<label for="cust_lastname" class="form-label required">{LAN=LAN_VSTORE_FR_LASTNAME}</label>
 				{CUSTOMER_FIELD: cust_lastname}
 			</div>
 		</div>
 
 		<div class="col col-xs-12">
 			<div class="form-group">
-				<label for="cust_company" class="form-label">Company</label>
+				<label for="cust_company" class="form-label">{LAN=LAN_VSTORE_FR_COMPANY}</label>
 				{CUSTOMER_FIELD: cust_company}
 			</div>
 		</div>
 
 		<div class="col-12 col-xs-12 col-sm-6">
 			<div class="form-group">
-				<label for="cust_vat_id" class="form-label">VAT ID</label>
+				<label for="cust_vat_id" class="form-label">{LAN=LAN_VSTORE_FR_VAT_ID}</label>
 				{CUSTOMER_FIELD: cust_vat_id}
 			</div>
 		</div>
 		<div class="col-12 col-xs-12 col-sm-6">
 			<div class="form-group">
-				<label for="cust_taxcode" class="form-label">Tax code</label>
+				<label for="cust_taxcode" class="form-label">{LAN=LAN_VSTORE_FR_TAXCODE}</label>
 				{CUSTOMER_FIELD: cust_taxcode}
 			</div>
 		</div>
 
 		<div class="col col-xs-12">
 			<div class="form-group">
-				<label for="cust_address" class="form-label required">Address</label>
+				<label for="cust_address" class="form-label required">{LAN=LAN_VSTORE_FR_ADDRESS}</label>
 				{CUSTOMER_FIELD: cust_address}
 			</div>
 		</div>
 
 		<div class="col-12 col-xs-12 col-sm-6">
 			<div class="form-group">
-				<label for="cust_city" class="form-label required">Town/City</label>
+				<label for="cust_city" class="form-label required">{LAN=LAN_VSTORE_FR_CITY}</label>
 				{CUSTOMER_FIELD: cust_city}
 			</div>
 		</div>
 		<div class="col-12 col-xs-12 col-sm-6">
 			<div class="form-group">
-				<label for="cust_state" class="form-label">State/Region</label>
+				<label for="cust_state" class="form-label">{LAN=LAN_VSTORE_FR_STATE}</label>
 				{CUSTOMER_FIELD: cust_state}
 			</div>
 		</div>
 
 		<div class="col-12 col-xs-12 col-sm-6">
 			<div class="form-group">
-				<label for="cust_zip" class="form-label required">Zip/Postcode</label>
+				<label for="cust_zip" class="form-label required">{LAN=LAN_VSTORE_FR_ZIP}</label>
 				{CUSTOMER_FIELD: cust_zip}
 			</div>
 		</div>
 		<div class="col-12 col-xs-12 col-sm-6">
 			<div class="form-group">
-				<label for="cust_country" class="form-label required">Country</label>
+				<label for="cust_country" class="form-label required">{LAN=LAN_VSTORE_FR_COUNTRY}</label>
 				{CUSTOMER_FIELD: cust_country}
 			</div>
 		</div>
 
 		<div class="col-12 col-xs-12">
 			<div class="form-group">
-				<label for="cust_email" class="form-label required">Email address</label>
+				<label for="cust_email" class="form-label required">{LAN=LAN_VSTORE_FR_EMAIL}</label>
 				{CUSTOMER_FIELD: cust_email}
 			</div>
 		</div>
 
 		<div class="col-12 col-xs-12 col-sm-6">
 			<div class="form-group">
-				<label for="cust_phone" class="form-label">Phone number</label>
+				<label for="cust_phone" class="form-label">{LAN=LAN_VSTORE_FR_PHONE}</label>
 				{CUSTOMER_FIELD: cust_phone}
 			</div>
 		</div>
 		<div class="col-12 col-xs-12 col-sm-6">
 			<div class="form-group">
-				<label for="cust_email" class="form-label">Fax number</label>
+				<label for="cust_fax" class="form-label">{LAN=LAN_VSTORE_FR_FAX}</label>
 				{CUSTOMER_FIELD: cust_fax}
 			</div>
 		</div>
@@ -374,7 +379,7 @@ $VSTORE_DASHBOARD_TEMPLATE['address']['edit']['billing']['body'] = '
 
 		<div class="col-12 col-xs-12">
 			<div class="form-group">
-				<label class="required"></label> Required field
+				<label class="required"></label> {LAN=LAN_VSTORE_FR_REQUIRED}
 			</div>
 		</div>
 	</div>

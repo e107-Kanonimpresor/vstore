@@ -8,365 +8,299 @@
 
 ---
 
-[![e107](https://img.shields.io/badge/e107-v2.3.0+-blue.svg)](https://e107.org)
-[![PHP](https://img.shields.io/badge/PHP-7.4%2B%20|%208.x-purple.svg)](https://php.net)
-[![Bootstrap](https://img.shields.io/badge/Bootstrap-3.x%20|%204.x%20|%205.x-7952B3.svg)](https://getbootstrap.com)
-[![License](https://img.shields.io/badge/License-GPL--3.0-green.svg)](LICENSE)
-[![Join the chat at https://gitter.im/e107inc/vstore](https://badges.gitter.im/e107inc/vstore.svg)](https://gitter.im/e107inc/vstore?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/e107-Kanonimpresor/vstore/releases/tag/v2.0.0)
+![e107](https://img.shields.io/badge/e107-2.3.2%2B-green)
+[![PHP](https://img.shields.io/badge/PHP-7.4%20to%208.4-purple.svg)](https://php.net)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-3%20%7C%205-purple)
+![License](https://img.shields.io/badge/license-GPL--3.0-orange)
+
+**Author:** [Kanonimpresor](https://marketingdeperformance.online) — Marketing de Performance  
+**Licence:** GPL-3.0
 
 ---
 
 ## 📋 Description
 
-**Vstore** is a comprehensive e-commerce solution for [e107 v2.x](https://e107.org) Bootstrap CMS. Built with flexibility and ease of use in mind, it provides everything you need to run a professional online store directly from your e107 website.
-
-Whether you're selling physical products, digital downloads, or services, Vstore integrates seamlessly with your e107 site, offering powerful features like multiple payment gateways, advanced tax calculations, coupon management, and inventory tracking.
+**Vstore** is an e-commerce plugin for [e107 v2.x](https://e107.org) Bootstrap CMS. It lets you run an online store directly from your e107 website: physical products, digital downloads or services, with several payment methods, EU VAT handling, coupons, stock control, PDF invoices and customer e-mails, in English, Spanish and Portuguese.
 
 ---
 
 ## ✨ Key Features
 
 ### 🛒 Shopping Cart & Checkout
-- **Dynamic Shopping Cart**: Real-time cart updates with AJAX functionality
-- **Guest Checkout**: Allow purchases without user registration
-- **Multi-step Checkout**: Clean, intuitive checkout flow
-- **Order History**: Customer dashboard with order tracking
-- **Digital Downloads**: Support for downloadable products
-- **Product Variations**: Size, color, and custom attributes for products
+- **Shopping cart** with AJAX add-to-cart and a quantity field on the product page
+- **Guest checkout**: customers can buy as a guest, log in or sign up
+- **Checkout** with billing and shipping addresses, optional additional fields and phone number
+- **Customer dashboard**: order history, order details, downloads and invoices
+- **Digital downloads**: files are available once the payment is received
+- **Product variations**: up to two variation groups per product (size, colour...) with price changes and their own stock
 
 ### 💳 Payment Processing
-- **Multiple Payment Gateways**:
-  - PayPal (Express Checkout & Standard)
-  - Stripe (Credit/Debit Cards)
-  - Mollie (iDEAL, Bancontact, and 20+ methods)
-  - Braintree (PayPal & Credit Cards)
-  - CoinPayments (Cryptocurrency)
-  - Bank Transfer (Manual)
-- **Secure Transactions**: PCI-compliant payment processing
-- **Order Status Tracking**: New, Processing, Completed, Refunded, etc.
+- **Payment gateways** (through [Omnipay](https://omnipay.thephpleague.com/)):
+  - **PayPal** (standard and REST)
+  - **Mollie**: credit cards, PayPal, **MB WAY**, **Multibanco**, iDEAL, Bancontact, bank transfer, direct debit, gift cards and more. Only the methods enabled in your Mollie profile are offered
+  - **Bank transfer** (manual): the order waits until you mark it as paid
+- **Hosted payment pages**: card data never touches your server
+- **Mollie webhook**: orders are created before the customer pays, so a payment that is still pending (MB WAY, Multibanco) or made without returning to the shop never gets lost
+- **Refunds** from the order page for gateways that support them (Mollie, PayPal)
+- **Order statuses**: New, Processing, On hold, Completed, Cancelled, Refunded
+
+> Euro-only Mollie methods (MB WAY, Multibanco, iDEAL, Bancontact, bank transfer, direct debit, gift cards) are hidden at checkout when the shop currency is not EUR.
 
 ### 💰 Pricing & Discounts
-- **Coupon System**:
-  - Percentage or fixed amount discounts
-  - Date range restrictions
-  - Category/product inclusion/exclusion
-  - Usage limits (global and per-user)
-  - Minimum order requirements
-- **Tax Calculation**:
-  - EU VAT support with VIES validation
-  - Multiple tax rates (standard, reduced, super-reduced)
-  - B2B reverse charge mechanism
-  - Country-specific tax classes
-  - Automatic tax calculation based on location
+- **Coupons**:
+  - Percentage or fixed-amount discounts
+  - Start and end dates
+  - Include/exclude categories and products
+  - Usage limits (total, per user and per item)
+- **Tax calculation**:
+  - Net prices, with the VAT of the customer's country added on top
+  - EU VAT with **VIES** validation of VAT IDs (and Portuguese NIF check digit)
+  - **Reverse charge** (0%) for businesses of another EU country with a valid VAT ID
+  - Optional switch to charge the shop-country VAT to EU consumers (sellers below the EU 10,000 EUR threshold)
+  - Tax classes: standard, reduced, super-reduced, parking and more
 
 ### 📦 Product Management
-- **Unlimited Products**: No restrictions on catalog size
-- **Categories & Subcategories**: Organized product hierarchy
-- **Product Variations**: Manage size, color, and custom attributes
-- **Inventory Tracking**: Stock management with low-stock alerts
-- **Image Galleries**: Multiple images per product with zoom
-- **SEO-Friendly URLs**: Clean URLs for better search rankings
-- **Related Products**: Cross-selling recommendations
+- **Unlimited products** and nested **categories**, restricted to user classes if needed
+- **Stock control** per product and per variation (`-1` for unlimited)
+- **Image galleries** with zoom, product videos and downloadable files
+- **Related products**
+- **SEO-friendly URLs**
+- **Search integration** with the e107 search
 
-### 🚚 Shipping & Fulfillment
-- **Flexible Shipping Rates**:
-  - Flat rate shipping
-  - Weight-based calculation
-  - Free shipping options
-  - Per-product shipping costs
-- **Shipping Address Management**: Separate billing and shipping addresses
-- **Order Notes**: Customer notes and admin internal notes
+### 🚚 Shipping
+- **Shipping methods**: sum of all items, sum of unique items, or tiered by order price or weight
+- **Per-product shipping costs**
+- **Separate billing and shipping addresses**; customer notes and internal admin notes
 
-### 📊 Analytics & Reporting
-- **Sales Statistics**: Revenue tracking and trends
-- **Order Reports**: Detailed order information
-- **Product Performance**: Best-sellers and inventory reports
-- **Customer Insights**: Purchase history and behavior
+### 📊 Statistics
+- **Dashboard** with revenue, orders of the month and a custom-period chart, also shown on the e107 control panel
 
 ### 🎨 Customization
-- **Template System**: Fully customizable HTML templates
-- **Shortcodes**: Extensive shortcode library for custom layouts
-- **Custom CSS**: Add your own styling
-- **Responsive Design**: Mobile-friendly out of the box
-- **Multi-language Support**: Translation-ready with LAN files
+- **Templates** for the shop, cart, customer area, e-mails and invoice; a theme can override them in `<theme>/templates/vstore/`
+- **Shortcodes** for custom layouts
+- **Custom CSS** from the admin area
+- **Responsive** Bootstrap markup (Bootstrap 3 and 5 themes)
+- **Fully translatable**: admin, storefront, e-mails, invoices and messages come from language files (English, Spanish, Portuguese; other languages fall back to English)
 
 ### 🔧 Admin Features
-- **Intuitive Dashboard**: Manage orders, products, and customers
-- **Bulk Actions**: Edit multiple items simultaneously
-- **Email Templates**: Customizable order confirmation emails
-- **Invoice Generation**: Automatic PDF invoices (requires PDF plugin)
-- **User Permissions**: Role-based access control
-- **Search Integration**: Products searchable via e107 search
+- **Admin area** for sales, products, categories, variations, coupons, customers, gateways, invoice and e-mail settings
+- **User Guide** and **About** tabs and a contextual help sidebar
+- **E-mail templates** per order status (confirmation, completed, cancelled, refunded), mobile-friendly, with a reset button
+- **PDF invoices** created with TCPDF (installed by Composer): number prefix, next number, footer blocks, preview; attached to the e-mail and available to the customer
+- **Permissions** for admin actions
+
+---
+
+## 🆕 What's new in v2.0.0
+
+- **Fully translatable** admin area and storefront (English, Spanish, Portuguese).
+- **Mollie MB WAY and Multibanco**, phone number sent to Mollie, Mollie **webhook** and a *Check payment in Mollie* button.
+- **EU VAT rewritten**: net prices, VIES, reverse charge, optional origin-country VAT.
+- **New e-mail design** and **built-in PDF invoices** (TCPDF 6.11 by Composer; the e107 *pdf* plugin is no longer needed).
+- **Business logic layer** in `src/` (namespace `Vstore\`) with 242 automated checks (`php tests/run.php`). `vstore.class.php` keeps its public methods, so themes and plugins keep working.
+- **Security review**: output escaping, SQL escaping, cart scoped to the visitor, credentials masked in logs, `composer audit` clean.
+- **Removed** Stripe, Braintree, CoinPayments and StarkPay (they had no working checkout). Cards are covered by Mollie.
+- New **user manual** ([docs/user-manual.html](docs/user-manual.html)) and **release notes** ([docs/RELEASE_NOTES_v2.0.0.md](docs/RELEASE_NOTES_v2.0.0.md)).
+
+### Upgrading from 1.x
+1. Replace the plugin folder (or `git pull`) and run `composer install --no-dev --optimize-autoloader`.
+2. In *Vstore → E-mail templates* and *Invoice Settings*, press **Reset template** if you had saved your own templates, to get the new design and the fixed invoice layout.
+3. Uninstall the e107 *pdf* plugin if you no longer use it elsewhere.
+4. For MB WAY, Multibanco and the other euro-only Mollie methods, set the shop currency to **EUR**.
 
 ---
 
 ## 🚀 Installation
 
 ### Requirements
-- **e107 CMS**: v2.3.0 or higher ([Download](https://github.com/e107inc/e107))
-- **PHP**: 7.4 or higher (PHP 8.x compatible)
-- **PHP Extensions**:
-  - SOAP (for VAT validation)
-  - cURL (for payment gateways)
-  - JSON
-  - GD or Imagick (for image processing)
+- **e107 CMS**: v2.3.2 or higher ([Download](https://github.com/e107inc/e107))
+- **PHP**: 7.4 to 8.4
+- **PHP extensions**: SOAP (VIES VAT validation), cURL (payment gateways), JSON, mbstring, GD (images and the invoice logo)
 - **Database**: MySQL 5.7+ / MariaDB 10.2+
-- **Optional**: [PDF Plugin](https://github.com/e107inc/pdf) for invoice generation
+- **Composer** (only when installing from the source repository)
 
-### Installation Steps
+### Installation steps
 
-1. **Download the Plugin**:
-   ```bash
-   cd e107_plugins
-   git clone https://github.com/Kanonimpresor/vstore.git
-   ```
+1. **Get the plugin**
+   - **Release package (recommended)**: download `vstore-2.0.0.zip` from the [Releases page](https://github.com/e107-Kanonimpresor/vstore/releases) and extract it into `e107_plugins/` (it already contains `vendor/`).
+   - **From source**:
+     ```bash
+     cd e107_plugins
+     git clone https://github.com/e107-Kanonimpresor/vstore.git
+     cd vstore
+     composer install --no-dev --optimize-autoloader
+     ```
 
-2. **Install Dependencies** ⚠️ **REQUIRED**:
-   ```bash
-   cd vstore
-   composer install --no-dev
-   ```
-   
-   > **⚠️ IMPORTANT**: The `vendor/` directory is not included in the repository.  
-   > You **MUST** run `composer install` after cloning to download all required dependencies.  
-   > Without this step, the plugin will not work and you'll see errors like:  
-   > `Fatal error: Failed opening required 'vendor/autoload.php'`
+   > **⚠️ IMPORTANT**: the source repository does not contain the `vendor/` folder. Without `composer install` you will see `Failed opening required 'vendor/autoload.php'`.
 
-3. **Install via e107 Admin**:
-   - Navigate to: **Admin → Plugins → Manage Plugins**
-   - Find "Vstore" in the list
-   - Click **Install**
+2. **Install in e107**: *Admin → Plugins → Manage Plugins → Vstore → Install*.
 
-4. **Configure Settings**:
-   - Go to: **Admin → Vstore → Settings**
-   - Configure:
-     - Store information (name, address, tax ID)
-     - Tax settings (enable VAT, tax rates)
-     - Payment gateways (API credentials)
-     - Shipping options
-     - Email templates
+3. **Configure**: *Admin → Vstore → Preferences*: currency, price format, weight unit, store address, shipping, tax, e-mails and checkout. The **User Guide** tab walks you through it.
 
-5. **Create Products**:
-   - Navigate to: **Admin → Vstore → Products**
-   - Add your first product with images and pricing
+4. **Payment gateways**: *Admin → Vstore → Payment Gateways*. Enter the credentials of at least one gateway and activate it. Test it in sandbox/test mode first.
 
-6. **Test Checkout**:
-   - Add a product to cart
-   - Complete a test order (use sandbox/test mode for gateways)
+5. **Create categories and products**: *Admin → Vstore → Categories / Products*.
+
+6. **Test the checkout** with a test order and follow it in *Sales*.
 
 ---
 
 ## 📖 Documentation
 
-### Quick Start Guides
-- [Creating Your First Product](wiki/creating-products.md)
-- [Setting Up Payment Gateways](wiki/payment-gateways.md)
-- [Configuring Tax Settings](wiki/tax-configuration.md)
-- [Managing Coupons](wiki/coupons.md)
-- [Customizing Templates](wiki/templates.md)
-
-### Advanced Topics
-- [Invoice Generation](wiki/invoice.md)
-- [Custom Shortcodes](wiki/shortcodes.md)
-- [Database Schema](wiki/database.md)
-- [API Integration](wiki/api.md)
-- [Security Best Practices](wiki/security.md)
-
-### Developer Resources
-- [Plugin Architecture](wiki/architecture.md)
-- [Extending Vstore](wiki/extending.md)
-- [Payment Gateway Development](wiki/gateway-development.md)
-- [Coding Standards](wiki/coding-standards.md)
+- [User manual](docs/user-manual.html) (Spanish)
+- [Release notes v2.0.0](docs/RELEASE_NOTES_v2.0.0.md) and [CHANGELOG](CHANGELOG.md)
+- [Invoices](wiki/invoice.md)
+- [Testing guide](docs/TESTING_GUIDE.md)
+- [Development notes](DEV_NOTES.md) and [update plan](docs/PLAN_ACTUALIZACION_V2.md)
 
 ---
 
 ## 🔧 Configuration
 
-### Tax Settings (EU VAT Example)
+### Tax settings (EU VAT example)
 
-```php
-// Admin → Vstore → Settings → Tax
-Business Country: PT (Portugal)
-Tax Calculation: Enabled
-Check VAT ID: Enabled
+```
+Admin → Vstore → Preferences → Tax
+Business country:     PT (Portugal)
+Tax calculation:      Enabled
+Check VAT ID (VIES):  Enabled
+Tax classes:          decimal values, e.g. 0.23 for 23%
 
-Tax Classes:
-- Standard: 23% (Portugal)
-- Reduced: 13%
-- Super Reduced: 6%
-
-// Automatic EU VAT handling:
-// - PT customer (B2C): 23% VAT
-// - ES customer (B2C): Spanish VAT rate
-// - DE customer with valid VAT ID (B2B): 0% (reverse charge)
-// - US customer: 0% (outside EU)
+Prices are net; the VAT of the destination country is added:
+- PT customer:                               23% (your local rate)
+- ES consumer:                               Spanish rate
+- DE business with a VIES-valid VAT ID:      0% (reverse charge)
+- US customer:                               0% (outside the EU)
 ```
 
-### Payment Gateway Configuration
+### Payment gateways
 
-#### PayPal
-```php
-Mode: Sandbox / Live
-Client ID: YOUR_PAYPAL_CLIENT_ID
-Client Secret: YOUR_PAYPAL_SECRET
 ```
-
-#### Stripe
-```php
-Mode: Test / Live
-Publishable Key: pk_test_...
-Secret Key: sk_test_...
-```
-
-#### Mollie
-```php
-API Key: test_... / live_...
-Enabled Methods: iDEAL, Credit Card, Bancontact
+PayPal   → mode (Sandbox / Live) and API credentials
+Mollie   → API key (test_... / live_...) and the payment methods to offer
+Transfer → the bank details shown to the customer
 ```
 
 ---
 
-## 🛠️ Usage Examples
+## 🛠️ Customizing
 
-### Display Product List
-```php
-// In any e107 page
-{VSTORE_LIST: cat=1&limit=12&orderby=price}
-```
+Templates live in `templates/`. To change one without touching the plugin, copy it to your theme as `<theme>/templates/vstore/<name>_template.php`:
 
-### Show Shopping Cart Icon
 ```php
-// In menu or header
-{LAN_PLUGIN_VSTORE_CARTICON}
-```
-
-### Custom Product Display
-```php
-// Create custom template in templates/vstore_template.php
+// <theme>/templates/vstore/vstore_template.php
 $VSTORE_TEMPLATE['list']['item'] = '
 <div class="product-card">
     {ITEM_PIC: w=300&h=300&crop=1}
     <h3>{ITEM_NAME}</h3>
     <p class="price">{ITEM_PRICE}</p>
+    {ITEM_QTY}
     {ITEM_ADDTOCART}
 </div>
 ';
 ```
 
+E-mails use `vstore_email_layout_template.php` (document) and `vstore_email_template.php` (bodies); the invoice uses `vstore_invoice_template.php`.
+
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions from the community! Here's how you can help:
+### Reporting bugs
+- Check the [existing issues](https://github.com/e107-Kanonimpresor/vstore/issues)
+- Open a new issue with: a clear description, steps to reproduce, e107, PHP and plugin versions, and any error message or screenshot
 
-### Reporting Bugs
-- Check [existing issues](https://github.com/Kanonimpresor/vstore/issues)
-- Create a new issue with:
-  - Clear description of the problem
-  - Steps to reproduce
-  - e107 version, PHP version, and plugin version
-  - Any error messages or screenshots
+### Feature requests
+- Open an issue with the `enhancement` label and describe the use case
 
-### Feature Requests
-- Open an issue with the `enhancement` label
-- Describe the feature and use case
-- Explain why it would benefit other users
-
-### Pull Requests
+### Pull requests
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
+2. Create a branch: `git checkout -b feature/amazing-feature`
+3. Run the tests: `php tests/run.php`
+4. Commit and push your branch, then open a Pull Request
 
 ### Testing
-- Testing of all features is greatly appreciated
-- Test on different PHP versions (7.4, 8.0, 8.1, 8.2)
+- Test on several PHP versions (7.4 to 8.4)
 - Test payment gateways in sandbox mode
 - Report compatibility issues
 
 ### Localization
-- Translations should occur after features are stable
-- Language files located in: `languages/[Language]/`
-- Follow e107 LAN file standards
-- Test with RTL languages if applicable
+- Language files are in `languages/<Language>/` (`<Language>_<area>.php`, array format, English fallback)
+- Constants use the `LAN_VSTORE_*` prefix
 
 ---
 
 ## 📝 Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for detailed list of changes, bug fixes, and new features.
+See [CHANGELOG.md](CHANGELOG.md) for the complete list of changes.
 
-**Latest Updates (November 2025)**:
-- ✅ Fixed compatibility with ibericode/vat v2.x
-- ✅ Resolved cart emptying when applying coupons
-- ✅ Fixed shipping data validation in checkout
-- ✅ PHP 8.x compatibility improvements
-- ✅ Enhanced error handling and validation
+**v2.0.0 (2026-10-17)**: translations, Mollie MB WAY/Multibanco and webhook, EU VAT rewrite, new e-mails, built-in PDF invoices, business layer with tests, security review. See the [release notes](docs/RELEASE_NOTES_v2.0.0.md).
 
 ---
 
 ## 🐛 Known Issues
 
-### Current Limitations
-- **PDF Generation**: Some warnings with TCPDF on PHP 8.x (non-critical)
-- **Email on Localhost**: Requires SMTP configuration for email sending
-- **Cache**: Clear e107 cache after template changes
-
-### Workarounds
-- PDF warnings can be suppressed or disable PDF generation
-- Use mail service like Mailtrap or Gmail SMTP for testing
-- Always clear cache: Admin → System → Clear Cache
+- Cancelling an order manually from the admin area does not give the stock back (payments that fail or expire do).
+- The saved credentials of the removed gateways stay in the database preferences; they are ignored.
+- The user manual is available in Spanish only.
+- On localhost, Mollie cannot send the webhook: use the *Check payment in Mollie* button.
+- E-mail on localhost needs an SMTP server (for example smtp4dev or Mailtrap).
+- Clear the e107 cache after changing templates.
+- PDF invoices need `vendor/tecnickcom/tcpdf` (run `composer install`).
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **GNU General Public License v3.0** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **GNU General Public License v3.0** - see the [LICENSE](LICENSE) file.
 
-### What this means:
 - ✅ Free to use for commercial and non-commercial purposes
-- ✅ Modify and distribute the code
-- ✅ Must disclose source code of modifications
-- ✅ Must use the same GPL-3.0 license for derivatives
+- ✅ You may modify and distribute the code
+- ✅ Modifications must be published under the same GPL-3.0 licence
 
 ---
 
 ## 🙏 Credits & Acknowledgments
 
 ### Maintainers
-- Original Developer: [e107 Community](https://e107.org)
-- Current Maintainer: [Kanonimpresor](https://github.com/Kanonimpresor)
+- Original developers: CaMerOn, Achim Ennenbach and the [e107 Community](https://e107.org)
+- Current maintainer: [Kanonimpresor](https://marketingdeperformance.online) — Marketing de Performance ([GitHub](https://github.com/e107-Kanonimpresor))
 
 ### Dependencies
 - [e107 CMS](https://github.com/e107inc/e107) - Content Management System
-- [Omnipay](https://omnipay.thephpleague.com/) - Payment processing abstraction
-- [ibericode/vat](https://github.com/ibericode/vat) - EU VAT validation
-- [TCPDF](https://tcpdf.org/) - PDF generation
+- [Omnipay](https://omnipay.thephpleague.com/) with its PayPal and Mollie drivers - payment abstraction
+- [ibericode/vat](https://github.com/ibericode/vat) - EU VAT rates and VIES validation
+- [TCPDF](https://tcpdf.org/) - PDF invoices
 
 ### Special Thanks
-- e107 community for continuous testing and feedback
-- Payment gateway providers for sandbox environments
-- All contributors who submit bug reports and pull requests
+- The e107 community for testing and feedback
+- Payment providers for their sandbox environments
+- Everyone who reports bugs and sends pull requests
 
 ---
 
 ## 📞 Support & Community
 
-### Getting Help
-- **Documentation**: Check the [Wiki](wiki/) first
-- **Community Chat**: [Gitter Channel](https://gitter.im/e107inc/vstore)
-- **e107 Forums**: [e107.org Forums](https://e107.org/forum)
-- **GitHub Issues**: [Report bugs](https://github.com/Kanonimpresor/vstore/issues)
-
-### Stay Updated
-- **GitHub**: Star and watch this repository
-- **e107 News**: [e107.org](https://e107.org)
-- **Social Media**: Follow e107 CMS updates
+- **Documentation**: [user manual](docs/user-manual.html) and the *User Guide* tab in the admin area
+- **GitHub Issues**: [report bugs](https://github.com/e107-Kanonimpresor/vstore/issues)
+- **e107 community**: [Q&A - Plugins](https://github.com/e107inc/e107/discussions/categories/q-a-plugins) and the [e107.org forums](https://e107.org/forum)
 
 ---
 
 ## 🗺️ Roadmap
+
+### ✅ Delivered in 2.0.0
+- [x] PHP 8.x full compatibility (7.4 to 8.4)
+- [x] Enhanced coupon system
+- [x] Complete localization (English, Spanish, Portuguese)
+- [x] Mollie MB WAY and Multibanco, built-in PDF invoices, EU VAT rewrite, new e-mail design
+
+### 🚧 In Progress
+- [ ] Product **quote** mode: leave the price empty and the product shows a "Quote / Presupuesto / Orçamento" button instead of "Add to cart"
+- [ ] More e-mail improvements
+- [ ] More languages (community translations)
+- [ ] Mobile app integration
 
 ### Planned Features
 - [ ] More payment gateways (Authorize.net, Square, etc.)
@@ -378,20 +312,13 @@ This project is licensed under the **GNU General Public License v3.0** - see the
 - [ ] Subscription/recurring payments
 - [ ] Gift cards and vouchers
 
-### In Progress
-- [x] PHP 8.x full compatibility
-- [x] Enhanced coupon system
-- [ ] Complete localization (multiple languages)
-- [ ] Mobile app integration
-
 ---
 
-## 📊 Statistics
+## 📊 At a glance
 
-- **Active Installations**: Growing e107 community
-- **Supported Languages**: English, Portuguese, Spanish (more coming)
-- **Payment Gateways**: 6+ integrated
-- **Average Rating**: ⭐⭐⭐⭐⭐ (Community feedback)
+- **Languages**: English, Portuguese, Spanish
+- **Payment methods**: PayPal, Mollie (cards and local methods), bank transfer
+- **Tests**: 242 automated checks (`php tests/run.php`), PHP 7.4, 8.2 and 8.4
 
 ---
 
@@ -399,7 +326,9 @@ This project is licensed under the **GNU General Public License v3.0** - see the
 
 **Made with ❤️ for the e107 CMS Community**
 
-[Report Bug](https://github.com/Kanonimpresor/vstore/issues) · [Request Feature](https://github.com/Kanonimpresor/vstore/issues) · [Documentation](wiki/)
+[Report Bug](https://github.com/e107-Kanonimpresor/vstore/issues) · [Request Feature](https://github.com/e107-Kanonimpresor/vstore/issues) · [Releases](https://github.com/e107-Kanonimpresor/vstore/releases)
 
-</div> 
+Copyright (c) 2026 Kanonimpresor / Marketing de Performance  
+Plugin developed for e107 CMS — https://marketingdeperformance.online
 
+</div>

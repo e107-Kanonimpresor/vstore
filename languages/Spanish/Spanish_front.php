@@ -11,6 +11,10 @@
 
 
 
-define("LAN_VSTORE_001", "Agregar al carrito");
-define("LAN_VSTORE_002", "En Stock");
-define("LAN_VSTORE_003", "Agotado");
+return array(
+	'LAN_VSTORE_001'           => 'Agregar al carrito',
+	'LAN_VSTORE_002'           => 'En Stock',
+	'LAN_VSTORE_003'           => 'Agotado',
+	'LAN_VSTORE_MENU_PRODUCTS'   => 'Productos',
+	'LAN_VSTORE_MENU_CATEGORIES' => 'Categorías de Vstore',
+);

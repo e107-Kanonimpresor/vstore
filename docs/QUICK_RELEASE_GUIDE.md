@@ -9,7 +9,7 @@ All code has been committed and pushed. The tag `v1.1.0` is ready on GitHub.
 ## 📋 Steps to Create the Release
 
 ### 1. Go to Releases Page
-Visit: https://github.com/Kanonimpresor/vstore/releases
+Visit: https://github.com/e107-Kanonimpresor/vstore/releases
 
 ### 2. Click "Draft a new release"
 
@@ -62,7 +62,7 @@ composer install --no-dev
 ✅ Order creation verified  
 ✅ All payment gateways working  
 
-📚 **Full documentation**: See [RELEASE_NOTES_v1.1.0.md](https://github.com/Kanonimpresor/vstore/blob/main/RELEASE_NOTES_v1.1.0.md)
+📚 **Full documentation**: See [RELEASE_NOTES_v1.1.0.md](https://github.com/e107-Kanonimpresor/vstore/blob/main/docs/RELEASE_NOTES_v1.1.0.md)
 
 ---
 

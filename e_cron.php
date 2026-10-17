@@ -13,13 +13,15 @@ class vstore_cron       // plugin-folder name + '_cron'.
 {
     function config() // Setup
     {
+        e107::lan('vstore', 'hooks', true);
+
         $cron = array();
 
         $cron[] = array(
-            'name'            => "Vstore - Purge cart",  // Displayed in admin area. .
+            'name'            => LAN_VSTORE_HOOK_CRON_NAME,  // Displayed in admin area. .
             'function'        => "purgeCart",    // Name of the function which is defined below.
             'category'        => 'content',           // Choose between: mail, user, content, notify, or backup
-            'description'     => "Delete cart entries, that haven't been touched for 2 days"  // Displayed in admin area.
+            'description'     => LAN_VSTORE_HOOK_CRON_DESC  // Displayed in admin area.
         );
 
         return $cron;

@@ -92,7 +92,7 @@ git push origin master
 
 After pushing, create a release on GitHub:
 
-1. Go to: https://github.com/Kanonimpresor/vstore/releases
+1. Go to: https://github.com/e107-Kanonimpresor/vstore/releases
 2. Click "Draft a new release"
 3. Tag version: `v1.1.0` (or appropriate version)
 4. Release title: `v1.1.0 - PHP 8.x Compatibility Update`
@@ -110,7 +110,7 @@ git fetch origin
 git log origin/main
 
 # View on GitHub
-# Navigate to: https://github.com/Kanonimpresor/vstore
+# Navigate to: https://github.com/e107-Kanonimpresor/vstore
 ```
 
 ## Troubleshooting
@@ -130,7 +130,7 @@ git push origin main
 git remote -v
 
 # Update remote URL
-git remote set-url origin https://github.com/Kanonimpresor/vstore.git
+git remote set-url origin https://github.com/e107-Kanonimpresor/vstore.git
 ```
 
 ### If authentication fails
@@ -139,7 +139,7 @@ git remote set-url origin https://github.com/Kanonimpresor/vstore.git
 # Generate token at: https://github.com/settings/tokens
 
 # Or configure SSH
-git remote set-url origin git@github.com:Kanonimpresor/vstore.git
+git remote set-url origin git@github.com:e107-Kanonimpresor/vstore.git
 ```
 
 ## Files Modified Summary
@@ -161,7 +161,7 @@ git remote set-url origin git@github.com:Kanonimpresor/vstore.git
 
 ## Post-Upload Checklist
 
-- [ ] Verify all files uploaded: https://github.com/Kanonimpresor/vstore
+- [ ] Verify all files uploaded: https://github.com/e107-Kanonimpresor/vstore
 - [ ] Check README displays correctly on GitHub
 - [ ] Language badges link to correct files
 - [ ] CHANGELOG.md is formatted properly

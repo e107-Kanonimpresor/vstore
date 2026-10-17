@@ -1,9 +1,13 @@
 <?php
+e107::lan('vstore', 'admin_pref', true);
+
 /**
- * Adminarea module cart
+ * Adminarea module preferences
  */
 class vstore_pref_ui extends e_admin_ui
 {
+	use vstore_admin_common;
+
 			
 		protected $pluginTitle		= 'Vstore';
 		protected $pluginName		= 'vstore';
@@ -25,64 +29,65 @@ class vstore_pref_ui extends e_admin_ui
 		// protected $fieldpref = array();
 
 		public static $taxClassesDefault = array(
-			0 => array('name'=>'none', 		'description'=>'No tax', 		'value'=>'0.00'),
-			1 => array('name'=>'reduced', 	'description'=>'Reduced tax', 	'value'=>'0.00'),
-			2 => array('name'=>'standard', 	'description'=>'Standard tax', 	'value'=>'0.00'),
+			0 => array('name'=>'none', 		'description'=>LAN_VSTORE_ADMIN_PREF_TAX_DEF_NONE, 		'value'=>'0.00'),
+			1 => array('name'=>'reduced', 	'description'=>LAN_VSTORE_ADMIN_PREF_TAX_DEF_REDUCED, 	'value'=>'0.00'),
+			2 => array('name'=>'standard', 	'description'=>LAN_VSTORE_ADMIN_PREF_TAX_DEF_STANDARD, 	'value'=>'0.00'),
 		);
 	
 		// optional
 		protected $preftabs = array(
 			'general'  => LAN_GENERAL,
-			'ship'     => "Shipping",
-			'tax'      => "Tax",
-			'email'    => "Emails",
-			'howto'    => "How to Order",
-			'admin'    => "Admin Area",
-			'checkout' => "Check-Out",
-			'menu'     => "Menu",
-			'css'      => "Custom CSS",
+			'ship'     => LAN_VSTORE_ADMIN_PREF_TAB_SHIP,
+			'tax'      => LAN_VSTORE_ADMIN_PREF_TAB_TAX,
+			'email'    => LAN_VSTORE_ADMIN_PREF_TAB_EMAIL,
+			'howto'    => LAN_VSTORE_ADMIN_PREF_TAB_HOWTO,
+			'admin'    => LAN_VSTORE_ADMIN_PREF_TAB_ADMIN,
+			'checkout' => LAN_VSTORE_ADMIN_PREF_TAB_CHECKOUT,
+			'menu'     => LAN_VSTORE_ADMIN_PREF_TAB_MENU,
+			'css'      => LAN_VSTORE_ADMIN_PREF_TAB_CSS,
 		);
 
 
 		protected $prefs = array(
-			'caption'                   => array('title'=> 'Store Caption', 'tab'=>'general', 'type'=>'text', 'help'=>'','writeParms'=>array('placeholder'=>'Vstore'),'multilan'=>true),
-			'caption_categories'        => array('title'=> 'Category Caption', 'tab'=>'general', 'type'=>'text', 'writeParms'=>array('placeholder'=>'Product Brands'),'multilan'=>true),
-			'caption_outofstock'        => array('title'=> 'Out-of-Stock Caption', 'tab'=>'general', 'type'=>'text', 'writeParms'=>array('placeholder'=>'Out of Stock'),'multilan'=>true),
+			'caption'                   => array('title'=> LAN_VSTORE_ADMIN_PREF_CAPTION, 'tab'=>'general', 'type'=>'text', 'help'=>LAN_VSTORE_ADMIN_PREF_CAPTION_H,'writeParms'=>array('placeholder'=>'Vstore'),'multilan'=>true),
+			'caption_categories'        => array('title'=> LAN_VSTORE_ADMIN_PREF_CAPTION_CAT, 'tab'=>'general', 'type'=>'text', 'writeParms'=>array('placeholder'=>LAN_VSTORE_ADMIN_PREF_CAPTION_CAT_PH),'multilan'=>true),
+			'caption_outofstock'        => array('title'=> LAN_VSTORE_ADMIN_PREF_CAPTION_STOCK, 'tab'=>'general', 'type'=>'text', 'writeParms'=>array('placeholder'=>LAN_VSTORE_ADMIN_PREF_CAPTION_STOCK_PH),'multilan'=>true),
 
-			'currency'		            => array('title'=> 'Currency', 'tab'=>'general', 'type'=>'dropdown', 'data' => 'string','help'=>'Select a currency.'),
-			'amount_format'	            => array('title'=> 'Price display', 'tab'=>'general', 'type'=>'dropdown', 'data' => 'string','help'=>'Select a format to be used for displaying item prices.'),
-			'weight_unit'		        => array('title'=> 'Weight unit', 'tab'=>'general', 'type'=>'dropdown', 'data' => 'string','help'=>'Select a unit of weight.'),
-			'customer_userclass'        => array('title'=> 'Assign userclass', 'tab'=>'general', 'type' => 'method', 'help' => 'Assign userclass to the customer after completing their purchase.'),
-			'show_outofstock'     		=> array('title'=> 'Show/hide out-of-stock products', 'tab'=>'general', 'type' => 'bool', 'help' => 'Show or hide "Out-of-stock" products in product listings', 'writeParms' => array('enabled' => LAN_SHOW, 'disabled' => 'Hide')),
+			'currency'		            => array('title'=> LAN_VSTORE_ADMIN_PREF_CURRENCY, 'tab'=>'general', 'type'=>'dropdown', 'data' => 'string','help'=>LAN_VSTORE_ADMIN_PREF_CURRENCY_H),
+			'amount_format'	            => array('title'=> LAN_VSTORE_ADMIN_PREF_AMOUNT_FORMAT, 'tab'=>'general', 'type'=>'dropdown', 'data' => 'string','help'=>LAN_VSTORE_ADMIN_PREF_AMOUNT_FORMAT_H),
+			'weight_unit'		        => array('title'=> LAN_VSTORE_ADMIN_PREF_WEIGHT_UNIT, 'tab'=>'general', 'type'=>'dropdown', 'data' => 'string','help'=>LAN_VSTORE_ADMIN_PREF_WEIGHT_UNIT_H),
+			'customer_userclass'        => array('title'=> LAN_VSTORE_ADMIN_PREF_USERCLASS, 'tab'=>'general', 'type' => 'method', 'help' => LAN_VSTORE_ADMIN_PREF_USERCLASS_H),
+			'show_outofstock'     		=> array('title'=> LAN_VSTORE_ADMIN_PREF_SHOW_STOCK, 'tab'=>'general', 'type' => 'bool', 'help' => LAN_VSTORE_ADMIN_PREF_SHOW_STOCK_H, 'writeParms' => array('enabled' => LAN_SHOW, 'disabled' => LAN_VSTORE_ADMIN_C_HIDE)),
 			
-			'shipping'		            => array('title'=> 'Calculate Shipping', 'tab'=>'ship', 'type'=>'bool', 'data' => 'int','help'=>'Including shipping calculation at checkout.', 'writeParms' => array('label' => 'yesno')),
-			'shipping_method'	        => array('title'=> 'Calculation method', 'tab'=>'ship', 'type'=>'dropdown', 'data' => 'string', 'help'=>'Define a method to calculate the shipping cost.', 'writeParms' => array('size'=>'large')),
-			'shipping_unit'	        	=> array('title'=> 'Value based on', 'tab'=>'ship', 'type'=>false, 'data' => 'string'),
-			'shipping_limit'        	=> array('title'=> 'Cost are', 'tab'=>'ship', 'type'=>false, 'data' => 'string'),
-			'shipping_data'				=> array('title'=> 'Tiered shipping costs', 'tab'=>'ship', 'type'=>'method', 'data' => 'array', 'writeParms'=>array('trClass'=>'shipping-tiered-row'), 'help'=>'Enter thresholds in the first column to set or limit shipping cost based on total order price or weight. Start with the lowest threshold and add more until your last threshold is higher than the maximum price/weight of a typical order. Setting the last threshold too low could result in no shipping cost at all.' ),
+			'shipping'		            => array('title'=> LAN_VSTORE_ADMIN_PREF_SHIPPING, 'tab'=>'ship', 'type'=>'bool', 'data' => 'int','help'=>LAN_VSTORE_ADMIN_PREF_SHIPPING_H, 'writeParms' => array('label' => 'yesno')),
+			'shipping_method'	        => array('title'=> LAN_VSTORE_ADMIN_PREF_SHIP_METHOD, 'tab'=>'ship', 'type'=>'dropdown', 'data' => 'string', 'help'=>LAN_VSTORE_ADMIN_PREF_SHIP_METHOD_H, 'writeParms' => array('size'=>'large')),
+			'shipping_unit'	        	=> array('title'=> LAN_VSTORE_ADMIN_PREF_SHIP_UNIT, 'tab'=>'ship', 'type'=>false, 'data' => 'string'),
+			'shipping_limit'        	=> array('title'=> LAN_VSTORE_ADMIN_PREF_SHIP_LIMIT, 'tab'=>'ship', 'type'=>false, 'data' => 'string'),
+			'shipping_data'				=> array('title'=> LAN_VSTORE_ADMIN_PREF_SHIP_DATA, 'tab'=>'ship', 'type'=>'method', 'data' => 'array', 'writeParms'=>array('trClass'=>'shipping-tiered-row'), 'help'=>LAN_VSTORE_ADMIN_PREF_SHIP_DATA_H ),
 
-			'sender_name'               => array('title'=> 'Sender Name', 'tab'=>'email', 'type'=>'text', 'writeParms'=>array('placeholder'=>'Sales Department'), 'help'=>'Leave blank to use system default','multilan'=>false),
-			'sender_email'              => array('title'=> LAN_EMAIL, 'tab'=>'email', 'type'=>'text', 'writeParms'=>array('placeholder'=>'orders@mysite.com'), 'help'=>'Leave blank to use system default', 'multilan'=>false),
-			'merchant_info'             => array('title'=> "Merchant Name/Address", 'tab'=>'email', 'type'=>'textarea', 'writeParms'=>array('placeholder'=>'My Store Inc. etc.'), 'help'=>'Will be displayed on customer email.', 'multilan'=>false),
+			'sender_name'               => array('title'=> LAN_VSTORE_ADMIN_PREF_SENDER_NAME, 'tab'=>'email', 'type'=>'text', 'writeParms'=>array('placeholder'=>LAN_VSTORE_ADMIN_PREF_SENDER_NAME_PH), 'help'=>LAN_VSTORE_ADMIN_PREF_SENDER_H,'multilan'=>false),
+			'sender_email'              => array('title'=> LAN_EMAIL, 'tab'=>'email', 'type'=>'text', 'writeParms'=>array('placeholder'=>LAN_VSTORE_ADMIN_PREF_SENDER_EMAIL_PH), 'help'=>LAN_VSTORE_ADMIN_PREF_SENDER_H, 'multilan'=>false),
+			'merchant_info'             => array('title'=> LAN_VSTORE_ADMIN_PREF_MERCHANT, 'tab'=>'email', 'type'=>'textarea', 'writeParms'=>array('placeholder'=>LAN_VSTORE_ADMIN_PREF_MERCHANT_PH), 'help'=>LAN_VSTORE_ADMIN_PREF_MERCHANT_H, 'multilan'=>false),
 			
-			'howtoorder'	            => array('title'=> 'How to order', 'tab'=>'howto', 'type'=>'bbarea', 'help'=>'Enter how-to-order info.'),
+			'howtoorder'	            => array('title'=> LAN_VSTORE_ADMIN_PREF_HOWTO, 'tab'=>'howto', 'type'=>'bbarea', 'help'=>LAN_VSTORE_ADMIN_PREF_HOWTO_H),
 
-			'admin_items_perpage'	    => array('title'=> 'Products per page', 'tab'=>'admin', 'type'=>'number', 'help'=>''),
-			'admin_categories_perpage'	=> array('title'=> 'Categories per page', 'tab'=>'admin', 'type'=>'number', 'help'=>''),
+			'admin_items_perpage'	    => array('title'=> LAN_VSTORE_ADMIN_PREF_ITEMS_PERPAGE, 'tab'=>'admin', 'type'=>'number', 'help'=>''),
+			'admin_categories_perpage'	=> array('title'=> LAN_VSTORE_ADMIN_PREF_CATS_PERPAGE, 'tab'=>'admin', 'type'=>'number', 'help'=>''),
 
-			'additional_fields'         => array('title'=>'Additional Fields', 'tab'=>'checkout', 'type'=>'method'),
+			'additional_fields'         => array('title'=>LAN_VSTORE_ADMIN_PREF_ADDITIONAL, 'tab'=>'checkout', 'type'=>'method', 'data'=>'array'),
 			
-			'custom_css'	            => array('title'=> 'Custom CSS', 'tab'=>'css', 'type' => 'textarea', 'data' => 'str', 'width' => '100%', 'readParms' => array(), 'writeParms' => array('cols'=> 80, 'rows' => 10, 'size'=>'block-level'), 'help'=>'Use this field to enter any vstore related custom css, without the need to edit any source files.'),
+			'custom_css'	            => array('title'=> LAN_VSTORE_ADMIN_PREF_CSS, 'tab'=>'css', 'type' => 'textarea', 'data' => 'str', 'width' => '100%', 'readParms' => array(), 'writeParms' => array('cols'=> 80, 'rows' => 10, 'size'=>'block-level'), 'help'=>LAN_VSTORE_ADMIN_PREF_CSS_H),
 
-			'tax_calculate'	            => array('title'=> 'Calculate tax', 'tab'=>'tax', 'type'=>'bool', 'data' => 'int','help'=>'Enable to activate tax calculation.', 'writeParms' => array('label' => 'yesno')),
-			'tax_business_country'		=> array('title'=> 'Business country', 'tab'=>'tax', 'type'=>'country', 'data' => 'string', 'help'=>'The country where the business is located.', 'writeParms' => array()),
+			'tax_calculate'	            => array('title'=> LAN_VSTORE_ADMIN_PREF_TAX_CALC, 'tab'=>'tax', 'type'=>'bool', 'data' => 'int','help'=>LAN_VSTORE_ADMIN_PREF_TAX_CALC_H, 'writeParms' => array('label' => 'yesno')),
+			'tax_business_country'		=> array('title'=> LAN_VSTORE_ADMIN_PREF_TAX_COUNTRY, 'tab'=>'tax', 'type'=>'country', 'data' => 'string', 'help'=>LAN_VSTORE_ADMIN_PREF_TAX_COUNTRY_H, 'writeParms' => array()),
 		//	'tax_include_in_price'		=> array('title'=> 'Include tax in display price', 'tab'=>'tax', 'type'=>'bool', 'data' => 'string', 'help'=>'When enabled, the price displayed will include tax.', 'writeParms' => array()),
 
-			'tax_check_vat'	            => array('title'=> 'Check VAT id online (EU only!)', 'tab'=>'tax', 'type'=>'bool', 'data' => 'int','help'=>'Enable to activate online VAT id checking. (EU only!)', 'writeParms' => array('label' => 'yesno')),
-			'tax_classes'				=> array('title'=> 'Tax classes', 'tab'=>'tax', 'type'=>'method', 'data' => 'array', 'help'=>'The tax classes and default tax value to use with the products.<br />Enter tax value as decimal number. eg. 0.19 for 19%', 'writeParms' => array()),
+			'tax_check_vat'	            => array('title'=> LAN_VSTORE_ADMIN_PREF_TAX_VAT, 'tab'=>'tax', 'type'=>'bool', 'data' => 'int','help'=>LAN_VSTORE_ADMIN_PREF_TAX_VAT_H, 'writeParms' => array('label' => 'yesno')),
+			'tax_origin_vat'			    => array('title'=> LAN_VSTORE_ADMIN_PREF_TAX_ORIGIN, 'tab'=>'tax', 'type'=>'bool', 'data' => 'int','help'=>LAN_VSTORE_ADMIN_PREF_TAX_ORIGIN_H, 'writeParms' => array('label' => 'yesno')),
+			'tax_classes'				=> array('title'=> LAN_VSTORE_ADMIN_PREF_TAX_CLASSES, 'tab'=>'tax', 'type'=>'method', 'data' => 'array', 'help'=>LAN_VSTORE_ADMIN_PREF_TAX_CLASSES_H, 'writeParms' => array()),
 			
-			'menu_cat'				    => array('title'=> 'Product category', 'tab'=>'menu', 'type'=>'dropdown', 'data' => 'int', 'help'=>'', 'writeParms' => array()),
-			'menu_item_count'		    => array('title'=> 'Product limit', 'tab'=>'menu', 'type'=>'number', 'data' => 'int', 'help'=>'Enter the number of products to display in the menu.', 'writeParms' => array('decimals' => 0,'default' => 2)),
+			'menu_cat'				    => array('title'=> LAN_VSTORE_ADMIN_PREF_MENU_CAT, 'tab'=>'menu', 'type'=>'dropdown', 'data' => 'int', 'help'=>'', 'writeParms' => array()),
+			'menu_item_count'		    => array('title'=> LAN_VSTORE_ADMIN_PREF_MENU_COUNT, 'tab'=>'menu', 'type'=>'number', 'data' => 'int', 'help'=>LAN_VSTORE_ADMIN_PREF_MENU_COUNT_H, 'writeParms' => array('decimals' => 0,'default' => 2)),
 		);
 
 
@@ -101,16 +106,16 @@ class vstore_pref_ui extends e_admin_ui
 				$this->prefs['currency']['writeParms'][$k] = $v['title'];
 			}
 			
-			$this->prefs['amount_format']['writeParms'] = array('0'=>'Currency before number', '1'=>'Currency behind number');
+			$this->prefs['amount_format']['writeParms'] = array('0'=>LAN_VSTORE_ADMIN_PREF_AMOUNT_BEFORE, '1'=>LAN_VSTORE_ADMIN_PREF_AMOUNT_BEHIND);
 
 			$this->prefs['weight_unit']['writeParms'] = vstore::weightUnits();
 
 			$this->prefs['shipping_method']['writeParms']['size'] = 'xxlarge';
 
 			$this->prefs['shipping_method']['writeParms']['optArray'] = array(
-				'sum_simple'	=> 'Sum of the shipping cost of all items',
-				'sum_unique'	=> 'Sum of the shipping cost of only unique items',
-				'tiered'		=> 'A tiered system based on price or weight',
+				'sum_simple'	=> LAN_VSTORE_ADMIN_PREF_SHIP_SUM_SIMPLE,
+				'sum_unique'	=> LAN_VSTORE_ADMIN_PREF_SHIP_SUM_UNIQUE,
+				'tiered'		=> LAN_VSTORE_ADMIN_PREF_SHIP_TIERED,
 			);
 
 			// Get all active product categories 
@@ -178,7 +183,7 @@ class vstore_pref_ui extends e_admin_ui
 					{
 						$forceSave = true;
 						$value['name'] = $defaultKeys[$key];
-						e107::getMessage()->addWarning('Tax classes seam not to be in order!<br>The first 3 must be "none", "reduced", "standard"!<br/>Add your country specific classes after them.');
+						e107::getMessage()->addWarning(LAN_VSTORE_ADMIN_PREF_TAX_ORDER_WARNING);
 					}
 					if (in_array($value['name'], $used))
 					{
@@ -194,7 +199,26 @@ class vstore_pref_ui extends e_admin_ui
 
 				$new_data['tax_classes'] = $tmp;
 
-			}			
+			}
+
+			// Saving in one language must not erase the texts typed in the others
+			if (isset($new_data['additional_fields']))
+			{
+				$stored = (array) varset($old_data['additional_fields'], array());
+				$fields = is_array($new_data['additional_fields']) ? $new_data['additional_fields'] : e107::unserialize($new_data['additional_fields']);
+
+				foreach ($fields as $i => $field)
+				{
+					foreach (array('caption', 'placeholder') as $name)
+					{
+						$fields[$i][$name] = \Vstore\Support\Translatable::merge(varset($stored[$i][$name]), varset($field[$name]));
+					}
+				}
+
+				$new_data['additional_fields'] = $fields;
+			}
+
+			return $new_data;			
 			
 		}
 
@@ -310,9 +334,9 @@ class vstore_pref_form_ui extends e_admin_form_ui
 // 			'shipping_limit'        	=> array('title'=> 'Cost are', 'tab'=>'ship', 'type'=>'dropdown', 'data' => 'string', 'help'=>'Define if the shipping cost are fixed to the spcified cost or limited to that value', 'writeParms' => array('fixed'=>'Fixed shipping costs', 'max'=>'Up to (max.) shipping costs')),
 		$pref = e107::pref('vstore');
 
-		$unitDropdown = $this->select('shipping_unit', ['price'=>'When total price of order is below &mdash;', 'weight'=>'When total weight of order is below &mdash;'], varset($pref['shipping_unit']), ['size'=>'block-level']);
+		$unitDropdown = $this->select('shipping_unit', ['price'=>LAN_VSTORE_ADMIN_PREF_SHIP_UNIT_PRICE, 'weight'=>LAN_VSTORE_ADMIN_PREF_SHIP_UNIT_WEIGHT], varset($pref['shipping_unit']), ['size'=>'block-level']);
 
-		$limitDropdown = $this->select('shipping_limit', ['fixed'=>'Set shipping cost to &mdash;', 'max'=>'Limit shipping cost to no more than &mdash;'], varset($pref['shipping_limit']), ['size'=>'block-level']);
+		$limitDropdown = $this->select('shipping_limit', ['fixed'=>LAN_VSTORE_ADMIN_PREF_SHIP_LIMIT_FIXED, 'max'=>LAN_VSTORE_ADMIN_PREF_SHIP_LIMIT_MAX], varset($pref['shipping_limit']), ['size'=>'block-level']);
 
 
 		$text = '
@@ -387,6 +411,11 @@ class vstore_pref_form_ui extends e_admin_form_ui
 	function additional_fields($curVal,$mode)
 	{
 		
+		if(!is_array($curVal))
+		{
+			$curVal = e107::unserialize($curVal);
+		}
+
 		$tmp = range(0,3);
 
 		$text = "<table class='table table-striped table-bordered'>
@@ -398,15 +427,15 @@ class vstore_pref_form_ui extends e_admin_form_ui
 				<col style='width:100px' />
 			</colgroup>";
 
-			$opts = array('text'=>"Text Box",'checkbox'=> "Check box");
+			$opts = array('text'=>LAN_VSTORE_ADMIN_PREF_ADD_TEXTBOX,'checkbox'=> LAN_VSTORE_ADMIN_PREF_ADD_CHECKBOX);
 
 		$text .= "
 			<tr>
 				<td>".LAN_ACTIVE."</td>
 				<td>".LAN_CAPTION."</td>
-				<td>Placeholder</span></td>
-				<td>Fieldtype</td>
-				<td>Required</td>
+				<td>".LAN_VSTORE_ADMIN_PREF_ADD_PLACEHOLDER."</td>
+				<td>".LAN_VSTORE_ADMIN_PREF_ADD_FIELDTYPE."</td>
+				<td>".LAN_VSTORE_ADMIN_PREF_ADD_REQUIRED."</td>
 			</tr>
 		";
 			
@@ -424,10 +453,10 @@ class vstore_pref_form_ui extends e_admin_form_ui
 			$text .= "
 				<tr>
 					<td>".$this->flipswitch('additional_fields['.$i.'][active]', $activeVal, null, array('switch'=>'small', 'title' => LAN_ACTIVE))."</td>
-					<td><span class='input-group'>".$this->text('additional_fields['.$i.'][caption]['.e_LANGUAGE.']', $capVal, 250, array('placeholder'=>LAN_CAPTION, 'size'=>'block-level')).$post."</span></td>
-					<td><span class='input-group'>".$this->text('additional_fields['.$i.'][placeholder]['.e_LANGUAGE.']',$placeholderVal, 100, array('placeholder'=>"Placeholder", 'size'=>'block-level')).$post."</span></td>
+					<td><span class='input-group'>".$this->text('additional_fields['.$i.'][caption]['.e_LANGUAGE.']', $capVal, 250, array('placeholder'=>\Vstore\Support\Translatable::pick(varset($curVal[$i]['caption']), e_LANGUAGE, LAN_CAPTION), 'size'=>'block-level')).$post."</span></td>
+					<td><span class='input-group'>".$this->text('additional_fields['.$i.'][placeholder]['.e_LANGUAGE.']',$placeholderVal, 100, array('placeholder'=>\Vstore\Support\Translatable::pick(varset($curVal[$i]['placeholder']), e_LANGUAGE, LAN_VSTORE_ADMIN_PREF_ADD_PLACEHOLDER), 'size'=>'block-level')).$post."</span></td>
 					<td>".$this->select('additional_fields['.$i.'][type]', $opts, $typeVal )."</td>
-					<td>".$this->flipswitch('additional_fields['.$i.'][required]', $reqVal, null, array('switch'=>'small', 'title' => 'Required'))."</td>
+					<td>".$this->flipswitch('additional_fields['.$i.'][required]', $reqVal, null, array('switch'=>'small', 'title' => LAN_VSTORE_ADMIN_PREF_ADD_REQUIRED))."</td>
 				</tr>
 			";
 
@@ -442,7 +471,7 @@ class vstore_pref_form_ui extends e_admin_form_ui
 	function customer_userclass($curVal, $mode)
 	{
 		$items = e107::getUserClass()->getClassList('nobody,member,classes');
-		$items = array('-1' => 'As defined in product') + $items;
+		$items = array('-1' => LAN_VSTORE_ADMIN_PREF_USERCLASS_PRODUCT) + $items;
 		return $this->select('customer_userclass', $items, $curVal);
 		
 	}
@@ -484,9 +513,9 @@ class vstore_pref_form_ui extends e_admin_form_ui
 						$readonly = in_array($v['name'], array('none', 'reduced', 'standard'));
 						$text .= '	
 							<div class="form-inline tax-classes-row" style="margin-bottom:5px">'.
-							$this->select('tax_classes['.$i.'][name]', $tax_classes, $v['name'], array('id'=>null, 'size'=>'medium', 'placeholder'=>'Name', 'readonly' => $readonly)).
-							" ".$this->text('tax_classes['.$i.'][description]', $v['description'], 150, array('id'=>null, 'size'=>'large', 'placeholder'=>'Description')).
-							" ".$this->text('tax_classes['.$i.'][value]', $v['value'], 6, array('id'=>null, 'size'=>'small', 'placeholder'=> 'Tax', 'pattern' => '^0\.?[0-9]{0,4}$')).
+							$this->select('tax_classes['.$i.'][name]', $tax_classes, $v['name'], array('id'=>null, 'size'=>'medium', 'placeholder'=>LAN_VSTORE_ADMIN_PREF_TAX_NAME, 'readonly' => $readonly)).
+							" ".$this->text('tax_classes['.$i.'][description]', $v['description'], 150, array('id'=>null, 'size'=>'large', 'placeholder'=>LAN_VSTORE_ADMIN_PREF_TAX_DESCRIPTION)).
+							" ".$this->text('tax_classes['.$i.'][value]', $v['value'], 6, array('id'=>null, 'size'=>'small', 'placeholder'=> LAN_VSTORE_ADMIN_PREF_TAX_VALUE, 'pattern' => '^0\.?[0-9]{0,4}$')).
 							" ".$this->button('tax-remove', '1', 'action', "<i class='fa fa-times'></i> ", array('class'=>'btn btn-danger vstore-tax-remove'.($readonly ? ' hidden invisible' : '')))
 							.'</div>';
 

@@ -12,18 +12,7 @@
 // define('e_DEBUG_VSTORE', true);
 
 // Cargar idiomas siempre (necesario para las constantes)
-e107::lan('vstore', false, true); // e107_plugins/vstore/languages/English_front.php
-
-// Verificar que las constantes estén disponibles, si no, definir fallbacks
-if (!defined('LAN_VSTORE_001')) {
-    define('LAN_VSTORE_001', 'Add to cart');
-}
-if (!defined('LAN_VSTORE_002')) {
-    define('LAN_VSTORE_002', 'In Stock');
-}
-if (!defined('LAN_VSTORE_003')) {
-    define('LAN_VSTORE_003', 'Out of Stock');
-}
+e107::lan('vstore', false, true); // e107_plugins/vstore/languages/English/English_front.php (English fallback is automatic)
 
 if(deftrue('USER_AREA'))
 {
@@ -39,9 +28,9 @@ if(deftrue('USER_AREA'))
 			'url'        => e107::url('vstore', 'cart'),
 			'addtocart'  => LAN_VSTORE_001, // 'Add to cart',
 			'outofstock' => empty($vstore_prefs['caption_outofstock'][e_LANGUAGE])
-				? 'Out of stock'
+				? LAN_VSTORE_003
 				: $vstore_prefs['caption_outofstock'][e_LANGUAGE],
-			'available'  => 'In stock',
+			'available'  => LAN_VSTORE_002,
 		),
 		'ImageZoom' => array('url' => '')
 	)

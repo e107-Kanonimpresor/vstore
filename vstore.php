@@ -38,6 +38,14 @@ e107::js('vstore', 'js/jquery.zoom.min.js');
 
 /** @var vstore $vstore */
 $vstore = e107::getSingleton('vstore', e_PLUGIN.'vstore/vstore.class.php');
+
+if(varset($_GET['mode']) === 'webhook')
+{
+	// Mollie payment notification: no page is rendered
+	$vstore->handleMollieWebhook();
+	exit;
+}
+
 $vstore->init();
 require_once(HEADERF);
 

@@ -1,0 +1,47 @@
+<?php
+if (!defined('e107_INIT')) { exit; }
+
+// Emails, facturas, PDF y mensajes del procesamiento de pedidos.
+return array(
+	'LAN_VSTORE_MAIL_HELLO'            => 'Hola',
+	'LAN_VSTORE_MAIL_THANKS'           => 'Gracias por tu compra.',
+	'LAN_VSTORE_MAIL_REF'              => 'El número de referencia de tu pedido es:',
+	'LAN_VSTORE_MAIL_MERCHANT'         => 'Comercio',
+	'LAN_VSTORE_MAIL_CUSTOMER'         => 'Cliente',
+	'LAN_VSTORE_MAIL_REGARDS'          => 'Un cordial saludo,',
+	'LAN_VSTORE_MAIL_COMPLETED'        => 'tu pedido #{REF} del {ORDER_DATA: order_date} se ha completado y te lo enviaremos en breve.',
+	'LAN_VSTORE_MAIL_CANCELLED'        => 'tu pedido #{REF} del {ORDER_DATA: order_date} se ha cancelado.',
+	'LAN_VSTORE_MAIL_CANCELLED_REFUND' => 'Cualquier pago que hayamos recibido por este pedido será reembolsado.',
+	'LAN_VSTORE_MAIL_REFUNDED'         => 'El pago de tu pedido #{REF} del {ORDER_DATA: order_date} ha sido reembolsado.',
+	'LAN_VSTORE_MAIL_SUBJECT'          => 'Tu pedido #[x] en %s',
+
+	'LAN_VSTORE_INV_HTML_LANG'         => 'es',
+	'LAN_VSTORE_INV_TITLE'             => 'Factura',
+	'LAN_VSTORE_INV_BILLING'           => 'Facturación',
+	'LAN_VSTORE_INV_ORDER_NR'          => 'Pedido n.º:',
+	'LAN_VSTORE_INV_ORDER_DATE'        => 'Fecha del pedido:',
+	'LAN_VSTORE_INV_PAYMENT_METHOD'    => 'Método de pago:',
+	'LAN_VSTORE_INV_DUE_BY'            => 'Vencimiento:',
+	'LAN_VSTORE_INV_NO'                => 'N.º',
+	'LAN_VSTORE_PDF_CREATED'           => 'Documento creado:',
+	'LAN_VSTORE_PDF_PAGE'              => 'Página',
+
+	'LAN_VSTORE_ORD_ERR_LOAD'          => 'No se pudo cargar el pedido.',
+	'LAN_VSTORE_ORD_ERR_NOT_FOUND'     => 'No se encontró el pedido.',
+	'LAN_VSTORE_ORD_ERR_SAVE'          => 'No se pudo insertar/actualizar el pedido.',
+	'LAN_VSTORE_ORD_ERR_STATUS_NOLOAD' => 'No se pudo cambiar el estado del pedido. No hay ningún pedido cargado.',
+	'LAN_VSTORE_ORD_ERR_STATUS'        => 'No se pudo actualizar el estado del pedido.',
+	'LAN_VSTORE_ORD_ERR_REF_NOLOAD'    => 'No hay ningún pedido cargado. No se pudo actualizar la referencia del pedido.',
+	'LAN_VSTORE_ORD_ERR_NOT_LOADED'    => 'El pedido no está cargado.',
+	'LAN_VSTORE_ORD_ERR_REFUNDED'      => 'El pedido ya está reembolsado.',
+	'LAN_VSTORE_ORD_ERR_REFUND_STATE'  => 'Solo se pueden reembolsar los pedidos con estado "%s", "%s" y "%s".',
+	'LAN_VSTORE_ORD_ERR_GATEWAY'       => 'Falta la pasarela de pago.',
+	'LAN_VSTORE_ORD_ERR_REFUND_DETAILS' => 'No se han definido los datos de reembolso.',
+	'LAN_VSTORE_ORD_ERR_REFUND_FAILED' => 'El reembolso ha fallado.',
+	'LAN_VSTORE_ORD_WARN_MANUAL_REFUND' => "El pedido se ha marcado como reembolsado, pero el método de pago '%s' no admite el reembolso automático.\nDebes hacerlo manualmente.",
+	'LAN_VSTORE_ORD_LOG_CHANGED'       => 'Cambio de [x] de [y] a [z].',
+	'LAN_VSTORE_ORD_LOG_STATUS'        => 'Estado',
+	'LAN_VSTORE_ORD_LOG_REF'           => 'Referencia de pedido asignada: %s',
+	'LAN_VSTORE_ORD_LOG_INVOICE'       => 'Número de factura asignado: %s',
+	'LAN_VSTORE_ORD_LOG_REFUNDED'      => 'Pedido reembolsado el [x] por [y] ([z])',
+);

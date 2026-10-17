@@ -22,7 +22,8 @@ $tp = e107::getParser();
 $sc = new plugin_vstore_vstore_shortcodes;
 $vst = new vstore_sitelink;
 
-$caption = "Vstore Categories";
+e107::lan('vstore', false, true);
+$caption = LAN_VSTORE_MENU_CATEGORIES;
 
 $items = $vst->storeCategories();
 

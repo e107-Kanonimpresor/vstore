@@ -1,8 +1,6 @@
 # Invoices
 
-**In order to make the invoices work, you MUST install the PDF plugin!**
-
-You can find the latest version here: https://github.com/e107inc/pdf
+**Invoices are created as PDF by Vstore itself with the TCPDF library. Run `composer install` in `e107_plugins/vstore` once; the e107 PDF plugin is not needed any more.**
 
 
 ## Contents

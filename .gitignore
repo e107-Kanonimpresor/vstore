@@ -8,3 +8,6 @@
 # Ignore any generated invoice pdf's
 invoices/*.pdf
 vendor
+
+# Release packages
+dist/

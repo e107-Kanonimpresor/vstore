@@ -135,6 +135,12 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 
 					url += (url.indexOf('?')>=0 ? '&' : '?') + 'mode=cart&add=' + itemid;
 
+					var qty = parseInt($('#vstore-item-qty-' + itemid).val(), 10);
+					if (qty > 1)
+					{
+						url += '&qty=' + qty;
+					}
+
 
 					if ($('#vstore-item-vars-' + itemid).length>0)
 					{
@@ -265,14 +271,24 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 	e107.behaviors.vstoreSetGateway = {
 		attach: function (context, settings)
 		{
+			// MB WAY sends the payment request to the customer's mobile number: the phone becomes mandatory
+			var togglePhoneRequired = function ()
+			{
+				var mbway = $('.vstore-gateway-radio[value="mollie_mbway"]').is(':checked');
+				$('input[name="cust[phone]"]').prop('required', mbway);
+			};
+
 			$(context).find('.vstore-gateway-radio').one('vstore-set-gateway').each(function (e)
 			{
 
 				$(this).change(function(){
 					$(".vstore-gateway").removeClass("active");
 					$(this).parent().addClass("active");
+					togglePhoneRequired();
 				});
 			});
+
+			togglePhoneRequired();
 		}
 	}
 

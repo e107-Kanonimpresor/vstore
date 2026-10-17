@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<e107Plugin name="Vstore" lan="" version="1.0" date="2014-05-29" compatibility="2.3.2" installRequired="true" >
-	<author name="e107 Inc" url="https://e107.org" />
+<e107Plugin name="Vstore" lan="" version="2.0.0" date="2026-10-17" compatibility="2.3.2" installRequired="true" >
+	<author name="Kanonimpresor" url="https://marketingdeperformance.online" email="info@marketingdeperformance.online" />
 	<summary lan="">Simple Virtual Store for e107</summary>
 	<description lan="">Shopping cart system for e107 v2.</description>
 	<keywords>
@@ -8,7 +8,7 @@
 		<word>shopping</word>
 	</keywords>
 	<category>content</category>
-	<copyright>GPL</copyright>
+	<copyright>Copyright (c) 2026 Kanonimpresor / Marketing de Performance — GPL v3</copyright>
 	<adminLinks>
 		<link url="admin_config.php" description="" icon="images/vstore_32.png" iconSmall="images/vstore_16.png" icon128="images/vstore_128.png" primary="true" >LAN_CONFIGURE</link>
 	</adminLinks>
@@ -18,8 +18,14 @@
 	</siteLinks>
 	<pluginPrefs>
 		<pref name='currency'>USD</pref>
+		<pref name='amount_format'>0</pref>
 		<pref name='shipping'>0</pref>
 		<pref name='weight_unit'>lb</pref>
+		<pref name='show_outofstock'>1</pref>
+		<pref name='tax_calculate'>0</pref>
+		<pref name='tax_check_vat'>0</pref>
+		<pref name='tax_origin_vat'>0</pref>
+		<pref name='menu_item_count'>2</pref>
 		<pref name='admin_items_perpage'>10</pref>
 		<pref name='admin_categories_perpage'>10</pref>
 	</pluginPrefs>

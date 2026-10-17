@@ -1,0 +1,47 @@
+<?php
+if (!defined('e107_INIT')) { exit; }
+
+// Emails, invoices, PDF and order processing messages.
+return array(
+	'LAN_VSTORE_MAIL_HELLO'            => 'Hello',
+	'LAN_VSTORE_MAIL_THANKS'           => 'Thank you for your purchase.',
+	'LAN_VSTORE_MAIL_REF'              => 'Your order reference number is:',
+	'LAN_VSTORE_MAIL_MERCHANT'         => 'Merchant',
+	'LAN_VSTORE_MAIL_CUSTOMER'         => 'Customer',
+	'LAN_VSTORE_MAIL_REGARDS'          => 'Kind regards,',
+	'LAN_VSTORE_MAIL_COMPLETED'        => 'your order #{REF} from {ORDER_DATA: order_date} has just been completed and will be shipped to you soon.',
+	'LAN_VSTORE_MAIL_CANCELLED'        => 'your order #{REF} from {ORDER_DATA: order_date} has just been cancelled.',
+	'LAN_VSTORE_MAIL_CANCELLED_REFUND' => 'Any payment we received from you on this order will be refunded.',
+	'LAN_VSTORE_MAIL_REFUNDED'         => 'The payment for your order #{REF} from {ORDER_DATA: order_date} has just been refunded.',
+	'LAN_VSTORE_MAIL_SUBJECT'          => 'Your Order #[x] at %s',
+
+	'LAN_VSTORE_INV_HTML_LANG'         => 'en',
+	'LAN_VSTORE_INV_TITLE'             => 'Invoice',
+	'LAN_VSTORE_INV_BILLING'           => 'Billing',
+	'LAN_VSTORE_INV_ORDER_NR'          => 'Order #:',
+	'LAN_VSTORE_INV_ORDER_DATE'        => 'Order date:',
+	'LAN_VSTORE_INV_PAYMENT_METHOD'    => 'Payment method:',
+	'LAN_VSTORE_INV_DUE_BY'            => 'Due by:',
+	'LAN_VSTORE_INV_NO'                => 'No.',
+	'LAN_VSTORE_PDF_CREATED'           => 'Document created:',
+	'LAN_VSTORE_PDF_PAGE'              => 'Page',
+
+	'LAN_VSTORE_ORD_ERR_LOAD'          => 'Unable to load order!',
+	'LAN_VSTORE_ORD_ERR_NOT_FOUND'     => 'Order not found!',
+	'LAN_VSTORE_ORD_ERR_SAVE'          => 'Unable to insert/update the order!',
+	'LAN_VSTORE_ORD_ERR_STATUS_NOLOAD' => 'Unable to change order status. No order loaded!',
+	'LAN_VSTORE_ORD_ERR_STATUS'        => 'Unable to update order status.',
+	'LAN_VSTORE_ORD_ERR_REF_NOLOAD'    => 'No order loaded. Unable to update order ref!',
+	'LAN_VSTORE_ORD_ERR_NOT_LOADED'    => 'Order not loaded!',
+	'LAN_VSTORE_ORD_ERR_REFUNDED'      => 'Order is already refunded!',
+	'LAN_VSTORE_ORD_ERR_REFUND_STATE'  => 'Only orders with status "%s", "%s" and "%s" can be refunded!',
+	'LAN_VSTORE_ORD_ERR_GATEWAY'       => 'Missing payment gateway!',
+	'LAN_VSTORE_ORD_ERR_REFUND_DETAILS' => 'Refunding details not set!',
+	'LAN_VSTORE_ORD_ERR_REFUND_FAILED' => 'Refunding failed!',
+	'LAN_VSTORE_ORD_WARN_MANUAL_REFUND' => "The order has been marked as refunded, but the payment method '%s' doesn't support automatic refunding!\nYou have to do it manually!",
+	'LAN_VSTORE_ORD_LOG_CHANGED'       => 'Changed [x] from [y] to [z].',
+	'LAN_VSTORE_ORD_LOG_STATUS'        => 'Status',
+	'LAN_VSTORE_ORD_LOG_REF'           => 'Order Ref-Nr. assigned: %s',
+	'LAN_VSTORE_ORD_LOG_INVOICE'       => 'Invoice-Nr. assigned: %s',
+	'LAN_VSTORE_ORD_LOG_REFUNDED'      => 'Order refunded on [x] by [y] ([z])',
+);

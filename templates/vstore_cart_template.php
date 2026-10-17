@@ -1,5 +1,6 @@
 <?php
 
+e107::lan('vstore', 'front_shop', true);
 
 /**
  * Shopping cart page
@@ -9,11 +10,11 @@ $VSTORE_CART_TEMPLATE['start'] = '
 <table class="table table-hover table-striped cart">
 <thead>
 	<tr>
-		<th>Product</th>
+		<th>{LAN=LAN_VSTORE_FR_PRODUCT}</th>
 		<th> </th>
-		<th>Quantity</th>
-		<th class="text-right text-end">Price</th>
-		<th class="text-right text-end">Total</th>
+		<th>{LAN=LAN_VSTORE_FR_QUANTITY}</th>
+		<th class="text-right text-end">{LAN=LAN_VSTORE_FR_PRICE}</th>
+		<th class="text-right text-end">{LAN=LAN_VSTORE_FR_TOTAL}</th>
 
 	</tr>
 </thead>
@@ -30,7 +31,7 @@ $VSTORE_CART_TEMPLATE['item'] = '
 				</div>
 				<div class="media-body">
 					<h5 class="media-heading"><a href="{ITEM_URL}">{ITEM_NAME}</a></h5>
-					<h6 class="media-heading"> by <a href="{ITEM_BRAND_URL}">{ITEM_BRAND}</a></h6>
+					<h6 class="media-heading"> {LAN=LAN_VSTORE_FR_BY} <a href="{ITEM_BRAND_URL}">{ITEM_BRAND}</a></h6>
 					{ITEM_VAR_STRING}
 				</div>
 			</div>
@@ -46,11 +47,11 @@ $VSTORE_CART_TEMPLATE['item'] = '
 
 $VSTORE_CART_TEMPLATE['end'] = '     
 	<tr>
-		<td colspan="4" class="text-right text-end">Subtotal</td>
+		<td colspan="4" class="text-right text-end">{LAN=LAN_VSTORE_FR_SUBTOTAL}</td>
 		<td class="text-right text-end"><strong>{CART_SUBTOTAL}</strong></td>
 	</tr>
 	<tr>
-		<td colspan="4" class="text-right text-end">Estimated shipping</td>
+		<td colspan="4" class="text-right text-end">{LAN=LAN_VSTORE_FR_EST_SHIPPING}</td>
 		<td class="text-right text-end"><strong>{CART_SHIPPINGTOTAL}</strong></td>
 	</tr>
 	{CART_COUPON}
@@ -58,7 +59,7 @@ $VSTORE_CART_TEMPLATE['end'] = '
 	</tbody>
 	<tfoot>
 	<tr>
-		<td colspan="4" class="text-right text-end"><h4>Total</h4></td>
+		<td colspan="4" class="text-right text-end"><h4>{LAN=LAN_VSTORE_FR_TOTAL}</h4></td>
 		<td class="text-right text-end"><h4>{CART_GRANDTOTAL}</h4></td>
 	</tr>
 	</tfoot>
@@ -74,7 +75,7 @@ $VSTORE_CART_TEMPLATE['end'] = '
 
 $VSTORE_CART_TEMPLATE['tax'] = '
 <tr>
-	<td colspan="3" class="text-right text-end">Tax</td>
+	<td colspan="3" class="text-right text-end">'.LAN_VSTORE_FR_TAX.'</td>
 	<td class="text-right text-end">[x]</td>
 	<td class="text-right text-end"><strong>[y]</strong></td>
 </tr>

@@ -59,6 +59,13 @@ class vstore_url // plugin-folder + '_url'
 		);
 
 
+		$config['webhook'] = array(
+			'regex'			=> '^vstore/checkout/webhook/?$',
+			'redirect'		=> '{e_PLUGIN}vstore/vstore.php?mode=webhook',
+			'sef'			=>  'vstore/checkout/webhook/',
+		);
+
+
 		$config['checkout'] = array(
 			'regex'			=> '^{alias}/checkout/?$',
 			'redirect'		=> '{e_PLUGIN}vstore/vstore.php?mode=checkout',

@@ -1,7 +1,5 @@
 <?php
 
-use Omnipay\Omnipay;
-
 /**
  * e107 website system
  *
@@ -16,8 +14,22 @@ use Omnipay\Omnipay;
  * @copyright 2019 e107inc
  */
 
-class vstore_order extends vstore
+class vstore_order
 {
+    /**
+     * Shortcode batch used to render the order emails
+     *
+     * @var vstore_shortcodes
+     */
+    private $sc;
+
+    /**
+     * Plugin preferences
+     *
+     * @var array
+     */
+    private $pref = array();
+
     /**
      * Order data array
      *
@@ -62,6 +74,7 @@ class vstore_order extends vstore
     {
         /** @var vstore_shortcodes sc */
         $this->sc = e107::getScParser()->getScObject('vstore_shortcodes', 'vstore', false);
+        e107::lan('vstore', 'front_mail', true);
         $this->sql = e107::getDb();
         $this->pref = e107::pref('vstore');
 
@@ -188,11 +201,11 @@ class vstore_order extends vstore
 	    {
 		    if($this->sql->getLastErrorNumber() > 0)
 		    {
-			    $this->last_error = 'Unable to load order! ' . $this->sql->getLastErrorText();
+			    $this->last_error = LAN_VSTORE_ORD_ERR_LOAD . ' ' . $this->sql->getLastErrorText();
 		    }
 		    else
 		    {
-			    $this->last_error = 'Order not found!';
+			    $this->last_error = LAN_VSTORE_ORD_ERR_NOT_FOUND;
 		    }
 
 		    return false;
@@ -329,7 +342,7 @@ class vstore_order extends vstore
 
 	    if($result === false)
 	    {
-		    $this->last_error = 'Unable to inset/update the order! ' . $this->sql->getLastErrorText();
+		    $this->last_error = LAN_VSTORE_ORD_ERR_SAVE . ' ' . $this->sql->getLastErrorText();
 
 		    return false;
 	    }
@@ -409,7 +422,7 @@ class vstore_order extends vstore
 
 		if(!$this->loaded)
 		{
-			$this->last_error = $errorPrefix . 'Unable to change order status. No Order loaded!';
+			$this->last_error = $errorPrefix . LAN_VSTORE_ORD_ERR_STATUS_NOLOAD;
 			trigger_error($this->last_error);
 			return false;
 		}
@@ -423,6 +436,7 @@ class vstore_order extends vstore
 			elseif($new_status === 'R') // if new status is refunded, set payment to refunded
 			{
 				$this->data['order_pay_status'] = 'refunded';
+				$this->data['order_refund_date'] = time();
 			}
 
 			// Prepare rawdata array
@@ -445,7 +459,7 @@ class vstore_order extends vstore
 				unset($rawdata, $raw_data);
 			}
 
-			$this->setOrderLog('Status', $this->data['order_status'], $new_status);
+			$this->setOrderLog(LAN_VSTORE_ORD_LOG_STATUS, $this->data['order_status'], $new_status);
 			$this->data['order_status'] = $new_status;
 
 			$result = $this->save();
@@ -455,12 +469,12 @@ class vstore_order extends vstore
 				// In case of a positive update and the order has been set to 'C' (complete)
 				// set the customer userclass
 				$items = $this->unserialize('order_items');
-				self::setCustomerUserclass($this->data['order_e107_user'], $items);
+				vstore::setCustomerUserclass($this->data['order_e107_user'], $items);
 			}
 			elseif($result == false && intval(e107::getDb()->getLastErrorNumber()) != 0)
 			{
 				// There was an error, return the last database error
-				$this->last_error = $errorPrefix . 'Unable to update order status. ' . e107::getDb()->getLastErrorText();
+				$this->last_error = $errorPrefix . LAN_VSTORE_ORD_ERR_STATUS . ' ' . e107::getDb()->getLastErrorText();
 				trigger_error($this->last_error);
 				return false;
 			}
@@ -500,7 +514,7 @@ class vstore_order extends vstore
 
         if (!empty($oldVal) || !empty($newVal)) {
             // Value changed message
-            $item['text'] = e107::getParser()->lanVars('Changed [x] from [y] to [z].', array(
+            $item['text'] = e107::getParser()->lanVars(LAN_VSTORE_ORD_LOG_CHANGED, array(
                 'x' => $title,
                 'y' => varset($oldVal, '--'),
                 'z' => varset($newVal, '--')
@@ -525,7 +539,7 @@ class vstore_order extends vstore
     public function setOrderRef()
     {
         if (!$this->isLoaded()) {
-            $this->last_error = 'No order loaded. Unable to update order ref!';
+            $this->last_error = LAN_VSTORE_ORD_ERR_REF_NOLOAD;
             return false;
         }
 
@@ -551,7 +565,7 @@ class vstore_order extends vstore
 
         $this->data['order_refcode'] = strtoupper($text);
 
-        $this->setOrderLog('Order Ref-Nr. assigned: ' . $this->data['order_refcode']);
+        $this->setOrderLog(sprintf(LAN_VSTORE_ORD_LOG_REF, $this->data['order_refcode']));
 
         return true;
     }
@@ -564,20 +578,9 @@ class vstore_order extends vstore
      */
     public function setInvoiceNr()
     {
-        // Get last used invoice nr.
-        $last_nr = e107::getDB()->retrieve('vstore_orders', 'MAX(order_invoice_nr) AS last');
-        // Get next nr. from prefs
-        $pref = (int)e107::pref('vstore', 'invoice_next_nr');
-        // if the pref nr is higher ...
-        if (vartrue($pref) > (int)$last_nr['last']) {
-            // ... use pref
-            $this->data['order_invoice_nr'] = $pref;
-        } else {
-            // ... otherwise return next higher
-            $this->data['order_invoice_nr'] = ($last_nr['last'] + 1);
-        }
+        $this->data['order_invoice_nr'] = vstore::getNextInvoiceNr();
 
-        $this->setOrderLog('Invoice-Nr. assigned: ' . $this->data['order_invoice_nr']);
+        $this->setOrderLog(sprintf(LAN_VSTORE_ORD_LOG_INVOICE, $this->data['order_invoice_nr']));
 
     }
 
@@ -601,7 +604,7 @@ class vstore_order extends vstore
 		// Check inputs
 		if(!$this->loaded)
 		{
-			$this->last_error = $errorPrefix . "Order not loaded!";
+			$this->last_error = $errorPrefix . LAN_VSTORE_ORD_ERR_NOT_LOADED;
 			trigger_error('Order not loaded!');
 
 			return false;
@@ -609,14 +612,14 @@ class vstore_order extends vstore
 
 		if($this->order_status == 'R')
 		{
-			$this->last_error = $errorPrefix . 'Order is already refunded!';
+			$this->last_error = $errorPrefix . LAN_VSTORE_ORD_ERR_REFUNDED;
 			trigger_error('Order is already refunded!');
 
 			return false;
 		}
 		elseif(!in_array($this->order_status, array('P', 'H', 'C')))
 		{
-			$message = 'Only orders with status "Processing", "On Hold" and "Complete" can be refunded!';
+			$message = sprintf(LAN_VSTORE_ORD_ERR_REFUND_STATE, vstore::getStatus('P'), vstore::getStatus('H'), vstore::getStatus('C'));
 			$this->last_error = $errorPrefix . $message;
 			trigger_error($message. print_r($this,true));
 
@@ -631,7 +634,7 @@ class vstore_order extends vstore
 		e107::getDebug()->log("Processing Gateway: " . $type);
 
 		// Fix $type in case of Mollie Gateway
-		if(self::isMollie($type))
+		if(vstore::isMollie($type))
 		{
 			$type = substr($type, 0, 6);
 		}
@@ -653,7 +656,7 @@ class vstore_order extends vstore
 			case "paypal":
 			case "mollie":
 			default:
-				list($gateway, $message) = $this->loadGateway($type);
+				list($gateway, $message) = vstore::createGateway($type, $this->pref);
 
 				$refundDetails = array(
 					'transactionReference' => $transactionId,
@@ -663,7 +666,7 @@ class vstore_order extends vstore
 
 				if(empty($gateway))
 				{
-					$this->last_error = $errorPrefix . "Missing pament gateway!";
+					$this->last_error = $errorPrefix . LAN_VSTORE_ORD_ERR_GATEWAY;
 					trigger_error($this->last_error);
 					return false;
 				}
@@ -685,7 +688,7 @@ class vstore_order extends vstore
 				// Check if selected gateway has it's refunding details set
 				if(empty($refundDetails))
 				{
-					$this->last_error = $errorPrefix . "Refunding details not set!";
+					$this->last_error = $errorPrefix . LAN_VSTORE_ORD_ERR_REFUND_DETAILS;
 					trigger_error($this->last_error);
 					return false;
 				}
@@ -711,7 +714,7 @@ class vstore_order extends vstore
 				// refunding can't be done automatically
 				$data = array(
 					'Refunded' => e107::getParser()->lanVars(
-						'Order refunded on [x] by [y] ([z])',
+						LAN_VSTORE_ORD_LOG_REFUNDED,
 						array(
 							gmdate('Y-m-d H:i:s'),
 							defset('USERNAME', '_guest_'),
@@ -732,16 +735,14 @@ class vstore_order extends vstore
 			{
 				// In case of bank_transfers or other payment methods that do not support refunding,
 				// return a warning, that the refunding of the money has to be done manually!
-				$this->last_error = $warnPrefix . "The order has been marked as refunded, but the payment method '" .
-					self::getGatewayTitle($type) .
-					"' doesn't support automatic refunding!\nYou have to do it manually!";
+				$this->last_error = $warnPrefix . sprintf(LAN_VSTORE_ORD_WARN_MANUAL_REFUND, vstore::getGatewayTitle($type));
 				return false;
 			}
 
 		}
 		catch(Exception $ex)
 		{
-			$this->last_error = $errorPrefix . "Refunding failed! " . $ex->getMessage();
+			$this->last_error = $errorPrefix . LAN_VSTORE_ORD_ERR_REFUND_FAILED . ' ' . $ex->getMessage();
 			return false;
 		}
 
@@ -772,13 +773,13 @@ class vstore_order extends vstore
 
         $createPDF = e107::pref('vstore', 'invoice_create_pdf', false);
 
-        if ($createPDF && self::validInvoiceOrderState($this->data['order_status']))
+        if ($createPDF && vstore::validInvoiceOrderState($this->data['order_status']))
         {
-            $pdf_file = $this->pathToInvoicePdf($this->data['order_invoice_nr'], $this->data['order_e107_user']);
+            $pdf_file = vstore::pathToInvoicePdf($this->data['order_invoice_nr'], $this->data['order_e107_user']);
         }
 
         $this->emailCustomer(
-            strtolower($this->getStatus($this->data['order_status'])),
+            vstore::getStatusSlug($this->data['order_status']),
             $pdf_file
         );
     }
@@ -921,13 +922,14 @@ class vstore_order extends vstore
 
 		$vars = $this->data;
 
-		$vars['is_business'] = !empty($receiver['vat_id']);
-		$vars['is_local'] = (varset($receiver['country'], varset($pref['tax_business_country'])) === varset( $pref['tax_business_country']));
+$vars['is_business'] = vstore::isReverseChargeOrder($receiver, $this->data['order_pay_tax']);
+        $vars['is_local'] = (strtoupper(varset($receiver['country'], varset($pref['tax_business_country']))) === strtoupper(varset($pref['tax_business_country'])));
 
 		$this->sc->setVars($vars);
+		$this->sc->wrapper('vstore_email/default');
 
 		//todo add to template
-		$subject = "Your Order #[x] at " . SITENAME;
+		$subject = sprintf(LAN_VSTORE_MAIL_SUBJECT, SITENAME);
 
 		$email = varset($receiver['email']);
 		$name = varset($receiver['firstname']) . " " . varset($receiver['lastname']);
@@ -937,7 +939,7 @@ class vstore_order extends vstore
 			'sender_email' => $sender_email,
 			'sender_name'  => $sender_name,
 			'html'         => true,
-			'template'     => 'default',
+			'template'     => array('plugin' => 'vstore', 'name' => 'vstore_email_layout', 'key' => 'default'),
 			'body'         => $tp->parseTemplate($template, true, $this->sc)
 		);
 
@@ -950,7 +952,7 @@ class vstore_order extends vstore
 
 		if(!empty($pdf_file))
 		{
-			$eml['attach'] = $pdf_file;
+			$eml['attachment'] = $pdf_file;
 		}
 
 		return array($email, $name, $eml);

@@ -1,7 +1,7 @@
 # Vstore E-Commerce Plugin - AI Coding Instructions
 
 ## Overview
-Vstore is an e107 v2.x CMS plugin providing shopping cart functionality with multiple payment gateways (PayPal, Mollie, Stripe, Braintree). Built on the e107 plugin architecture with PHP 7.4+ and Bootstrap templates.
+Vstore is an e107 v2.x CMS plugin providing shopping cart functionality with multiple payment gateways (PayPal, Mollie, bank transfer). Built on the e107 plugin architecture with PHP 7.4+ and Bootstrap templates.
 
 ## Core Architecture
 
@@ -123,15 +123,15 @@ Defines regex patterns for clean URLs:
 
 ## Integration Points
 
-### Dependency: PDF Plugin
-Required for invoice generation (not included):
-- Repo: https://github.com/e107inc/pdf
-- Used in `vstore_pdf.class.php` for `invoiceToPdf()`
+### PDF invoices (TCPDF, Composer)
+Invoices are created with `tecnickcom/tcpdf` ^6.11 (the 7.x line needs PHP 8.2 and has another API):
+- Class `Vstore\Pdf\InvoicePdf` (`src/Pdf/InvoicePdf.php`) extends `TCPDF`; it has no e107 calls, everything is passed in
+- Used by `vstore::invoiceToPdf()`; the e107 pdf plugin is not needed
 - Invoices stored in e107 Media datastore
 
 ### External Packages (Composer)
 - `league/omnipay`: Payment gateway abstraction
-- `omnipay/*`: Gateway-specific drivers (paypal, mollie, stripe, braintree)
+- `omnipay/*`: Gateway-specific drivers (paypal, mollie)
 - `ibericode/vat`: EU VAT validation
 - Run `composer install` in plugin root (vendors committed to repo)
 

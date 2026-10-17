@@ -1,4 +1,5 @@
 <?php
+e107::lan('vstore', 'admin_products', true);
 
 
 	/**
@@ -6,6 +7,8 @@
 	 */
 	class vstore_items_ui extends e_admin_ui
 	{
+		use vstore_admin_common;
+
 
 		protected $pluginTitle = 'Vstore';
 		protected $pluginName  = 'vstore';
@@ -16,7 +19,7 @@
 		protected $batchCopy   = true;
 		protected $sortField   = 'item_order';
 		//	protected $orderStep		= 10;
-		protected $tabs = array(LAN_BASIC, 'Images/Videos', LAN_ADVANCED, 'Variations', 'Reviews', 'Files'); // Use 'tab'=>0  OR 'tab'=>1 in the $fields below to enable.
+		protected $tabs = array(LAN_BASIC, LAN_VSTORE_ADMIN_PROD_TAB_IMAGES, LAN_ADVANCED, LAN_VSTORE_ADMIN_PROD_TAB_VARS, LAN_VSTORE_ADMIN_PROD_TAB_REVIEWS, LAN_VSTORE_ADMIN_PROD_TAB_FILES); // Use 'tab'=>0  OR 'tab'=>1 in the $fields below to enable.
 
 		//	protected $listQry      	= "SELECT * FROM #tableName WHERE field != '' "; // Example Custom Query. LEFT JOINS allowed. Should be without any Order or Limit.
 
@@ -31,38 +34,38 @@
 			'item_preview'   => array('title' => LAN_PREVIEW, 'type' => 'method', 'data' => false, 'width' => '5%', 'forced' => 1),
 			'item_id'        => array('title' => LAN_ID, 'type' => 'text', 'data' => 'int', 'width' => '5%', 'help' => '', 'readParms' => 'link=sef&target=blank', 'writeParms' => array(), 'class' => 'left', 'thclass' => 'left',),
 			'item_active'    => array('title' => LAN_ACTIVE, 'type' => 'boolean', 'data' => 'int', 'inline' => true, 'width' => '5%', 'help' => '', 'readParms' => array(), 'writeParms' => array('default' => '1'), 'class' => 'center', 'thclass' => 'center'),
-			'item_code'      => array('title' => 'Code', 'type' => 'text', 'inline' => true, 'data' => 'str', 'width' => '2%', 'help' => "The product code. Use only UPPERCASE letters, digits and hyphens.", 'readParms' => array(), 'writeParms' => array('placeholder'=>'PROD001', 'size'=>'large', 'pattern'=>'[A-Z0-9-]*', 'required'=>true), 'class' => 'center', 'thclass' => 'center',),
+			'item_code'      => array('title' => LAN_VSTORE_ADMIN_C_CODE, 'type' => 'text', 'inline' => true, 'data' => 'str', 'width' => '2%', 'help' => LAN_VSTORE_ADMIN_PROD_CODE_H, 'readParms' => array(), 'writeParms' => array('placeholder'=>LAN_VSTORE_ADMIN_PROD_CODE_PH, 'size'=>'large', 'pattern'=>'[A-Z0-9-]*', 'required'=>true), 'class' => 'center', 'thclass' => 'center',),
 			'item_name'      => array('title' => LAN_TITLE, 'type' => 'text', 'data' => 'str', 'width' => 'auto', 'inline' => true, 'help' => '', 'readParms' => array(), 'writeParms' => array('size' => 'xxlarge'), 'class' => 'left', 'thclass' => 'left',),
 			'item_desc'      => array('title' => LAN_DESCRIPTION, 'type' => 'textarea', 'data' => 'str', 'width' => 'auto', 'help' => '', 'readParms' => array(), 'writeParms' => array('size' => 'xxlarge', 'maxlength' => 250), 'class' => 'center', 'thclass' => 'center',),
 			'item_cat'       => array('title' => LAN_CATEGORY, 'type' => 'dropdown', 'data' => 'int', 'width' => 'auto', 'filter' => true, 'batch' => true, 'inline' => true, 'help' => '', 'readParms' => array(), 'writeParms' => array(), 'class' => 'left', 'thclass' => 'left',),
-			'item_price'     => array('title' => 'Price', 'type' => 'number', 'data' => 'float', 'width' => 'auto', 'inline' => true, 'help' => '', 'readParms' => array('decimals' => 2), 'writeParms' => array('decimals' => 2), 'class' => 'right', 'thclass' => 'right',),
-			'item_inventory' => array('title' => 'Inventory', 'type' => 'method', 'data' => 'int', 'width' => 'auto', 'inline' => false, 'help' => '', 'readParms' => array(), 'writeParms' => array('default' => -1), 'class' => 'right item-inventory', 'thclass' => 'right',),
+			'item_price'     => array('title' => LAN_VSTORE_ADMIN_C_PRICE, 'type' => 'number', 'data' => 'float', 'width' => 'auto', 'inline' => true, 'help' => '', 'readParms' => array('decimals' => 2), 'writeParms' => array('decimals' => 2), 'class' => 'right', 'thclass' => 'right',),
+			'item_inventory' => array('title' => LAN_VSTORE_ADMIN_PROD_INVENTORY, 'type' => 'method', 'data' => 'int', 'width' => 'auto', 'inline' => false, 'help' => '', 'readParms' => array(), 'writeParms' => array('default' => -1), 'class' => 'right item-inventory', 'thclass' => 'right',),
 
 			// Tab 1
-			'item_pic'       => array('title' => 'Images/Videos', 'type' => 'images', 'tab' => 1, 'data' => 'json', 'width' => 'auto', 'help' => "Drag and drop images and videos here to display them on the product's page.", 'readParms' => array(), 'writeParms' => 'media=vstore&video=1&max=8', 'class' => 'center', 'thclass' => 'center',),
+			'item_pic'       => array('title' => LAN_VSTORE_ADMIN_PROD_TAB_IMAGES, 'type' => 'images', 'tab' => 1, 'data' => 'json', 'width' => 'auto', 'help' => LAN_VSTORE_ADMIN_PROD_IMAGES_H, 'readParms' => array(), 'writeParms' => 'media=vstore&video=1&max=8', 'class' => 'center', 'thclass' => 'center',),
 
 			// Tab 2
-			'item_tax_class' => array('title' => 'Tax class', 'type' => 'method',  'tab' => 2,'data' => 'str', 'width' => 'auto', 'filter' => true, 'batch' => true, 'inline' => true, 'help' => '', 'readParms' => array(), 'writeParms' => array(), 'class' => 'left', 'thclass' => 'left'),
-			'item_shipping'  => array('title' => 'Shipping', 'type' => 'number', 'tab' => 2, 'data' => 'float', 'width' => 'auto', 'help' => '', 'readParms' => array(), 'writeParms' => array('decimals' => 2, 'placeholder'=>'0.00'), 'class' => 'center', 'thclass' => 'center',),
-			'item_weight'    => array('title' => 'Weight', 'type' => 'number', 'tab' => 2, 'data' => 'float', 'width' => 'auto', 'help' => '', 'readParms' => array(), 'writeParms' => array('decimals' => 2, 'placeholder'=>'0.00'), 'class' => 'center', 'thclass' => 'center',),
+			'item_tax_class' => array('title' => LAN_VSTORE_ADMIN_PROD_TAX_CLASS, 'type' => 'method',  'tab' => 2,'data' => 'str', 'width' => 'auto', 'filter' => true, 'batch' => true, 'inline' => true, 'help' => '', 'readParms' => array(), 'writeParms' => array(), 'class' => 'left', 'thclass' => 'left'),
+			'item_shipping'  => array('title' => LAN_VSTORE_ADMIN_C_SHIPPING, 'type' => 'number', 'tab' => 2, 'data' => 'float', 'width' => 'auto', 'help' => '', 'readParms' => array(), 'writeParms' => array('decimals' => 2, 'placeholder'=>'0.00'), 'class' => 'center', 'thclass' => 'center',),
+			'item_weight'    => array('title' => LAN_VSTORE_ADMIN_PROD_WEIGHT, 'type' => 'number', 'tab' => 2, 'data' => 'float', 'width' => 'auto', 'help' => '', 'readParms' => array(), 'writeParms' => array('decimals' => 2, 'placeholder'=>'0.00'), 'class' => 'center', 'thclass' => 'center',),
 
-			'item_details' => array('title' => 'Detailed Description', 'type' => 'bbarea', 'tab' => 2, 'data' => 'str', 'width' => 'auto', 'help' => '', 'readParms' => array(), 'writeParms' => array(), 'class' => 'center', 'thclass' => 'center',),
+			'item_details' => array('title' => LAN_VSTORE_ADMIN_PROD_DETAILS, 'type' => 'bbarea', 'tab' => 2, 'data' => 'str', 'width' => 'auto', 'help' => '', 'readParms' => array(), 'writeParms' => array(), 'class' => 'center', 'thclass' => 'center',),
 
-			'item_userclass' => array('title' => 'Assign userclass', 'type' => 'method', 'tab'=>2, 'help' => 'Assign an e107 userclass to the customer after completing their purchase.'),
+			'item_userclass' => array('title' => LAN_VSTORE_ADMIN_PROD_USERCLASS, 'type' => 'method', 'tab'=>2, 'help' => LAN_VSTORE_ADMIN_PROD_USERCLASS_H),
 
 			// Tab 3
-			'item_vars'           => array('title' => 'Product Variations', 'tab'=>3, 'type' => 'method', 'data' => 'str', 'help' => 'You can select up to 2 variations. Product variations inventory is tracked.', ),
-			'item_vars_inventory' => array('title' => 'Variations Inventory', 'tab'=>3, 'type' => 'method', 'data' => 'json'),
+			'item_vars'           => array('title' => LAN_VSTORE_ADMIN_PROD_VARS, 'tab'=>3, 'type' => 'method', 'data' => 'str', 'help' => LAN_VSTORE_ADMIN_PROD_VARS_H, ),
+			'item_vars_inventory' => array('title' => LAN_VSTORE_ADMIN_PROD_VARS_INV, 'tab'=>3, 'type' => 'method', 'data' => 'json'),
 		//	'item_vars_nt'        => array('title' => 'Product Options', 'tab'=>3, 'type' => 'method', 'data' => false, 'help' => 'Select up to 6 product options. Product options are NOT relevant to inventory tracking.'),
 
 			// Tab 4
-			'item_reviews' => array('title' => 'Reviews', 'type' => 'textarea', 'tab' => 4, 'data' => 'str', 'width' => 'auto', 'help' => '', 'readParms' => array(), 'writeParms' => 'size=xxlarge', 'class' => 'center', 'thclass' => 'center',),
-			'item_related' => array('title' => 'Related', 'type' => 'method', 'tab' => 4, 'data' => 'json', 'width' => 'auto', 'help' => '', 'readParms' => array(), 'writeParms' => 'video=1', 'class' => 'center', 'thclass' => 'center',),
+			'item_reviews' => array('title' => LAN_VSTORE_ADMIN_PROD_TAB_REVIEWS, 'type' => 'textarea', 'tab' => 4, 'data' => 'str', 'width' => 'auto', 'help' => '', 'readParms' => array(), 'writeParms' => 'size=xxlarge', 'class' => 'center', 'thclass' => 'center',),
+			'item_related' => array('title' => LAN_VSTORE_ADMIN_PROD_RELATED, 'type' => 'method', 'tab' => 4, 'data' => 'json', 'width' => 'auto', 'help' => '', 'readParms' => array(), 'writeParms' => 'video=1', 'class' => 'center', 'thclass' => 'center',),
 
 			// Tab 5
-			'item_files'     => array('title' => 'Files', 'type' => 'files', 'tab' => 5, 'data' => 'json', 'width' => 'auto', 'help' => 'Add up to 5 downloadable files to the product page.<br />eg. a product specifications PDF file or related brochure', 'readParms' => array(), 'writeParms' => 'media=vstore_file_2', 'class' => 'center', 'thclass' => 'center',),
-			'item_link'     => array('title' => 'External Link', 'type' => 'text', 'inline'=>true, 'tab' => 5, 'data' => 'str', 'width' => 'auto', 'help' => 'Optional: Enter URL of item on external site. Used only when no inventory is available.', 'readParms' => array(), 'writeParms' => array('size'=>'xxlarge'), 'class' => 'left', 'thclass' => 'left',),
-			'item_download' => array('title' => 'Download File', 'type' => 'file', 'tab' => 5, 'data' => 'str', 'width' => 'auto', 'help' => "If your product is a digital item, please choose a file here to send to the customer after payment.", 'readParms' => array(), 'writeParms' => 'media=vstore_file', 'class' => 'center', 'thclass' => 'center',),
+			'item_files'     => array('title' => LAN_VSTORE_ADMIN_PROD_TAB_FILES, 'type' => 'files', 'tab' => 5, 'data' => 'json', 'width' => 'auto', 'help' => LAN_VSTORE_ADMIN_PROD_FILES_H, 'readParms' => array(), 'writeParms' => 'media=vstore_file_2', 'class' => 'center', 'thclass' => 'center',),
+			'item_link'     => array('title' => LAN_VSTORE_ADMIN_PROD_LINK, 'type' => 'text', 'inline'=>true, 'tab' => 5, 'data' => 'str', 'width' => 'auto', 'help' => LAN_VSTORE_ADMIN_PROD_LINK_H, 'readParms' => array(), 'writeParms' => array('size'=>'xxlarge'), 'class' => 'left', 'thclass' => 'left',),
+			'item_download' => array('title' => LAN_VSTORE_ADMIN_PROD_DOWNLOAD, 'type' => 'file', 'tab' => 5, 'data' => 'str', 'width' => 'auto', 'help' => LAN_VSTORE_ADMIN_PROD_DOWNLOAD_H, 'readParms' => array(), 'writeParms' => 'media=vstore_file', 'class' => 'center', 'thclass' => 'center',),
 
 			'item_order'          => array('title' => LAN_ORDER, 'type' => 'hidden', 'data' => 'int', 'width' => 'auto', 'help' => '', 'readParms' => array(), 'writeParms' => array(), 'class' => 'left', 'thclass' => 'left',),
 
@@ -82,10 +85,10 @@
 			$currency = e107::pref('vstore', 'currency');
 			$weight = e107::pref('vstore', 'weight_unit');
 
-			$this->fields['item_price']['help']         = "Enter the price of the item in ".$currency." (without tax).";
-			$this->fields['item_shipping']['help']      = "The cost of shipping this item in ".$currency.". eg. 2.00";
-			$this->fields['item_weight']['help']        = "The weight of the item (".vstore::weightUnits($weight)."). Enter decimal value only.";
-			$this->fields['item_inventory']['help']    = "Enter -1 if this item is always available or the number of units you have in stock.";
+			$this->fields['item_price']['help']         = sprintf(LAN_VSTORE_ADMIN_PROD_PRICE_H, $currency);
+			$this->fields['item_shipping']['help']      = sprintf(LAN_VSTORE_ADMIN_PROD_SHIPPING_H, $currency);
+			$this->fields['item_weight']['help']        = sprintf(LAN_VSTORE_ADMIN_PROD_WEIGHT_H, vstore::weightUnits($weight));
+			$this->fields['item_inventory']['help']    = LAN_VSTORE_ADMIN_PROD_INVENTORY_H;
 
 		}
 
@@ -169,8 +172,25 @@
 		}
 
 
+		/**
+		 * Warn the admin when the downloadable file cannot be served,
+		 * otherwise the customer finds out only after paying.
+		 */
+		private function warnMissingDownload($data)
+		{
+			if(!empty($data['item_download']) && vstore::resolveDownloadPath($data['item_download']) === false)
+			{
+				e107::getMessage()->addWarning(
+					sprintf(LAN_VSTORE_ADMIN_PROD_DOWNLOAD_MISSING, htmlspecialchars($data['item_download'])),
+					'default',
+					true
+				);
+			}
+		}
+
 		public function beforeCreate($new_data, $old_data)
 		{
+			$this->warnMissingDownload($new_data);
 
 			if(!vartrue($new_data['item_tax_class']))
 			{
@@ -221,6 +241,7 @@
 
 		public function beforeUpdate($new_data, $old_data, $id)
 		{
+			$this->warnMissingDownload($new_data);
 			if(isset($new_data['item_inventory'])){
 				$new_data['item_inventory'] = intval($new_data['item_inventory']);
 				$new_data['item_inventory'] = $new_data['item_inventory'] < 0 ? -1 : $new_data['item_inventory'];
@@ -470,7 +491,7 @@
 					$inventory = $this->getController()->getFieldVar('item_vars_inventory');
 					if (!empty($inventory))
 					{
-						return 'Based on variations';
+						return LAN_VSTORE_ADMIN_PROD_INV_BY_VARS;
 					}
 					return $curVal;
 					break;
@@ -480,10 +501,10 @@
 					$icon = e107::getParser()->toGlyph('fa-info-circle');
 					if (empty($inventory)) {
 						$text = $this->number('item_inventory', varset($curVal, -1), null, array('class'=>'pull-left', 'decimals' => 0, 'min' => -1, 'readonly' => !empty($inventory))); // to allow also negative values (<0 = Item will not run out of stock)
-						$text .= ' <span style="display:inline-block;padding:6px" title="In case of any Product Variations selected, this setting will ignored! You have to fill out the Variations Inventory instead!">'.$icon.'</span>';
+						$text .= ' <span style="display:inline-block;padding:6px" title="'.LAN_VSTORE_ADMIN_PROD_INV_IGNORED.'">'.$icon.'</span>';
 					} else {
 						$text = $this->hidden('item_inventory', varset($curVal, -1));
-						$text .= ' <span class="help">The inventory is controlled by product variations inventory!</span>';
+						$text .= ' <span class="help">'.LAN_VSTORE_ADMIN_PROD_INV_CONTROLLED.'</span>';
 					}
 
 					return $text;
@@ -520,13 +541,13 @@
 
 			if($item_vars == '')
 			{
-				return 'You need to select the Product Variations first!';
+				return LAN_VSTORE_ADMIN_PROD_INV_SELECT_VARS;
 			}
 
 			$sql = e107::getDb();
 
 
-			if($sql->select('vstore_items_vars', '*', sprintf('FIND_IN_SET(item_var_id, "%s") LIMIT 2', $item_vars)))
+			if($sql->select('vstore_items_vars', '*', sprintf('FIND_IN_SET(item_var_id, "%s") LIMIT 2', preg_replace('/[^0-9,]/', '', (string) $item_vars))))
 			{
 
 				if($curVal && !is_array($curVal))
@@ -556,7 +577,7 @@
 			';
 				if(count($col) == 2)
 				{
-					$text .= sprintf('<tr><th>%s</th><th colspan="%d">%s</th></tr>', 'Inventory', count($col['y']['names']), $col['y']['caption']);
+					$text .= sprintf('<tr><th>%s</th><th colspan="%d">%s</th></tr>', LAN_VSTORE_ADMIN_PROD_INVENTORY, count($col['y']['names']), $col['y']['caption']);
 
 					$text .= sprintf('<tr><th>%s</th>', $col['x']['caption']);
 					foreach($col['y']['names'] as $value)
@@ -570,7 +591,7 @@
 
 				if(count($col) == 1)
 				{
-					$text .= sprintf('<tr><th style="width: 20%%;">%s</th><th>%s</th>', $col['x']['caption'], 'Inventory');
+					$text .= sprintf('<tr><th style="width: 20%%;">%s</th><th>%s</th>', $col['x']['caption'], LAN_VSTORE_ADMIN_PROD_INVENTORY);
 					foreach($col['x']['names'] as $nameX)
 					{
 						$text .= sprintf('<tr><th style="width: 20%%;">%s</th>', $nameX);
@@ -583,7 +604,7 @@
 				}
 				else
 				{
-					$helpText = 'Enter -1 if this item is always available or the number of units you have in stock of each variation.';
+					$helpText = LAN_VSTORE_ADMIN_PROD_INV_VARS_H;
 					foreach($col['x']['names'] as $nameX)
 					{
 						$text .= sprintf('<tr><th style="width: 20%%;">%s'.$this->help($helpText).'</th>', $nameX);
@@ -604,7 +625,7 @@
 				return $text;
 			}
 
-			return e107::getMessage()->addError('Product Variations not found! Maybe they have been deleted in the meanwhile ...', 'vstore')->render('vstore');
+			return e107::getMessage()->addError(LAN_VSTORE_ADMIN_PROD_VARS_NOT_FOUND, 'vstore')->render('vstore');
 		}
 
 		function item_vars($curVal, $mode)
@@ -614,7 +635,7 @@
 			switch($mode)
 			{
 				case 'read': // List Page
-					$values = e107::getDb()->retrieve('vstore_items_vars', 'GROUP_CONCAT(item_var_name)', 'item_var_compulsory = 1 AND FIND_IN_SET(item_var_id, "0,'.$curVal.'") ORDER BY item_var_name', false);
+					$values = e107::getDb()->retrieve('vstore_items_vars', 'GROUP_CONCAT(item_var_name)', 'item_var_compulsory = 1 AND FIND_IN_SET(item_var_id, "0,'.preg_replace('/[^0-9,]/', '', (string) $curVal).'") ORDER BY item_var_name', false);
 					return $values ? str_replace(',', ', ', $values) : LAN_NONE;
 					break;
 
@@ -632,12 +653,11 @@
 					$text = $this->select('item_vars', $opt_array, $curVal, array('multiple' => 1));
 					if($curVal)
 					{
-						$text .= '<p class="small">Do not select more than 2 variations, as only the first 2 will be stored.<br>
-						<b>Be aware, that changing this setting will initialize the Variations Inventory table during save!</b></p>';
+						$text .= '<p class="small">'.LAN_VSTORE_ADMIN_PROD_VARS_LIMIT.'</p>';
 					}
 					else
 					{
-						$text .= '<p class="small">Select up to 2 variations, save product and reopen it to access the Variations Inventory table</p>';
+						$text .= '<p class="small">'.LAN_VSTORE_ADMIN_PROD_VARS_HOWTO.'</p>';
 					}
 
 					return $text;
@@ -660,7 +680,7 @@
 			switch($mode)
 			{
 				case 'read': // List Page
-					$values = e107::getDb()->retrieve('vstore_items_vars', 'GROUP_CONCAT(item_var_name)', 'item_var_compulsory = 0 AND FIND_IN_SET(item_var_id, "0,'.$curVal.'") ORDER BY item_var_name', false);
+					$values = e107::getDb()->retrieve('vstore_items_vars', 'GROUP_CONCAT(item_var_name)', 'item_var_compulsory = 0 AND FIND_IN_SET(item_var_id, "0,'.preg_replace('/[^0-9,]/', '', (string) $curVal).'") ORDER BY item_var_name', false);
 					return $values ? str_replace(',', ', ', $values) : LAN_NONE;
 					break;
 
@@ -783,7 +803,7 @@
 				$opt[$id] = $row['chapter_name'];
 			}
 
-			$options['Chapters'] = $opt;
+			$options[LAN_VSTORE_ADMIN_PROD_RELATED_CHAPTERS] = $opt;
 
 			switch($mode)
 			{
@@ -792,7 +812,7 @@
 					break;
 
 				case 'write': // Edit Page
-					return "Tab Name: " . $this->text('item_related[caption]', $curVal['caption']) . "<br />Source: " . $this->select('item_related[src]', $options, $curVal['src'], null, true);
+					return LAN_VSTORE_ADMIN_PROD_RELATED_TAB . $this->text('item_related[caption]', $curVal['caption']) . "<br />" . LAN_VSTORE_ADMIN_PROD_RELATED_SRC . $this->select('item_related[src]', $options, $curVal['src'], null, true);
 					break;
 
 				case 'filter':
@@ -817,7 +837,7 @@
 					if($uc !== -1)
 					{
 						$name = e107::getUserClass()->getName($uc);
-						$text = "<span class='label label-success' title='Userclass defined in store preferences'>".$name."</span>";
+						$text = "<span class='label label-success' title='".LAN_VSTORE_ADMIN_PROD_USERCLASS_PREF."'>".$name."</span>";
 						$text .= $this->hidden('item_userclass', $curVal);
 
 						return $text;

@@ -10,7 +10,7 @@
 
 	$VSTORE_MENU_TEMPLATE = array();
 
-	// Catiegories menu
+	// Categories menu
 	$VSTORE_MENU_TEMPLATE['categories']['start'] = '
     <div class="list-group vstore-categories">
     ';

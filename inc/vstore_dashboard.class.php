@@ -2,8 +2,11 @@
 if (!defined('e107_INIT')) { exit; }
 
 
-class vstore_dashboard extends vstore
+class vstore_dashboard
 {
+
+    /** Orders and downloads per page */
+    const PER_PAGE = 9;
 
     protected $dashboards;
     protected $actions;
@@ -17,26 +20,38 @@ class vstore_dashboard extends vstore
     protected $sql;
     protected $template;
 
+    /** @var vstore_shortcodes */
+    protected $sc;
+    protected $get = array();
+    protected $pref = array();
+    protected $perPage = self::PER_PAGE;
+    protected $from = 1;
+
 
     public function __construct()
     {
-		Parent::__construct();
+		$this->sc = e107::getScParser()->getScObject('vstore_shortcodes', 'vstore', false);
+		$this->get = varset($_GET);
+		$this->pref = e107::pref('vstore');
+
+		e107::lan('vstore', 'front_shop', true);
+		e107::lan('vstore', 'front_dashboard', true);
 
 		$this->dashboards = array(
-			'dashboard' => 'Dashboard', 
-			'orders' => 'My orders', 
-			'files' => 'My downloads', 
-			'addresses' => 'My addresses',
-			'account' => 'My account'
+			'dashboard' => LAN_VSTORE_DB_DASHBOARD, 
+			'orders' => LAN_VSTORE_DB_ORDERS, 
+			'files' => LAN_VSTORE_DB_FILES, 
+			'addresses' => LAN_VSTORE_DB_ADDRESSES,
+			'account' => LAN_VSTORE_DB_ACCOUNT
         );
         
         $this->actions = array(
             'orders' => array(
-                'view' => 'View details',
-                'cancel' => 'Cancel order'
+                'view' => LAN_VSTORE_DB_VIEW,
+                'cancel' => LAN_VSTORE_DB_CANCEL
             ),
             'addresses' => array(
-                'edit' => 'Edit address'
+                'edit' => LAN_VSTORE_DB_EDIT_ADDRESS
             )
         );
 
@@ -49,9 +64,7 @@ class vstore_dashboard extends vstore
         $this->frm = e107::getForm();
 
         $this->template = e107::getTemplate('vstore', 'vstore_dashboard');
-		$this->from = vartrue($this->get['page'],1);
-
-		$this->from = vartrue($this->get['page'],1);
+		$this->from = max(1, (int) varset($this->get['page'], 1));
 		$this->limit_from = ($this->from - 1) * $this->perPage;        
     }
 
@@ -94,7 +107,7 @@ class vstore_dashboard extends vstore
 	{
 		// Access only for logged in users
 		if (!USER) {
-			e107::getMessage()->addError('You need to <a href="'.SITEURL.'login.php">login</a> to access this page!', 'vstore');
+			e107::getMessage()->addError(sprintf(LAN_VSTORE_DB_MSG_LOGIN, SITEURL.'login.php'), 'vstore');
 			return '';
 		}
 
@@ -115,7 +128,7 @@ class vstore_dashboard extends vstore
         }
         else
         {
-            e107::getMessage()->addError('Dashboard area "'.$this->dashboards[$this->area].'" not implemented yet!', 'vstore');
+            e107::getMessage()->addError(sprintf(LAN_VSTORE_DB_MSG_NOT_IMPL, $this->dashboards[$this->area]), 'vstore');
         }
 
 		$text .= $this->tp->parseTemplate($this->template['footer'], true, $this->sc);
@@ -178,7 +191,7 @@ class vstore_dashboard extends vstore
         }
         else
         {
-            $text .= '<p>No order has been made yet.</p>';
+            $text .= '<p>'.LAN_VSTORE_DB_MSG_NO_ORDERS.'</p>';
         }
         return $text;
     }
@@ -197,7 +210,7 @@ class vstore_dashboard extends vstore
         if (!$data)
         {
             // Order not found or not assigned to user
-            $text .= '<p>No data found!</p>';
+            $text .= '<p>'.LAN_VSTORE_DB_MSG_NO_DATA.'</p>';
         }
         else
         {
@@ -222,16 +235,16 @@ class vstore_dashboard extends vstore
         if (!$data)
         {
             // Order not found or not assigned to user
-            $text .= '<p>No data found!</p>';
+            $text .= '<p>'.LAN_VSTORE_DB_MSG_NO_DATA.'</p>';
         }
         else
         {
             // render cancel order confirmation
             $text .= $this->frm->open('confirm-cancel', 'post', null, array('class'=>'form'));
             $text .= '
-                <div class="alert alert-warning" role="alert">Do you really want to cancel your order '.$data['order_refcode'].'?</div>
-                <a href="'.e107::url('vstore', 'dashboard', array('dash' => 'orders')).'" class="btn btn-primary" name="cancel_cancel" id="cancel_cancel">No, take me back</a>
-                <button type="submit" class="btn btn-warning" name="cancel_order" id="cancel_order" value="'.$data['order_id'].'">Yes, cancel this order!</button>
+                <div class="alert alert-warning" role="alert">'.sprintf(LAN_VSTORE_DB_MSG_CANCEL_ASK, $data['order_refcode']).'</div>
+                <a href="'.e107::url('vstore', 'dashboard', array('dash' => 'orders')).'" class="btn btn-primary" name="cancel_cancel" id="cancel_cancel">'.LAN_VSTORE_DB_MSG_CANCEL_NO.'</a>
+                <button type="submit" class="btn btn-warning" name="cancel_order" id="cancel_order" value="'.$data['order_id'].'">'.LAN_VSTORE_DB_MSG_CANCEL_YES.'</button>
             ';
             $text .= $this->frm->close();
 
@@ -283,7 +296,7 @@ class vstore_dashboard extends vstore
         }
         else
         {
-            $text .= '<p>No downloadable files yet.</p>';
+            $text .= '<p>'.LAN_VSTORE_DB_MSG_NO_FILES.'</p>';
         }        
 
         return $text;
@@ -307,7 +320,7 @@ class vstore_dashboard extends vstore
         }
         else
         {
-            $text .= '<p>No addresses available yet.</p>';
+            $text .= '<p>'.LAN_VSTORE_DB_MSG_NO_ADDRESS.'</p>';
         }
         unset($data);        
         return $text;
@@ -381,7 +394,7 @@ class vstore_dashboard extends vstore
 							if ($v['type'] == 'text')
 							{
 								// Textboxes
-								$field = $this->frm->text($fieldname, $fieldvalue, 100, array('placeholder' =>varset($v['placeholder'][e_LANGUAGE]), 'required' =>($v['required'] ? 1 : 0)));
+								$field = $this->frm->text($fieldname, $fieldvalue, 100, array('placeholder' =>\Vstore\Support\Translatable::pick(varset($v['placeholder']), e_LANGUAGE), 'required' =>($v['required'] ? 1 : 0)));
 							}
 							elseif ($v['type'] == 'checkbox')
 							{
@@ -389,14 +402,14 @@ class vstore_dashboard extends vstore
 								$field = '<div class="form-control">'.$this->frm->checkbox($fieldname, 1, 0, array('required'=>($v['required'] ? 1 : 0)));
 								if (vartrue($v['placeholder']))
 								{
-									$field .= ' <label for="'.$this->frm->name2id($fieldname).'-1" class="text-muted">&nbsp;'.$this->tp->toHTML($v['placeholder'][e_LANGUAGE]).'</label>';
+									$field .= ' <label for="'.$this->frm->name2id($fieldname).'-1" class="text-muted">&nbsp;'.$this->tp->toHTML(\Vstore\Support\Translatable::pick($v['placeholder'], e_LANGUAGE)).'</label>';
 								}
 								$field .= '</div>';
 							}
 
 							$this->sc->addVars(array(
 								'fieldname' => $fieldname,
-								'fieldcaption' => $this->tp->toHTML(varset($v['caption'][e_LANGUAGE], 'Additional field '.$k)),
+								'fieldcaption' => $this->tp->toHTML(\Vstore\Support\Translatable::pick(varset($v['caption']), e_LANGUAGE, sprintf(LAN_VSTORE_DB_MSG_ADD_FIELD, $k))),
 								'field' => $field,
 								'fieldcount' => $addFieldActive,
 								'fieldrequired' => $v['required']
@@ -421,21 +434,21 @@ class vstore_dashboard extends vstore
 			}
 			else
 			{
-				e107::getMessage()->addError('Invalid address!', 'vstore');
+				e107::getMessage()->addError(LAN_VSTORE_DB_MSG_BAD_ADDRESS, 'vstore');
 			}
 
 			$text .= '
 				<hr/>
 				<div class="text-center">
-				<a href="'.e107::url('vstore', 'dashboard', array('dash' => 'addresses')).'"  class="btn btn-default btn-secondary">Back</a>&nbsp;';
-			$text .= $this->frm->button('edit_address', $this->id, 'submit', 'Save', array('class' => 'btn btn-primary'));
+				<a href="'.e107::url('vstore', 'dashboard', array('dash' => 'addresses')).'"  class="btn btn-default btn-secondary">'.LAN_VSTORE_FR_BACK.'</a>&nbsp;';
+			$text .= $this->frm->button('edit_address', $this->id, 'submit', LAN_VSTORE_DB_SAVE, array('class' => 'btn btn-primary'));
 			$text .= '</div>';
 
 			$text .= $this->frm->close();
         }
         else
         {
-            $text .= '<p>No addresses available yet.</p>';
+            $text .= '<p>'.LAN_VSTORE_DB_MSG_NO_ADDRESS.'</p>';
         }
         unset($data);        
         return $text;

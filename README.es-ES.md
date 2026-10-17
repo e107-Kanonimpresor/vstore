@@ -8,297 +8,327 @@
 
 ---
 
-[![e107](https://img.shields.io/badge/e107-v2.3.0+-blue.svg)](https://e107.org)
-[![PHP](https://img.shields.io/badge/PHP-7.4%2B%20|%208.x-purple.svg)](https://php.net)
-[![Bootstrap](https://img.shields.io/badge/Bootstrap-3.x%20|%204.x%20|%205.x-7952B3.svg)](https://getbootstrap.com)
-[![License](https://img.shields.io/badge/License-GPL--3.0-green.svg)](LICENSE)
-[![Join the chat at https://gitter.im/e107inc/vstore](https://badges.gitter.im/e107inc/vstore.svg)](https://gitter.im/e107inc/vstore?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/e107-Kanonimpresor/vstore/releases/tag/v2.0.0)
+![e107](https://img.shields.io/badge/e107-2.3.2%2B-green)
+[![PHP](https://img.shields.io/badge/PHP-7.4%20a%208.4-purple.svg)](https://php.net)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-3%20%7C%205-purple)
+![License](https://img.shields.io/badge/license-GPL--3.0-orange)
+
+**Autor:** [Kanonimpresor](https://marketingdeperformance.online) — Marketing de Performance  
+**Licencia:** GPL-3.0
 
 ---
 
 ## 📋 Descripción
 
-**Vstore** es una solución de comercio electrónico completa para [e107 v2.x](https://e107.org) Bootstrap CMS. Diseñado con flexibilidad y facilidad de uso, proporciona todo lo necesario para gestionar una tienda online profesional directamente desde tu sitio web e107.
-
-Ya sea que vendas productos físicos, descargas digitales o servicios, Vstore se integra perfectamente con tu sitio e107, ofreciendo características potentes como múltiples pasarelas de pago, cálculo avanzado de impuestos, gestión de cupones y seguimiento de inventario.
+**Vstore** es un plugin de comercio electrónico para el CMS Bootstrap [e107 v2.x](https://e107.org). Permite gestionar una tienda online directamente desde su sitio e107: productos físicos, descargas digitales o servicios, con varios métodos de pago, IVA de la UE, cupones, control de stock, facturas en PDF y correos a los clientes, en español, inglés y portugués.
 
 ---
 
 ## ✨ Características Principales
 
 ### 🛒 Carrito de Compras y Checkout
-- **Carrito Dinámico**: Actualizaciones en tiempo real con funcionalidad AJAX
-- **Compra como Invitado**: Permite compras sin registro de usuario
-- **Checkout Multi-paso**: Flujo de compra limpio e intuitivo
-- **Historial de Pedidos**: Panel del cliente con seguimiento de pedidos
-- **Descargas Digitales**: Soporte para productos descargables
-- **Variaciones de Productos**: Talla, color y atributos personalizados
+- **Carrito** con añadir al carrito por AJAX y campo de cantidad en la página del producto
+- **Compra como invitado**: el cliente puede comprar como invitado, iniciar sesión o registrarse
+- **Checkout** con direcciones de facturación y envío, campos adicionales opcionales y teléfono
+- **Panel del cliente**: historial de pedidos, detalle, descargas y facturas
+- **Descargas digitales**: los archivos están disponibles cuando se recibe el pago
+- **Variaciones de producto**: hasta dos grupos por producto (talla, color...) con cambio de precio e inventario propio
 
 ### 💳 Procesamiento de Pagos
-- **Múltiples Pasarelas de Pago**:
-  - PayPal (Express Checkout & Standard)
-  - Stripe (Tarjetas de Crédito/Débito)
-  - Mollie (iDEAL, Bancontact y más de 20 métodos)
-  - Braintree (PayPal y Tarjetas de Crédito)
-  - CoinPayments (Criptomonedas)
-  - Transferencia Bancaria (Manual)
-- **Transacciones Seguras**: Procesamiento compatible con PCI
-- **Seguimiento de Estado**: Nuevo, En Proceso, Completado, Reembolsado, etc.
+- **Pasarelas de pago** (mediante [Omnipay](https://omnipay.thephpleague.com/)):
+  - **PayPal** (estándar y REST)
+  - **Mollie**: tarjetas, PayPal, **MB WAY**, **Multibanco**, iDEAL, Bancontact, transferencia, domiciliación, tarjetas regalo y más. Solo se ofrecen los métodos activos en su perfil de Mollie
+  - **Transferencia bancaria** (manual): el pedido espera hasta que lo marque como pagado
+- **Páginas de pago alojadas**: los datos de la tarjeta nunca pasan por su servidor
+- **Webhook de Mollie**: los pedidos se crean antes de que el cliente pague, de modo que un pago pendiente (MB WAY, Multibanco) o realizado sin volver a la tienda nunca se pierde
+- **Reembolsos** desde el pedido en las pasarelas que los permiten (Mollie, PayPal)
+- **Estados del pedido**: Nuevo, En proceso, En espera, Completado, Cancelado, Reembolsado
+
+> Los métodos de Mollie que solo aceptan euros (MB WAY, Multibanco, iDEAL, Bancontact, transferencia, domiciliación y tarjetas regalo) se ocultan en el checkout si la moneda de la tienda no es EUR.
 
 ### 💰 Precios y Descuentos
-- **Sistema de Cupones**:
-  - Descuentos por porcentaje o monto fijo
-  - Restricciones por rango de fechas
-  - Inclusión/exclusión de categorías/productos
-  - Límites de uso (global y por usuario)
-  - Requisitos de pedido mínimo
-- **Cálculo de Impuestos**:
-  - Soporte para IVA de la UE con validación VIES
-  - Múltiples tasas de impuestos (estándar, reducida, súper reducida)
-  - Mecanismo de inversión del sujeto pasivo B2B
-  - Clases de impuestos específicas por país
-  - Cálculo automático basado en ubicación
+- **Cupones**:
+  - Descuentos porcentuales o de importe fijo
+  - Fechas de inicio y fin
+  - Incluir/excluir categorías y productos
+  - Límites de uso (total, por usuario y por artículo)
+- **Cálculo de impuestos**:
+  - Precios netos, con el IVA del país del cliente añadido
+  - IVA de la UE con validación **VIES** del NIF/IVA (y dígito de control del NIF portugués)
+  - **Inversión del sujeto pasivo** (0%) para empresas de otro país de la UE con NIF/IVA válido
+  - Opción de cobrar el IVA del país de la tienda a consumidores de la UE (vendedores bajo el umbral de 10.000 EUR)
+  - Clases de impuesto: estándar, reducido, superreducido, parking y más
 
 ### 📦 Gestión de Productos
-- **Productos Ilimitados**: Sin restricciones en el tamaño del catálogo
-- **Categorías y Subcategorías**: Jerarquía organizada de productos
-- **Variaciones de Productos**: Gestión de talla, color y atributos personalizados
-- **Seguimiento de Inventario**: Gestión de stock con alertas de bajo stock
-- **Galerías de Imágenes**: Múltiples imágenes por producto con zoom
-- **URLs Amigables para SEO**: URLs limpias para mejor posicionamiento
-- **Productos Relacionados**: Recomendaciones de venta cruzada
+- **Productos ilimitados** y **categorías** anidadas, restringibles a clases de usuario
+- **Control de stock** por producto y por variación (`-1` para ilimitado)
+- **Galerías de imágenes** con zoom, vídeos y archivos descargables
+- **Productos relacionados**
+- **URLs amigables** para SEO
+- **Integración con la búsqueda** de e107
 
-### 🚚 Envío y Cumplimiento
-- **Tarifas de Envío Flexibles**:
-  - Tarifa plana
-  - Cálculo basado en peso
-  - Opciones de envío gratuito
-  - Costos de envío por producto
-- **Gestión de Direcciones**: Direcciones de facturación y envío separadas
-- **Notas de Pedido**: Notas del cliente y notas internas del administrador
+### 🚚 Envío
+- **Métodos de envío**: suma de todos los artículos, suma de artículos únicos o escalonado por precio o peso del pedido
+- **Costes de envío por producto**
+- **Direcciones de facturación y envío separadas**; notas del cliente y notas internas del administrador
 
-### 📊 Análisis e Informes
-- **Estadísticas de Ventas**: Seguimiento de ingresos y tendencias
-- **Informes de Pedidos**: Información detallada de pedidos
-- **Rendimiento de Productos**: Más vendidos e informes de inventario
-- **Información de Clientes**: Historial de compras y comportamiento
+### 📊 Estadísticas
+- **Panel** con ingresos, pedidos del mes y un gráfico por periodo, también en el panel de control de e107
 
 ### 🎨 Personalización
-- **Sistema de Plantillas**: Plantillas HTML completamente personalizables
-- **Shortcodes**: Amplia biblioteca de shortcodes para diseños personalizados
-- **CSS Personalizado**: Añade tus propios estilos
-- **Diseño Responsive**: Compatible con móviles desde el inicio
-- **Soporte Multi-idioma**: Listo para traducción con archivos LAN
+- **Plantillas** de tienda, carrito, área del cliente, correos y factura; el tema puede sobrescribirlas en `<tema>/templates/vstore/`
+- **Shortcodes** para diseños propios
+- **CSS personalizado** desde el administrador
+- **Diseño adaptable** con marcado Bootstrap (temas Bootstrap 3 y 5)
+- **Totalmente traducible**: administración, tienda, correos, facturas y mensajes salen de archivos de idioma (español, inglés y portugués; el resto usa inglés)
 
-### 🔧 Características de Administración
-- **Panel Intuitivo**: Gestión de pedidos, productos y clientes
-- **Acciones en Masa**: Editar múltiples elementos simultáneamente
-- **Plantillas de Email**: Emails de confirmación personalizables
-- **Generación de Facturas**: Facturas PDF automáticas (requiere plugin PDF)
-- **Permisos de Usuario**: Control de acceso basado en roles
-- **Integración de Búsqueda**: Productos buscables vía búsqueda e107
+### 🔧 Administración
+- **Área de administración** de ventas, productos, categorías, variaciones, cupones, clientes, pasarelas, facturas y correos
+- Pestañas **Guía de Usuario** y **Acerca de**, y una barra lateral de ayuda contextual
+- **Plantillas de correo** por estado del pedido (confirmación, completado, cancelado, reembolsado), adaptables a móvil, con botón de restablecer
+- **Facturas en PDF** creadas con TCPDF (instalado por Composer): prefijo, siguiente número, bloques del pie, vista previa; se adjuntan al correo y el cliente puede descargarlas
+- **Permisos** para las acciones de administración
+
+---
+
+## 🆕 Novedades de la v2.0.0
+
+- Administración y tienda **totalmente traducibles** (español, inglés y portugués).
+- **Mollie MB WAY y Multibanco**, teléfono enviado a Mollie, **webhook** de Mollie y botón *Comprobar el pago en Mollie*.
+- **IVA de la UE reescrito**: precios netos, VIES, inversión del sujeto pasivo, IVA de origen opcional.
+- **Nuevo diseño de correos** y **facturas PDF integradas** (TCPDF 6.11 por Composer; ya no hace falta el plugin *pdf* de e107).
+- **Capa de lógica de negocio** en `src/` (espacio de nombres `Vstore\`) con 242 pruebas automáticas (`php tests/run.php`). `vstore.class.php` conserva sus métodos públicos, por lo que los temas y plugins siguen funcionando.
+- **Revisión de seguridad**: escape de salidas y de SQL, carrito limitado al visitante, credenciales ocultas en los registros, `composer audit` sin avisos.
+- **Eliminados** Stripe, Braintree, CoinPayments y StarkPay (no tenían un checkout funcional). Las tarjetas las cubre Mollie.
+- Nuevo **manual de usuario** ([docs/user-manual.html](docs/user-manual.html)) y **notas de la versión** ([docs/RELEASE_NOTES_v2.0.0.md](docs/RELEASE_NOTES_v2.0.0.md)).
+
+### Actualizar desde la 1.x
+1. Sustituya la carpeta del plugin (o haga `git pull`) y ejecute `composer install --no-dev --optimize-autoloader`.
+2. En *Vstore → Plantillas de correo* y *Configuración de Facturas*, pulse **Restablecer plantilla** si guardó plantillas propias, para obtener el diseño nuevo y la factura corregida.
+3. Desinstale el plugin *pdf* de e107 si no lo usa para otra cosa.
+4. Para MB WAY, Multibanco y los demás métodos de Mollie solo en euros, ponga la moneda de la tienda en **EUR**.
 
 ---
 
 ## 🚀 Instalación
 
 ### Requisitos
-- **e107 CMS**: v2.3.0 o superior ([Descargar](https://github.com/e107inc/e107))
-- **PHP**: 7.4 o superior (compatible con PHP 8.x)
-- **Extensiones PHP**:
-  - SOAP (para validación de IVA)
-  - cURL (para pasarelas de pago)
-  - JSON
-  - GD o Imagick (para procesamiento de imágenes)
-- **Base de Datos**: MySQL 5.7+ / MariaDB 10.2+
-- **Opcional**: [Plugin PDF](https://github.com/e107inc/pdf) para generación de facturas
+- **e107 CMS**: v2.3.2 o superior ([Descargar](https://github.com/e107inc/e107))
+- **PHP**: 7.4 a 8.4
+- **Extensiones PHP**: SOAP (validación VIES), cURL (pasarelas de pago), JSON, mbstring, GD (imágenes y logotipo de la factura)
+- **Base de datos**: MySQL 5.7+ / MariaDB 10.2+
+- **Composer** (solo si instala desde el repositorio de código fuente)
 
-### Pasos de Instalación
+### Pasos de instalación
 
-1. **Descargar el Plugin**:
-   ```bash
-   cd e107_plugins
-   git clone https://github.com/Kanonimpresor/vstore.git
-   ```
+1. **Obtenga el plugin**
+   - **Paquete de la versión (recomendado)**: descargue `vstore-2.0.0.zip` desde la [página de Releases](https://github.com/e107-Kanonimpresor/vstore/releases) y extráigalo en `e107_plugins/` (ya incluye `vendor/`).
+   - **Desde el código fuente**:
+     ```bash
+     cd e107_plugins
+     git clone https://github.com/e107-Kanonimpresor/vstore.git
+     cd vstore
+     composer install --no-dev --optimize-autoloader
+     ```
 
-2. **Instalar Dependencias** ⚠️ **OBLIGATORIO**:
-   ```bash
-   cd vstore
-   composer install --no-dev
-   ```
-   
-   > **⚠️ IMPORTANTE**: El directorio `vendor/` NO está incluido en el repositorio.  
-   > **DEBES** ejecutar `composer install` después de clonar para descargar todas las dependencias.  
-   > Sin este paso, el plugin NO funcionará y verás errores como:  
-   > `Fatal error: Failed opening required 'vendor/autoload.php'`
+   > **⚠️ IMPORTANTE**: el repositorio de código fuente no incluye la carpeta `vendor/`. Sin `composer install` verá `Failed opening required 'vendor/autoload.php'`.
 
-3. **Instalar vía Admin de e107**:
-   - Navegar a: **Admin → Plugins → Gestionar Plugins**
-   - Encontrar "Vstore" en la lista
-   - Hacer clic en **Instalar**
+2. **Instale en e107**: *Admin → Plugins → Gestionar plugins → Vstore → Instalar*.
 
-4. **Configurar Ajustes**:
-   - Ir a: **Admin → Vstore → Settings**
-   - Configurar:
-     - Información de la tienda (nombre, dirección, NIF)
-     - Configuración de impuestos (activar IVA, tasas)
-     - Pasarelas de pago (credenciales API)
-     - Opciones de envío
-     - Plantillas de email
+3. **Configure**: *Admin → Vstore → Preferencias*: moneda, formato de precio, unidad de peso, dirección de la tienda, envíos, impuestos, correos y checkout. La pestaña **Guía de Usuario** le guía paso a paso.
 
-5. **Crear Productos**:
-   - Navegar a: **Admin → Vstore → Productos**
-   - Añadir tu primer producto con imágenes y precios
+4. **Pasarelas de pago**: *Admin → Vstore → Pasarelas de Pago*. Introduzca las credenciales de al menos una y actívela. Pruébela antes en modo sandbox/pruebas.
 
-6. **Probar Checkout**:
-   - Añadir un producto al carrito
-   - Completar un pedido de prueba (usar modo sandbox para pasarelas)
+5. **Cree categorías y productos**: *Admin → Vstore → Categorías / Productos*.
+
+6. **Pruebe el checkout** con un pedido de prueba y sígalo en *Ventas*.
 
 ---
 
 ## 📖 Documentación
 
-### Guías de Inicio Rápido
-- [Crear Tu Primer Producto](wiki/creating-products.md)
-- [Configurar Pasarelas de Pago](wiki/payment-gateways.md)
-- [Configurar Impuestos](wiki/tax-configuration.md)
-- [Gestionar Cupones](wiki/coupons.md)
-- [Personalizar Plantillas](wiki/templates.md)
-
-### Temas Avanzados
-- [Generación de Facturas](wiki/invoice.md)
-- [Shortcodes Personalizados](wiki/shortcodes.md)
-- [Esquema de Base de Datos](wiki/database.md)
-- [Integración API](wiki/api.md)
-- [Mejores Prácticas de Seguridad](wiki/security.md)
-
-### Recursos para Desarrolladores
-- [Arquitectura del Plugin](wiki/architecture.md)
-- [Extender Vstore](wiki/extending.md)
-- [Desarrollo de Pasarelas de Pago](wiki/gateway-development.md)
-- [Estándares de Código](wiki/coding-standards.md)
+- [Manual de usuario](docs/user-manual.html)
+- [Notas de la versión 2.0.0](docs/RELEASE_NOTES_v2.0.0.md) y [CHANGELOG](CHANGELOG.md)
+- [Facturas](wiki/invoice.md)
+- [Guía de pruebas](docs/TESTING_GUIDE.md)
+- [Notas de desarrollo](DEV_NOTES.md) y [plan de actualización](docs/PLAN_ACTUALIZACION_V2.md)
 
 ---
 
 ## 🔧 Configuración
 
-### Configuración de Impuestos (Ejemplo IVA UE)
+### Configuración de impuestos (ejemplo IVA UE)
 
-```php
-// Admin → Vstore → Settings → Tax
-País del Negocio: ES (España)
-Cálculo de Impuestos: Activado
-Verificar NIF-IVA: Activado
+```
+Admin → Vstore → Preferencias → Impuestos
+País del negocio:               PT (Portugal)
+Cálculo de impuestos:           Activado
+Comprobar NIF/IVA (VIES):       Activado
+Clases de impuesto:             valores decimales, p. ej. 0.23 para el 23%
 
-Clases de Impuestos:
-- Estándar: 21% (España)
-- Reducido: 10%
-- Súper Reducido: 4%
-
-// Manejo automático de IVA UE:
-// - Cliente ES (B2C): 21% IVA
-// - Cliente FR (B2C): Tasa de IVA francesa
-// - Cliente DE con NIF válido (B2B): 0% (inversión sujeto pasivo)
-// - Cliente US: 0% (fuera de la UE)
+Los precios son netos; se añade el IVA del país de destino:
+- Cliente de PT:                                  23% (su tipo local)
+- Consumidor de ES:                               tipo español
+- Empresa de DE con NIF/IVA válido en VIES:       0% (inversión del sujeto pasivo)
+- Cliente de EE. UU.:                             0% (fuera de la UE)
 ```
 
-### Configuración de Pasarelas de Pago
+### Pasarelas de pago
 
-#### PayPal
-```php
-Modo: Sandbox / Live
-Client ID: TU_PAYPAL_CLIENT_ID
-Client Secret: TU_PAYPAL_SECRET
+```
+PayPal        → modo (Sandbox / Live) y credenciales de API
+Mollie        → clave de API (test_... / live_...) y métodos de pago a ofrecer
+Transferencia → los datos bancarios que verá el cliente
 ```
 
-#### Stripe
+---
+
+## 🛠️ Personalización
+
+Las plantillas están en `templates/`. Para cambiar una sin tocar el plugin, cópiela en su tema como `<tema>/templates/vstore/<nombre>_template.php`:
+
 ```php
-Modo: Test / Live
-Publishable Key: pk_test_...
-Secret Key: sk_test_...
+// <tema>/templates/vstore/vstore_template.php
+$VSTORE_TEMPLATE['list']['item'] = '
+<div class="product-card">
+    {ITEM_PIC: w=300&h=300&crop=1}
+    <h3>{ITEM_NAME}</h3>
+    <p class="price">{ITEM_PRICE}</p>
+    {ITEM_QTY}
+    {ITEM_ADDTOCART}
+</div>
+';
 ```
 
-#### Mollie
-```php
-API Key: test_... / live_...
-Métodos Habilitados: iDEAL, Tarjeta de Crédito, Bancontact
-```
+Los correos usan `vstore_email_layout_template.php` (documento) y `vstore_email_template.php` (cuerpos); la factura usa `vstore_invoice_template.php`.
 
 ---
 
 ## 🤝 Contribuir
 
-¡Damos la bienvenida a contribuciones de la comunidad! Aquí puedes ayudar:
+### Reportar errores
+- Revise las [incidencias existentes](https://github.com/e107-Kanonimpresor/vstore/issues)
+- Abra una nueva con: descripción clara, pasos para reproducirlo, versiones de e107, PHP y del plugin, y cualquier mensaje de error o captura
 
-### Reportar Errores
-- Verificar [issues existentes](https://github.com/Kanonimpresor/vstore/issues)
-- Crear un nuevo issue con:
-  - Descripción clara del problema
-  - Pasos para reproducir
-  - Versión de e107, PHP y plugin
-  - Mensajes de error o capturas de pantalla
-
-### Solicitudes de Características
-- Abrir un issue con la etiqueta `enhancement`
-- Describir la característica y caso de uso
-- Explicar por qué beneficiaría a otros usuarios
+### Solicitudes de características
+- Abra una incidencia con la etiqueta `enhancement` y describa el caso de uso
 
 ### Pull Requests
-1. Fork del repositorio
-2. Crear rama de característica: `git checkout -b feature/caracteristica-increible`
-3. Commit de cambios: `git commit -m 'Añadir característica increíble'`
-4. Push a la rama: `git push origin feature/caracteristica-increible`
-5. Abrir un Pull Request
+1. Haga un fork del repositorio
+2. Cree una rama: `git checkout -b feature/amazing-feature`
+3. Ejecute las pruebas: `php tests/run.php`
+4. Confirme y suba su rama, y abra un Pull Request
+
+### Pruebas
+- Pruebe en varias versiones de PHP (7.4 a 8.4)
+- Pruebe las pasarelas en modo sandbox
+- Informe de problemas de compatibilidad
+
+### Localización
+- Los archivos de idioma están en `languages/<Idioma>/` (`<Idioma>_<área>.php`, formato array, inglés como respaldo)
+- Las constantes usan el prefijo `LAN_VSTORE_*`
 
 ---
 
 ## 📝 Historial de Cambios
 
-Ver [CHANGELOG.md](CHANGELOG.md) para la lista detallada de cambios, correcciones y nuevas características.
+Consulte [CHANGELOG.md](CHANGELOG.md) para la lista completa de cambios.
 
-**Últimas Actualizaciones (Noviembre 2025)**:
-- ✅ Compatibilidad corregida con ibericode/vat v2.x
-- ✅ Resuelto vaciado de carrito al aplicar cupones
-- ✅ Corregida validación de datos de envío en checkout
-- ✅ Mejoras de compatibilidad con PHP 8.x
-- ✅ Mejorado manejo de errores y validación
+**v2.0.0 (2026-10-17)**: traducciones, Mollie MB WAY/Multibanco y webhook, IVA de la UE reescrito, nuevos correos, facturas PDF integradas, capa de negocio con pruebas, revisión de seguridad. Vea las [notas de la versión](docs/RELEASE_NOTES_v2.0.0.md).
+
+---
+
+## 🐛 Problemas Conocidos
+
+- Cancelar un pedido a mano desde el administrador no devuelve el stock (los pagos fallidos o caducados sí).
+- Las credenciales guardadas de las pasarelas eliminadas siguen en las preferencias de la base de datos; se ignoran.
+- El manual de usuario solo está en español.
+- En localhost, Mollie no puede enviar el webhook: use el botón *Comprobar el pago en Mollie*.
+- El correo en localhost necesita un servidor SMTP (por ejemplo smtp4dev o Mailtrap).
+- Vacíe la caché de e107 tras cambiar plantillas.
+- Las facturas PDF necesitan `vendor/tecnickcom/tcpdf` (ejecute `composer install`).
 
 ---
 
 ## 📄 Licencia
 
-Este proyecto está licenciado bajo **GNU General Public License v3.0** - ver el archivo [LICENSE](LICENSE) para detalles.
+Este proyecto se distribuye bajo la **Licencia Pública General de GNU v3.0** - consulte el archivo [LICENSE](LICENSE).
+
+- ✅ Libre para uso comercial y no comercial
+- ✅ Puede modificar y distribuir el código
+- ✅ Las modificaciones deben publicarse bajo la misma licencia GPL-3.0
 
 ---
 
 ## 🙏 Créditos y Agradecimientos
 
 ### Mantenedores
-- Desarrollador Original: [Comunidad e107](https://e107.org)
-- Mantenedor Actual: [Kanonimpresor](https://github.com/Kanonimpresor)
+- Desarrolladores originales: CaMerOn, Achim Ennenbach y la [comunidad e107](https://e107.org)
+- Mantenedor actual: [Kanonimpresor](https://marketingdeperformance.online) — Marketing de Performance ([GitHub](https://github.com/e107-Kanonimpresor))
 
 ### Dependencias
-- [e107 CMS](https://github.com/e107inc/e107) - Sistema de Gestión de Contenidos
-- [Omnipay](https://omnipay.thephpleague.com/) - Abstracción de procesamiento de pagos
-- [ibericode/vat](https://github.com/ibericode/vat) - Validación de IVA UE
-- [TCPDF](https://tcpdf.org/) - Generación de PDF
+- [e107 CMS](https://github.com/e107inc/e107) - Sistema de gestión de contenidos
+- [Omnipay](https://omnipay.thephpleague.com/) con sus controladores de PayPal y Mollie - abstracción de pagos
+- [ibericode/vat](https://github.com/ibericode/vat) - Tipos de IVA de la UE y validación VIES
+- [TCPDF](https://tcpdf.org/) - Facturas en PDF
+
+### Agradecimientos Especiales
+- A la comunidad e107 por las pruebas y los comentarios
+- A los proveedores de pago por sus entornos sandbox
+- A quienes reportan errores y envían pull requests
 
 ---
 
 ## 📞 Soporte y Comunidad
 
-### Obtener Ayuda
-- **Documentación**: Consultar la [Wiki](wiki/) primero
-- **Chat Comunitario**: [Canal Gitter](https://gitter.im/e107inc/vstore)
-- **Foros e107**: [Foros e107.org](https://e107.org/forum)
-- **GitHub Issues**: [Reportar errores](https://github.com/Kanonimpresor/vstore/issues)
+- **Documentación**: [manual de usuario](docs/user-manual.html) y la pestaña *Guía de Usuario* del administrador
+- **Incidencias en GitHub**: [reportar errores](https://github.com/e107-Kanonimpresor/vstore/issues)
+- **Comunidad e107**: [Q&A - Plugins](https://github.com/e107inc/e107/discussions/categories/q-a-plugins) y los [foros de e107.org](https://e107.org/forum)
+
+---
+
+## 🗺️ Hoja de Ruta
+
+### ✅ Entregado en la 2.0.0
+- [x] Compatibilidad total con PHP 8.x (7.4 a 8.4)
+- [x] Sistema de cupones mejorado
+- [x] Localización completa (español, inglés y portugués)
+- [x] Mollie MB WAY y Multibanco, facturas PDF integradas, IVA de la UE reescrito, nuevo diseño de correos
+
+### 🚧 En Desarrollo
+- [ ] Modo **presupuesto** de producto: si deja el precio vacío, el producto muestra un botón "Presupuesto / Quote / Orçamento" en lugar de "Añadir al carrito"
+- [ ] Más mejoras de los correos
+- [ ] Más idiomas (traducciones de la comunidad)
+- [ ] Integración con aplicación móvil
+
+### Características Planificadas
+- [ ] Más pasarelas de pago (Authorize.net, Square, etc.)
+- [ ] Panel de análisis avanzado con gráficos
+- [ ] Reseñas y valoraciones de productos
+- [ ] Lista de deseos
+- [ ] Recuperación de carritos abandonados
+- [ ] Soporte de marketplace multivendedor
+- [ ] Pagos por suscripción/recurrentes
+- [ ] Tarjetas regalo y vales
+
+---
+
+## 📊 De un vistazo
+
+- **Idiomas**: español, inglés y portugués
+- **Métodos de pago**: PayPal, Mollie (tarjetas y métodos locales), transferencia bancaria
+- **Pruebas**: 242 comprobaciones automáticas (`php tests/run.php`), PHP 7.4, 8.2 y 8.4
 
 ---
 
 <div align="center">
 
-**Hecho con ❤️ para la Comunidad e107 CMS**
+**Hecho con ❤️ para la comunidad de e107 CMS**
 
-[Reportar Error](https://github.com/Kanonimpresor/vstore/issues) · [Solicitar Característica](https://github.com/Kanonimpresor/vstore/issues) · [Documentación](wiki/)
+[Reportar error](https://github.com/e107-Kanonimpresor/vstore/issues) · [Solicitar característica](https://github.com/e107-Kanonimpresor/vstore/issues) · [Releases](https://github.com/e107-Kanonimpresor/vstore/releases)
+
+Copyright (c) 2026 Kanonimpresor / Marketing de Performance  
+Plugin desarrollado para e107 CMS — https://marketingdeperformance.online
 
 </div>

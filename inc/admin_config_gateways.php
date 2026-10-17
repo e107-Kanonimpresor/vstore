@@ -1,6 +1,8 @@
 <?php
+e107::lan('vstore', 'admin_gateways', true);
+
 /**
- * Adminarea module orders
+ * Adminarea module payment gateways
  */
 
 use Omnipay\Omnipay;
@@ -9,6 +11,8 @@ use Composer\Autoload\ClassLoader;
 
 class vstore_gateways_ui extends e_admin_ui
 {
+	use vstore_admin_common;
+
 
 	protected $pluginTitle = 'Vstore';
 	protected $pluginName = 'vstore';
@@ -37,7 +41,7 @@ class vstore_gateways_ui extends e_admin_ui
 		'paypal_rest'   => 'Paypal REST',
 		'paypal_pro'    => 'Paypal Pro',
 		'mollie'        => 'Mollie',
-		'bank_transfer' => 'Bank Transfer'
+		'bank_transfer' => LAN_VSTORE_ADMIN_GATE_TAB_BANK
 	);
 
 
@@ -57,15 +61,15 @@ class vstore_gateways_ui extends e_admin_ui
 		//	'paypal_signature'      => array('title'=>"Paypal Signature", 'type'=>'text', 'tab'=>'paypal', 'data'=>'str', 'help'=>'', 'writeParms'=>array('size'=>'xxlarge')),
 
 		'mollie_active'                 => array('title' => LAN_ACTIVE, 'type' => 'boolean', 'tab' => 'mollie', 'data' => 'int', 'help' => ''),
-		'mollie_testmode'               => array('title' => "Mollie Testmode", 'type' => 'boolean', 'tab' => 'mollie', 'data' => 'int', 'writeParms' => array(), 'help' => 'Use Mollie Testmode'),
-		'mollie_api_key_live'           => array('title' => "Mollie Live API key", 'type' => 'text', 'tab' => 'mollie', 'data' => 'str', 'note' => 'Get your api keys <a href="https://www.mollie.com/dashboard/developers/api-keys">here</a>', 'writeParms' => array('size' => 'xxlarge')),
-		'mollie_api_key_test'           => array('title' => "Mollie Test API key", 'type' => 'text', 'tab' => 'mollie', 'data' => 'str', 'note' => '', 'help' => '', 'writeParms' => array('size' => 'xxlarge')),
-		'mollie_payment_methods'        => array('title' => "Mollie Payment methods", 'type' => 'checkboxes', 'tab' => 'mollie', 'data' => 'str', 'note' => 'Select at least 1 payment method.\nThe payment method MUST BE enabled in your Mollie dashoard BEFORE you can use it with vstore!\nBe aware, that not all methods support all currencies!', 'help' => '', 'writeParms' => array('__options' => array('multiple' => true, 'size' => 'xxlarge'))),
+		'mollie_testmode'               => array('title' => LAN_VSTORE_ADMIN_GATE_MOLLIE_TEST, 'type' => 'boolean', 'tab' => 'mollie', 'data' => 'int', 'writeParms' => array(), 'help' => LAN_VSTORE_ADMIN_GATE_MOLLIE_TEST_H),
+		'mollie_api_key_live'           => array('title' => LAN_VSTORE_ADMIN_GATE_MOLLIE_KEY_LIVE, 'type' => 'text', 'tab' => 'mollie', 'data' => 'str', 'note' => LAN_VSTORE_ADMIN_GATE_MOLLIE_KEYS_NOTE, 'writeParms' => array('size' => 'xxlarge')),
+		'mollie_api_key_test'           => array('title' => LAN_VSTORE_ADMIN_GATE_MOLLIE_KEY_TEST, 'type' => 'text', 'tab' => 'mollie', 'data' => 'str', 'note' => '', 'help' => '', 'writeParms' => array('size' => 'xxlarge')),
+		'mollie_payment_methods'        => array('title' => LAN_VSTORE_ADMIN_GATE_MOLLIE_METHODS, 'type' => 'checkboxes', 'tab' => 'mollie', 'data' => 'str', 'note' => LAN_VSTORE_ADMIN_GATE_MOLLIE_METHODS_NOTE, 'help' => '', 'writeParms' => array('__options' => array('multiple' => true, 'size' => 'xxlarge'))),
 
 		'gateways/bank_transfer/active' => array('title' => LAN_ACTIVE, 'type' => 'boolean', 'tab' => 'bank_transfer', 'data' => 'int', 'help' => ''),
-		'gateways/bank_transfer/title'  => array('title' => LAN_TITLE, 'type' => 'text', 'tab' => 'bank_transfer',  'data' => 'str', 'writeParms' => array('size'=>'xxlarge', 'default'=>'Bank Transfer')),
+		'gateways/bank_transfer/title'  => array('title' => LAN_TITLE, 'type' => 'text', 'tab' => 'bank_transfer',  'data' => 'str', 'writeParms' => array('size'=>'xxlarge', 'default'=>LAN_VSTORE_ADMIN_GATE_BANK_TITLE_DEF)),
 		'gateways/bank_transfer/icon'   => array('title' => LAN_ICON, 'type' => 'icon', 'tab' => 'bank_transfer', 'data' => 'str', 'help' => '', 'writeParms'=>array('default'=>'fa-bank.glyph')),
-		'gateways/bank_transfer/details' => array('title' => "Bank Transfer", 'type' => 'textarea', 'tab' => 'bank_transfer', 'data' => 'str', 'writeParms' => array('placeholder' => "Bank Account Details"), 'help' => ''),
+		'gateways/bank_transfer/details' => array('title' => LAN_VSTORE_ADMIN_GATE_BANK_DETAILS, 'type' => 'textarea', 'tab' => 'bank_transfer', 'data' => 'str', 'writeParms' => array('placeholder' => LAN_VSTORE_ADMIN_GATE_BANK_DETAILS_PH), 'help' => ''),
 
 	);
 
@@ -83,7 +87,6 @@ class vstore_gateways_ui extends e_admin_ui
 			$this->prefs['mollie_payment_methods']['writeParms'][$k] = vstore::getMolliePaymentMethodIcon($k, '2x') . '  ' . $row['title'];
 		}
 		asort($this->prefs['mollie_payment_methods']['writeParms']);
-		$this->prefs['mollie_payment_methods']['note'] = str_replace('\n', '<br/>', $this->prefs['mollie_payment_methods']['note']);
 
 
 		/** Automatically build the preferences from the Gateway files         * */
@@ -91,9 +94,52 @@ class vstore_gateways_ui extends e_admin_ui
 
 		$this->setGatewayFields();
 		$this->checkDeprecatedPrefs();
+		$this->warnRetiredGateways();
+		$this->warnMollieCurrency();
 
 		ksort($this->preftabs); // sort the tabs.
 
+	}
+
+	/** Settings saved for gateways that are no longer offered stay in the database but are never used. */
+	private function warnRetiredGateways()
+	{
+		$saved = (array) e107::pref('vstore', 'gateways');
+		$found = array();
+
+		foreach(array_keys($saved) as $name)
+		{
+			if(\Vstore\Support\Catalog::isRetiredGateway($name))
+			{
+				$found[] = ucfirst($name);
+			}
+		}
+
+		if($found)
+		{
+			e107::getMessage()->addInfo(e107::getParser()->lanVars(LAN_VSTORE_ADMIN_GATE_RETIRED, implode(', ', $found)));
+		}
+	}
+
+	/** Euro-only Mollie methods are hidden at checkout in other currencies: tell the admin why. */
+	private function warnMollieCurrency()
+	{
+		$currency = strtoupper((string) e107::pref('vstore', 'currency'));
+		$methods  = (array) e107::pref('vstore', 'mollie_payment_methods');
+		$hidden   = array();
+
+		foreach(array_keys($methods) as $method)
+		{
+			if(!\Vstore\Support\Catalog::supportsCurrency($method, $currency))
+			{
+				$hidden[] = ucfirst(str_replace('_', ' ', substr($method, 7)));
+			}
+		}
+
+		if($hidden)
+		{
+			e107::getMessage()->addInfo(e107::getParser()->lanVars(LAN_VSTORE_ADMIN_GATE_MOLLIE_CURRENCY, array('x' => implode(', ', $hidden), 'y' => $currency)));
+		}
 	}
 
 	private function checkDeprecatedPrefs()
@@ -126,12 +172,12 @@ class vstore_gateways_ui extends e_admin_ui
 
 		$cfg->save(false,true,false);
 
-		$text = "<p>The way in which gateway preferences are stored has been changed.</p><p><b>These old preferences have now been deleted.</b></p><p>You may re-enter these values in the form below if you wish. </p>
+		$text = LAN_VSTORE_ADMIN_GATE_DEPRECATED_TEXT."
 		<table class='table table-striped table-bordered table-condensed' style='width:600px'>
 		".$message."
 		</table>";
 
-		e107::getMessage()->setTitle('Important', E_MESSAGE_ERROR)->setIcon('fa-warning', E_MESSAGE_ERROR)->addError($text);
+		e107::getMessage()->setTitle(LAN_VSTORE_ADMIN_GATE_DEPRECATED_TITLE, E_MESSAGE_ERROR)->setIcon('fa-warning', E_MESSAGE_ERROR)->addError($text);
 
 	}
 
@@ -165,12 +211,7 @@ class vstore_gateways_ui extends e_admin_ui
 
 		$packages = vstore::getGatewayPackageList();
 
-		$defaultIcons = array(
-			'coinpayments'  => 'fa-bitcoin.glyph',
-			'braintree'     => 'fa-apple-pay.glyph',
-			'stripe'        => 'fa-cc-stripe.glyph',
-			'stark'         => 'fab-ethereum.glyph',
-		);
+		$defaultIcons = array();
 
 		foreach($packages as $folder => $class)
 		{
@@ -197,6 +238,31 @@ class vstore_gateways_ui extends e_admin_ui
 		return $new_data;
 	}
 
+	/** e107 writes the changed settings, keys included, to the admin log: hide them there. */
+	function afterPrefsSave()
+	{
+		$sql = e107::getDb();
+		$where = array();
+		foreach(\Vstore\Support\SecretMask::KEYWORDS as $word)
+		{
+			$where[] = "dblog_remarks LIKE '%" . $sql->escape($word) . "%'";
+		}
+
+		$rows = $sql->retrieve('admin_log', 'dblog_id, dblog_remarks', implode(' OR ', $where), true);
+
+		foreach((array) $rows as $row)
+		{
+			$masked = \Vstore\Support\SecretMask::maskLogText($row['dblog_remarks']);
+
+			if($masked !== $row['dblog_remarks'])
+			{
+				$sql->update('admin_log', array('data' => array('dblog_remarks' => $masked), 'WHERE' => 'dblog_id=' . (int) $row['dblog_id']));
+			}
+		}
+
+		return null;
+	}
+
 	/**
 	 * Automatically loads and sets gateway parameter fields based on their their classes.
 	 */
@@ -211,7 +277,7 @@ class vstore_gateways_ui extends e_admin_ui
 			$this->prefs['gateways/'.$plug.'/active'] = array('title' => LAN_ACTIVE, 'type' => 'bool', 'tab' => $plug, 'data' => 'int', 'writeParms' => array());
 			$this->prefs['gateways/'.$plug.'/title'] = array('title' => LAN_TITLE, 'type' => 'text', 'tab' => $plug,  'data' => 'str', 'writeParms' => array('size'=>'xxlarge', 'default'=>varset($gates['title'])));
 			$this->prefs['gateways/'.$plug.'/icon'] = array('title' => LAN_ICON, 'type' => 'icon', 'tab' => $plug, 'data' => 'str', 'writeParms' => array('default'=>varset($gates['icon'])));
-			$this->prefs['gateways/'.$plug.'/name'] = array('title' => 'Classname', 'type' => 'hidden', 'tab' => $plug,  'data' => 'str', 'writeParms' => array('value'=>$gates['name']));
+			$this->prefs['gateways/'.$plug.'/name'] = array('title' => LAN_VSTORE_ADMIN_GATE_CLASSNAME, 'type' => 'hidden', 'tab' => $plug,  'data' => 'str', 'writeParms' => array('value'=>$gates['name']));
 
 			foreach($gates['parms'] as $pref => $field)
 			{

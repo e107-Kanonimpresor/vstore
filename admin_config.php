@@ -17,8 +17,10 @@ e107::css('inline',"
 ");
 
 e107::lan('vstore', true, true);
+e107::lan('vstore', 'admin_common', true);
 
 require_once('vstore.class.php');
+require_once('inc/vstore_admin_common.php');
 
 class vstore_admin extends e_admin_dispatcher
 {
@@ -142,6 +144,10 @@ class vstore_admin extends e_admin_dispatcher
 		'email/prefs' 	    => array('caption'=> LAN_VSTORE_ADMIN_009, 'perm' => '0', 'icon'=>'fas-envelope'),
 		'invoice/prefs' 	=> array('caption'=> LAN_VSTORE_ADMIN_010, 'perm' => '0',  'icon'=>'fas-file-invoice'),
 		'gateways/prefs'	=> array('caption'=> LAN_VSTORE_ADMIN_011, 'perm' => '0', 'icon'=>'fas-dollar-sign'),
+
+		'main/div'          => array('divider'=>true),
+		'main/guide'        => array('caption'=> LAN_VSTORE_ADMIN_GUIDE, 'perm' => 'P', 'icon'=>'fas-book'),
+		'main/about'        => array('caption'=> LAN_VSTORE_ADMIN_ABOUT, 'perm' => 'P', 'icon'=>'fas-info-circle'),
 
 	);
 

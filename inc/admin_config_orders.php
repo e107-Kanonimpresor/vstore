@@ -1,4 +1,6 @@
 <?php
+e107::lan('vstore', 'admin_orders', true);
+
 /**
  * Adminarea module orders
  */
@@ -20,6 +22,8 @@ e107::css('inline', "
 
 class vstore_order_ui extends e_admin_ui
 {
+	use vstore_admin_common;
+
 
 		protected $pluginTitle		= 'Vstore';
 		protected $pluginName		= 'vstore';
@@ -31,7 +35,7 @@ class vstore_order_ui extends e_admin_ui
 	//	protected $batchCopy		= true;
 	//	protected $sortField		= 'somefield_order';
 	//	protected $orderStep		= 10;
-		protected $tabs				= array(LAN_GENERAL, 'Details', 'Log'); // Use 'tab'=>0  OR 'tab'=>1 in the $fields below to enable.
+		protected $tabs				= array(LAN_GENERAL, LAN_DETAILS, LAN_VSTORE_ADMIN_ORD_TAB_LOG); // Use 'tab'=>0  OR 'tab'=>1 in the $fields below to enable.
 
 		// protected $listQry      	= "SELECT o.*, SUM(c.cart_qty) as items FROM `#vstore_orders` AS o LEFT JOIN `#vstore_cart` AS  c ON o.order_session = c.cart_session  "; // Example Custom Query. LEFT JOINS allowed. Should be without any Order or Limit.
 
@@ -43,26 +47,26 @@ class vstore_order_ui extends e_admin_ui
 			'checkboxes'           	=> array ( 'title' => '', 'type' => null, 'data' => null, 'width' => '5%', 'thclass' => 'center', 'forced' => '1', 'class' => 'center', 'toggle' => 'e-multiselect',  ),
 			'order_id'            	=> array ( 'title' => LAN_ID, 'data' => 'int', 'type'=>'number',  'width' => '5%', 'help' => '', 'readonly'=>true, 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
 			'order_date'          	=> array ( 'title' => LAN_DATESTAMP, 'type' => 'datestamp', 'data' => 'str',  'readonly'=>true, 'width' => 'auto', 'filter' => true, 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
-			'order_status'          => array ( 'title' => 'Status', 'type'=>'method', 'data'=>'str', 'inline'=>false, 'filter'=>true, 'batch'=>true,'width'=>'5%', 'class'=>'td-status'),
-			'order_pay_status'      => array ( 'title' => 'Pay Status', 'type' => 'method',  'data' => 'str',  'readonly'=>true, 'width' => '5%', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'td-pay-status left', 'thclass' => 'left',  ),
-			'order_refund_date' 	=> array ( 'title' => 'Refund date', 'type' => 'method', 'tab'=>0, 'data' => 'str', 'readonly'=>true, 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
+			'order_status'          => array ( 'title' => LAN_STATUS, 'type'=>'method', 'data'=>'str', 'inline'=>false, 'filter'=>true, 'batch'=>true,'width'=>'5%', 'class'=>'td-status'),
+			'order_pay_status'      => array ( 'title' => LAN_VSTORE_ADMIN_ORD_PAY_STATUS, 'type' => 'method',  'data' => 'str',  'readonly'=>true, 'width' => '5%', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'td-pay-status left', 'thclass' => 'left',  ),
+			'order_refund_date' 	=> array ( 'title' => LAN_VSTORE_ADMIN_ORD_REFUND_DATE, 'type' => 'method', 'tab'=>0, 'data' => 'str', 'readonly'=>true, 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
 
-			'order_invoice_nr'     	=> array ( 'title' => 'Invoice #', 'type'=>'method', 'data'=>false, 'width'=>'10%'),
-			'order_billing'      	=> array ( 'title' => 'Billing to', 'type'=>'method', 'data'=>false, 'width'=>'20%'),
-			'order_shipping'      	=> array ( 'title' => 'Ship to', 'type'=>'method', 'data'=>false, 'width'=>'20%'),
-			'order_items'     		=> array ( 'title' => 'Items', 'type' => 'method', 'data' => false, 'width' => '5%', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'right', 'thclass' => 'right',  ),
+			'order_invoice_nr'     	=> array ( 'title' => LAN_VSTORE_ADMIN_ORD_INVOICE_NR, 'type'=>'method', 'data'=>false, 'width'=>'10%'),
+			'order_billing'      	=> array ( 'title' => LAN_VSTORE_ADMIN_ORD_BILLING_TO, 'type'=>'method', 'data'=>false, 'width'=>'20%'),
+			'order_shipping'      	=> array ( 'title' => LAN_VSTORE_ADMIN_ORD_SHIP_TO, 'type'=>'method', 'data'=>false, 'width'=>'20%'),
+			'order_items'     		=> array ( 'title' => LAN_VSTORE_ADMIN_C_ITEMS, 'type' => 'method', 'data' => false, 'width' => '5%', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'right', 'thclass' => 'right',  ),
 			'order_e107_user'     	=> array ( 'title' => LAN_AUTHOR, 'type' => 'method', 'data' => 'str', 'readonly'=>true, 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
-			'order_pay_transid'     => array ( 'title' => 'TransID', 'type' => 'text', 'data' => 'str', 'readonly'=>true, 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
+			'order_pay_transid'     => array ( 'title' => LAN_VSTORE_ADMIN_ORD_TRANSID, 'type' => 'text', 'data' => 'str', 'readonly'=>true, 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
 
-			'order_pay_gateway'     => array ( 'title' => 'Gateway', 'type' => 'method', 'data' => false,  'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'td-gateway left', 'thclass' => 'left',  ),
-			'order_pay_amount' 		=> array ( 'title' => 'Total', 'type' => 'method', 'data' => false, 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'td-total left', 'thclass' => 'left',  ),
-			'order_pay_shipping' 	=> array ( 'title' => 'Shipping', 'type' => 'number', 'data' => 'float', 'readonly'=>true, 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
-			'order_pay_currency' 	=> array ( 'title' => 'Currency', 'type' => 'text', 'data' => 'str', 'readonly'=>true, 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
+			'order_pay_gateway'     => array ( 'title' => LAN_VSTORE_ADMIN_C_GATEWAY, 'type' => 'method', 'data' => false,  'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'td-gateway left', 'thclass' => 'left',  ),
+			'order_pay_amount' 		=> array ( 'title' => LAN_VSTORE_ADMIN_C_TOTAL, 'type' => 'method', 'data' => false, 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'td-total left', 'thclass' => 'left',  ),
+			'order_pay_shipping' 	=> array ( 'title' => LAN_VSTORE_ADMIN_C_SHIPPING, 'type' => 'number', 'data' => 'float', 'readonly'=>true, 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
+			'order_pay_currency' 	=> array ( 'title' => LAN_VSTORE_ADMIN_ORD_CURRENCY, 'type' => 'text', 'data' => 'str', 'readonly'=>true, 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
 
-			'order_ship_notes'      => array ( 'title' => 'Notes', 'type'=>'method', 'tab'=>1, 'data'=>false, 'width'=>'20%'),
-			'order_session'       	=> array ( 'title' => 'Session', 'type' => 'text', 'tab'=>1, 'data' => 'str', 'readonly'=>true, 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
-			'order_pay_rawdata' 	=> array ( 'title' => 'Rawdata', 'type' => 'method', 'tab'=>1, 'data' => 'str', 'readonly'=>true, 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
-			'order_log' 			=> array ( 'title' => 'Log', 'type' => 'method', 'tab'=>2, 'data' => 'json', 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
+			'order_ship_notes'      => array ( 'title' => LAN_VSTORE_ADMIN_C_NOTES, 'type'=>'method', 'tab'=>1, 'data'=>false, 'width'=>'20%'),
+			'order_session'       	=> array ( 'title' => LAN_VSTORE_ADMIN_ORD_SESSION, 'type' => 'text', 'tab'=>1, 'data' => 'str', 'readonly'=>true, 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
+			'order_pay_rawdata' 	=> array ( 'title' => LAN_VSTORE_ADMIN_ORD_RAWDATA, 'type' => 'method', 'tab'=>1, 'data' => 'str', 'readonly'=>true, 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
+			'order_log' 			=> array ( 'title' => LAN_VSTORE_ADMIN_ORD_TAB_LOG, 'type' => 'method', 'tab'=>2, 'data' => 'json', 'width' => 'auto', 'help' => '', 'readParms' => '', 'writeParms' => '', 'class' => 'left', 'thclass' => 'left',  ),
 
 			'options' 				=> array ( 'title' => LAN_OPTIONS, 'type' => null, 'data' => null, 'width' => '10%', 'thclass' => 'center last', 'class' => 'center last', 'forced' => '1',  ),
 		);
@@ -137,10 +141,8 @@ class vstore_order_ui extends e_admin_ui
 					$uc = vstore::getCustomerUserclass(json_decode($old_data['order_items'], true));
 					if ($uc)
 					{
-						$uc_list = e107::getDB()->retrieve('SELECT GROUP_CONCAT(userclass_name) AS ucs FROM e107_userclass_classes WHERE FIND_IN_SET(userclass_id, "'.$uc.'")');
-						$msg = $tp->lanVars('The userclasses, the customer has been assigned to during the purchase can not be removed automatically.<br/>
-							Click <a href="'.e_ADMIN.'users.php?searchquery=[x]">here</a> to remove the following userclasses manually.<br/>[y]', 
-							array('x' => $old_data['order_e107_user'], 'y' => str_replace(',', ', ', $uc_list)));
+						$uc_list = e107::getDB()->retrieve('SELECT GROUP_CONCAT(userclass_name) AS ucs FROM e107_userclass_classes WHERE FIND_IN_SET(userclass_id, "'.preg_replace('/[^0-9,]/', '', (string) $uc).'")');
+						$msg = $tp->lanVars(LAN_VSTORE_ADMIN_ORD_MSG_USERCLASS, array('x' => e_ADMIN.'users.php?searchquery='.$old_data['order_e107_user'], 'y' => str_replace(',', ', ', $uc_list)));
 						
 						if (e_AJAX_REQUEST)
 						{
@@ -168,12 +170,22 @@ class vstore_order_ui extends e_admin_ui
 						$order_id = $old_data['order_id'];
 						if ($order_id > 0)
 						{
-							$vs = e107::getSingleton('vstore', e_PLUGIN . 'vstore/vstore.class.php');
-							// Now do the actual refunding
-							$result = $vs->refundPurchase($order_id, true);
-							if(is_string($result))
+							$order = e107::getSingleton('vstore_order', e_PLUGIN . 'vstore/inc/vstore_order.class.php');
+							$order->load($order_id);
+
+							// refundOrder() saves the new status, log and refund date and emails the customer
+							$result = $order->refundOrder();
+
+							if($result === true || $order->order_status === 'R')
 							{
-								$msg = vartrue($result, 'Order could\'t be refunded!');
+								unset($new_data['order_status'], $new_data['order_pay_status'], $new_data['order_refund_date']);
+								$old_data['order_log'] = e107::getDb()->retrieve('vstore_orders', 'order_log', 'order_id=' . (int) $order_id);
+							}
+
+							if($result !== true)
+							{
+								// failure, or a refund that has to be paid back manually
+								$msg = vartrue($order->getLastError(), LAN_VSTORE_ADMIN_ORD_MSG_REFUND_FAIL);
 								if (e_AJAX_REQUEST)
 								{
 									$response_msg = e107::getMessage()->addWarning($msg)->render();
@@ -186,11 +198,6 @@ class vstore_order_ui extends e_admin_ui
 								{
 									e107::getMessage()->addWarning($msg);
 								}
-							}
-							else{
-								// Refund was successfull, set the pay status also to "refunded"
-								$new_data['order_pay_status'] = 'refunded';
-								$new_data['order_refund_date'] = time();
 							}
 						}
 					}
@@ -231,12 +238,13 @@ class vstore_order_ui extends e_admin_ui
 				}
 			}
 
-			$vs = e107::getSingleton('vstore');
+			$vs = e107::getSingleton('vstore', e_PLUGIN.'vstore/vstore.class.php');
+			$vs->order->load($id);
 
 			if (isset($_POST['force_new_invoice']) && intval($_POST['force_new_invoice']) == 1 && vstore::validInvoiceOrderState($new_data['order_status']))
 			{
 				// User requests to delete the current invoice pdf and to create a new one.
-				$data = $vs->renderInvoice($new_data['order_id'], true);
+				$data = $vs->renderInvoice(true);
 				if ($data)
 				{
 					$vs->invoiceToPdf($data, true);
@@ -245,17 +253,19 @@ class vstore_order_ui extends e_admin_ui
 				// Check if the pdf was created
 				if (empty($vs->pathToInvoicePdf($new_data['order_invoice_nr'], $new_data['order_e107_user'])))
 				{
-					e107::getMessage()->addWarning('Invoice couldn\'t be created!');
+					e107::getMessage()->addWarning(LAN_VSTORE_ADMIN_ORD_MSG_INV_FAIL);
 				}
 				else
 				{
-					e107::getMessage()->addSuccess('Invoice successfully created!');
+					e107::getMessage()->addSuccess(LAN_VSTORE_ADMIN_ORD_MSG_INV_OK);
 				}
 			}
 
 			// Send our email to customer
-			$vc = e107::getSingleton('vstore_order', e_PLUGIN.'vstore/inc/vstore_order.class.php');
-			$vc->emailCustomerOnStatusChange($new_data['order_id']);
+			if(isset($new_data['order_status']) && $new_data['order_status'] !== $old_data['order_status'])
+			{
+				$vs->order->emailCustomerOnStatusChange();
+			}
 		}
 
 		public function onUpdateError($new_data, $old_data, $id)
@@ -312,13 +322,13 @@ class vstore_order_form_ui extends e_admin_form_ui
 		switch($mode)
 		{
 			case 'read': // List Page
-				return '<span title="Click to open/generate the invoice pdf">' .$text . '</span>';
+				return '<span title="'.LAN_VSTORE_ADMIN_ORD_INVOICE_TIP.'">' .$text . '</span>';
 				break;
 
 			case 'write': // Edit Page
 				if ($exists)
 				{
-					return $text . ' &nbsp;&nbsp;&nbsp;&nbsp;' . $this->checkbox_label('Check to force the creation of a new invoice pdf during save', 'force_new_invoice', 1);
+					return $text . ' &nbsp;&nbsp;&nbsp;&nbsp;' . $this->checkbox_label(LAN_VSTORE_ADMIN_ORD_INVOICE_FORCE, 'force_new_invoice', 1);
 				}
 				else
 				{
@@ -348,6 +358,9 @@ class vstore_order_form_ui extends e_admin_form_ui
 			case 'write': // Edit Page
 
 				$order_id = $this->getController()->getFieldVar('order_id');
+				$waitsForMollie = vstore::isMollie($this->getController()->getFieldVar('order_pay_gateway'))
+					&& $this->getController()->getFieldVar('order_pay_status') === 'incomplete'
+					&& $this->getController()->getFieldVar('order_pay_transid');
 				// $order_pay_status = $this->getController()->getFieldVar('order_pay_status');
 				// $order_pay_transid = $this->getController()->getFieldVar('order_pay_transid');
 
@@ -355,24 +368,28 @@ class vstore_order_form_ui extends e_admin_form_ui
 
 				switch($curVal) {
 					case 'N': // new
-						$text .= $this->button('btnCancel', 1, 'danger', 'Cancel order', array('confirm' => 'Do you really want to cancel this order?'));
-						$text .= $this->button('btnOnHold', 1, 'warning', 'Hold order', array());
-						$text .= $this->button('btnProcessing', 1, 'button', 'Process order', array());
+						if($waitsForMollie)
+						{
+							$text .= $this->button('btnCheckPayment', 1, 'primary', LAN_VSTORE_ADMIN_ORD_BTN_CHECK_PAYMENT, array());
+						}
+						$text .= $this->button('btnCancel', 1, 'danger', LAN_VSTORE_ADMIN_ORD_BTN_CANCEL, array('confirm' => LAN_VSTORE_ADMIN_ORD_CONFIRM_CANCEL));
+						$text .= $this->button('btnOnHold', 1, 'warning', LAN_VSTORE_ADMIN_ORD_BTN_HOLD, array());
+						$text .= $this->button('btnProcessing', 1, 'button', LAN_VSTORE_ADMIN_ORD_BTN_PROCESS, array());
 						break;
 					case 'P': // processing
-						$text .= $this->button('btnCancel', 1, 'danger', 'Cancel order', array('confirm' => 'Do you really want to cancel this order?'));
-						$text .= $this->button('btnRefund', '1', 'danger', 'Refund order', array());
-						$text .= $this->button('btnComplete', 1, 'button', 'Complete order', array());
+						$text .= $this->button('btnCancel', 1, 'danger', LAN_VSTORE_ADMIN_ORD_BTN_CANCEL, array('confirm' => LAN_VSTORE_ADMIN_ORD_CONFIRM_CANCEL));
+						$text .= $this->button('btnRefund', '1', 'danger', LAN_VSTORE_ADMIN_ORD_BTN_REFUND, array());
+						$text .= $this->button('btnComplete', 1, 'button', LAN_VSTORE_ADMIN_ORD_BTN_COMPLETE, array());
 						break;
 					case 'H': // On hold
-						$text .= $this->button('btnCancel', 1, 'danger', 'Cancel order', array('confirm' => 'Do you really want to cancel this order?'));
-						$text .= $this->button('btnProcessing', 1, 'button', 'Process order', array());
+						$text .= $this->button('btnCancel', 1, 'danger', LAN_VSTORE_ADMIN_ORD_BTN_CANCEL, array('confirm' => LAN_VSTORE_ADMIN_ORD_CONFIRM_CANCEL));
+						$text .= $this->button('btnProcessing', 1, 'button', LAN_VSTORE_ADMIN_ORD_BTN_PROCESS, array());
 						break;
 					case 'C': // completed
-						$text .= $this->button('btnRefund', '1', 'danger', 'Refund order', array('confirm' => 'Do you really want to refund this order?'));
+						$text .= $this->button('btnRefund', '1', 'danger', LAN_VSTORE_ADMIN_ORD_BTN_REFUND, array('confirm' => LAN_VSTORE_ADMIN_ORD_CONFIRM_REFUND));
 						break;
 					case 'X': // cancelled
-						$text .= $this->button('btnProcessing', 1, 'button', 'Process order', array());
+						$text .= $this->button('btnProcessing', 1, 'button', LAN_VSTORE_ADMIN_ORD_BTN_PROCESS, array());
 						break;
 					case 'R': // refunded
 						//$text .= 'Order is already refunded!';
@@ -399,6 +416,11 @@ class vstore_order_form_ui extends e_admin_form_ui
 
 						}
 					
+						$('#btncheckpayment').click(function(e){
+							e.preventDefault();
+							updateOrder('checkpayment', {$order_id});
+						});
+
 						$('#btnprocessing').click(function(e){
 							e.preventDefault();
 							updateOrder('process', {$order_id});
@@ -406,19 +428,19 @@ class vstore_order_form_ui extends e_admin_form_ui
 					
 						$('#btnonhold').click(function(e){
 							e.preventDefault();
-							if (!confirm('Do you really want to set the order on hold?')) return;
+							if (!confirm(".json_encode(LAN_VSTORE_ADMIN_ORD_CONFIRM_HOLD).")) return;
 							updateOrder('hold', {$order_id});
 						});
 					
 						$('#btncancel').click(function(e){
 							e.preventDefault();
-							if (!confirm('Do you really want to cancel this order?')) return;
+							if (!confirm(".json_encode(LAN_VSTORE_ADMIN_ORD_CONFIRM_CANCEL).")) return;
 							updateOrder('cancel', {$order_id});
 						});
 					
 						$('#btnrefund').click(function(e){
 							e.preventDefault();
-							if (!confirm('Do you really want to refund this order?')) return;
+							if (!confirm(".json_encode(LAN_VSTORE_ADMIN_ORD_CONFIRM_REFUND).")) return;
 							updateOrder('refund', {$order_id});
 						});
 						
@@ -442,7 +464,7 @@ class vstore_order_form_ui extends e_admin_form_ui
 
 			case 'filter':
 				$filter = vstore::getStatus();
-				$filter['open'] = 'Open';
+				$filter['open'] = LAN_VSTORE_ADMIN_ORD_FILTER_OPEN;
 				return $filter;
 				break;
 
@@ -456,9 +478,26 @@ class vstore_order_form_ui extends e_admin_form_ui
 	function order_e107_user($curVal,$mode)
 	{
 
-		$text = $curVal.') '.e107::getDb()->retrieve('user', 'user_name', 'user_id="'.$curVal.'"');
+		$text = (int) $curVal.') '.htmlspecialchars((string) e107::getDb()->retrieve('user', 'user_name', 'user_id=' . (int) $curVal), ENT_QUOTES, 'UTF-8');
 		return $text;
 
+	}
+
+	/** Text of customer or gateway data, safe to print as HTML. */
+	private function esc($value)
+	{
+		return htmlspecialchars(is_scalar($value) ? (string) $value : '', ENT_QUOTES, 'UTF-8');
+	}
+
+	/** Address block of a billing or shipping array. */
+	private function formatContact(array $val)
+	{
+		return $this->esc(varset($val['firstname'])) . ' ' . $this->esc(varset($val['lastname'])).'<br />'
+			.$this->esc(varset($val['company'])).'<br />'
+			.$this->esc(varset($val['address'])).'<br />'
+			.$this->esc(varset($val['city'])) . ', ' . $this->esc(varset($val['state'])) . ' ' . $this->esc(varset($val['zip'])).'<br />'
+			.(empty($val['country']) ? '' : $this->getCountry($val['country']) . '<br />')
+			.$this->esc(varset($val['phone']));
 	}
 
 	function order_items($curVal,$mode)
@@ -482,7 +521,7 @@ class vstore_order_form_ui extends e_admin_form_ui
 			case 'write': // Edit Page
 				if(empty($curVal))
 				{
-					return 'n/a';
+					return LAN_VSTORE_ADMIN_ORD_NA;
 				}
 
 
@@ -494,11 +533,11 @@ class vstore_order_form_ui extends e_admin_form_ui
 				$text = "<table class='table table-striped table-bordered' style='margin:0;width:70%'>
 				<thead>
 				<tr>
-					<th>Name</th>
-					<th>Description</th>
-					<th class='text-right'>Qty.</th>
+					<th>".LAN_VSTORE_ADMIN_ORD_COL_NAME."</th>
+					<th>".LAN_VSTORE_ADMIN_ORD_COL_DESCRIPTION."</th>
+					<th class='text-right'>".LAN_VSTORE_ADMIN_ORD_COL_QTY."</th>
 
-					<th class='text-right'>Price</th>
+					<th class='text-right'>".LAN_VSTORE_ADMIN_ORD_COL_PRICE."</th>
 				</tr>
 				</thead>";
 
@@ -507,10 +546,10 @@ class vstore_order_form_ui extends e_admin_form_ui
 
 					$text .= "
 					<tr>
-						<td>".$row['name']."</td>
-						<td>".$row['description']."</td>
-						<td class='text-right'>".$row['quantity']."</td>
-						<td class='text-right'>".$row['price']."</td>
+						<td>".$this->esc($row['name'])."</td>
+						<td>".$this->esc($row['description'])."</td>
+						<td class='text-right'>".$this->esc($row['quantity'])."</td>
+						<td class='text-right'>".$this->esc($row['price'])."</td>
 					</tr>";
 				}
 
@@ -537,14 +576,9 @@ class vstore_order_form_ui extends e_admin_form_ui
 			case 'write': // Edit Page
 				$val = e107::unserialize($curVal);
 
-				if (count($val) == 0) return 'No billing address set';
+				if (count($val) == 0) return LAN_VSTORE_ADMIN_ORD_NO_BILLING;
 
-				return varset($val['firstname']) . ' ' . varset($val['lastname']).'<br />'
-					.varset($val['company']).'<br />'
-					.varset($val['address']).'<br />'
-					.varset($val['city']) . ', ' . varset($val['state']) . ' ' . varset($val['zip']).'<br />'
-					.(empty($val['country']) ? '' : $this->getCountry($val['country']) . '<br />')
-					.varset($val['phone']);
+				return $this->formatContact($val);
 
 				break;
 			}
@@ -560,14 +594,9 @@ class vstore_order_form_ui extends e_admin_form_ui
 			case 'write': // Edit Page
 				$val = e107::unserialize($curVal);
 
-				if (count($val) == 0) return 'No shipping address set';
+				if (count($val) == 0) return LAN_VSTORE_ADMIN_ORD_NO_SHIPPING;
 		
-				return varset($val['firstname']) . ' ' . varset($val['lastname']).'<br />'
-					.varset($val['company']).'<br />'
-					.varset($val['address']).'<br />'
-					.varset($val['city']) . ', ' . varset($val['state']) . ' ' . varset($val['zip']).'<br />'
-					.(empty($val['country']) ? '' : $this->getCountry($val['country']) . '<br />')
-					.varset($val['phone']);
+				return $this->formatContact($val);
 
 			break;
 		}
@@ -580,7 +609,7 @@ class vstore_order_form_ui extends e_admin_form_ui
 			case 'read':
 			case 'write':
 				$notes = e107::unserialize($this->getController()->getFieldVar('order_shipping'));
-				$notes = !empty($notes['notes']) ? nl2br($notes['notes']) : '';
+				$notes = !empty($notes['notes']) ? nl2br($this->esc($notes['notes'])) : '';
 				return $notes;
 				break;
 		}
@@ -627,8 +656,6 @@ class vstore_order_form_ui extends e_admin_form_ui
 				{
 					if (!is_array($curVal)) {
 						$data = e107::unserialize($curVal);
-						$json_err = json_last_error_msg();
-						echo $json_err;
 					} else {
 						$data = $curVal;
 					}
@@ -648,13 +675,11 @@ class vstore_order_form_ui extends e_admin_form_ui
 								<col />
 							</colgroup>
 							";
-						$text .= "<tr><th colspan='2'><b>" . ucfirst($section ). "</b></th></tr>";
+						$text .= "<tr><th colspan='2'><b>" . $this->esc(ucfirst($section)) . "</b></th></tr>";
 						foreach($row as $k => $v)
 						{
-							if(is_array($v)) {
-								$v = '<pre>' . e107::serialize($v, 'json') . '</pre>';
-							}
-							$text .= "<tr><td>" . $k . "</td><td>" . $v . "</td></tr>";
+							$v = is_array($v) ? '<pre>' . $this->esc(e107::serialize($v, 'json')) . '</pre>' : $this->esc($v);
+							$text .= "<tr><td>" . $this->esc($k) . "</td><td>" . $v . "</td></tr>";
 						}
 
 						$text .= "</table>";
@@ -679,9 +704,9 @@ class vstore_order_form_ui extends e_admin_form_ui
 
 		$text = '<table class="table table-bordered table-striped">
 			<tr>
-				<th>Date/Time</th>
-				<th>User</td>
-				<td>Description</td>
+				<th>'.LAN_VSTORE_ADMIN_ORD_COL_DATETIME.'</th>
+				<th>'.LAN_VSTORE_ADMIN_ORD_COL_USER.'</td>
+				<td>'.LAN_VSTORE_ADMIN_ORD_COL_DESCRIPTION.'</td>
 			</tr>
 			';
 		foreach ($items as $item) {
@@ -692,8 +717,8 @@ class vstore_order_form_ui extends e_admin_form_ui
 				<td>%s</td>
 			</tr>', 
 				e107::getDateConvert()->convert_date($item['datestamp']),
-				$item['user_name'],
-				$item['user_id'],
+				$this->esc($item['user_name']),
+				(int) $item['user_id'],
 				e107::getParser()->toHTML($item['text']));
 		}
 		$text .= '</table>';
@@ -711,7 +736,7 @@ class vstore_order_form_ui extends e_admin_form_ui
 
 	function order_pay_status($curVal)
 	{
-		return '<span class="label label-wide label-'.self::$pay_status_classes[$curVal].'">'.ucfirst($curVal).'</span>';
+		return '<span class="label label-wide label-'.self::$pay_status_classes[$curVal].'">'.defset('LAN_VSTORE_ADMIN_ORD_PAYSTATUS_'.strtoupper($curVal), ucfirst($curVal)).'</span>';
 	}
 
 	function order_refund_date($curVal)

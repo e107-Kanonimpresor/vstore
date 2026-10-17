@@ -22,16 +22,17 @@ class vstore_sitelink // include plugin-folder in the name.
 {
 	function config()
 	{
+		e107::lan('vstore', 'hooks', true);
 
 		$links = array();
 			
 		$links[] = array(
-			'name'			=> "Vstore Categories",
+			'name'			=> LAN_VSTORE_HOOK_SITELINK_CATS,
 			'function'		=> "storeCategories"
 		);
 
 			$links[] = array(
-			'name'			=> "Vstore Shopping Cart",
+			'name'			=> LAN_VSTORE_HOOK_SITELINK_CART,
 			'function'		=> "storeCart"
 		);
 		
@@ -49,8 +50,8 @@ class vstore_sitelink // include plugin-folder in the name.
 		
 		//$sql->select("vstore_cat","*","cat_id != '' ORDER BY cat_order,cat_name");
 		$sql->gen('SELECT c.*, COUNT(i.item_id) AS items_count
-			FROM e107_vstore_cat c
-			LEFT JOIN e107_vstore_items i ON (c.cat_id = i.item_cat)
+			FROM #vstore_cat c
+			LEFT JOIN #vstore_items i ON (c.cat_id = i.item_cat)
 			WHERE i.item_inventory != 0 AND i.item_active = 1
 			GROUP BY c.cat_id
 			ORDER BY cat_order');
@@ -88,9 +89,8 @@ class vstore_sitelink // include plugin-folder in the name.
 		$cust = $vst->getCustomerData();
 		$data = $vst->prepareCheckoutData($data, false, true);
 
-		$isBusiness = !empty($cust['vat_id']);
-		$country = isset($cust['country']) ? $cust['country'] : e107::pref('vstore', 'tax_business_country');
-		$isLocal = ($country === e107::pref('vstore', 'tax_business_country'));
+		$isBusiness = !empty($data['totals']['is_business']);
+		$isLocal = !empty($data['totals']['is_local']);
 		
 		$frm = e107::getForm();
 		$tp = e107::getParser();

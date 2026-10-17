@@ -27,7 +27,8 @@
             min-width: var(--sidebar-width);
             max-width: var(--sidebar-width);
             background: #f8f9fa;
-            min-height: 100vh;
+            height: 100vh;
+            overflow-y: auto;
             transition: all 0.3s;
             position: fixed;
             top: 0;
@@ -322,7 +323,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <ul>
-                                    <li><strong>Múltiples Pasarelas de Pago:</strong> PayPal, Mollie, Stripe, Braintree</li>
+                                    <li><strong>Múltiples Pasarelas de Pago:</strong> PayPal, Mollie (tarjetas, iDEAL, MB WAY, Multibanco, etc.), transferencia bancaria</li>
                                     <li><strong>Gestión de Inventario:</strong> Control de stock en tiempo real</li>
                                     <li><strong>Variaciones de Productos:</strong> Tallas, colores, opciones personalizadas</li>
                                     <li><strong>Cupones de Descuento:</strong> Sistema avanzado de promociones</li>
@@ -359,7 +360,7 @@
                         <li>PHP 7.4 o superior</li>
                         <li>Extensión PHP SOAP</li>
                         <li>MySQL 5.6 o superior</li>
-                        <li><strong>(Opcional)</strong> Plugin PDF para generación de facturas</li>
+                        <li>Composer (para instalar las librerías, entre ellas TCPDF para las facturas PDF)</li>
                     </ul>
                 </div>
                 
@@ -408,17 +409,16 @@ composer install</code></pre>
                 
                 <div class="card">
                     <div class="card-header">
-                        Paso 4: (Opcional) Instalar Plugin PDF
+                        Paso 4: Facturas en PDF
                     </div>
                     <div class="card-body">
-                        <p>Para habilitar la generación de facturas en PDF, instale el plugin PDF:</p>
+                        <p>Vstore crea las facturas en PDF con su propia librería (TCPDF), que se instala con Composer. No hace falta ningún plugin adicional:</p>
                         <ol>
-                            <li>Descargue desde: <a href="https://github.com/e107inc/pdf" target="_blank">https://github.com/e107inc/pdf</a></li>
-                            <li>Instale siguiendo las instrucciones del repositorio</li>
-                            <li>Active el plugin desde <strong>Admin → Plugins</strong></li>
+                            <li>Ejecute <code>composer install</code> en la carpeta <code>e107_plugins/vstore</code></li>
+                            <li>Active <strong>Crear factura en PDF</strong> en <strong>Admin → Vstore → Facturas</strong></li>
                         </ol>
                         <div class="alert alert-warning mt-3">
-                            <strong>Importante:</strong> Sin el plugin PDF, las facturas solo estarán disponibles en formato HTML.
+                            <strong>Importante:</strong> Sin la librería TCPDF, las facturas solo estarán disponibles en formato HTML.
                         </div>
                     </div>
                 </div>
@@ -615,6 +615,74 @@ composer install</code></pre>
                             <h6><i class="bi bi-shield-check"></i> Seguridad</h6>
                             <p class="mb-0">Los archivos descargables están protegidos y solo son accesibles por clientes que han completado la compra.</p>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Categorías -->
+            <section id="categorias" class="section">
+                <h2 class="section-title"><i class="bi bi-folder"></i> Categorías</h2>
+
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#inicio">Inicio</a></li>
+                        <li class="breadcrumb-item active">Categorías</li>
+                    </ol>
+                </nav>
+
+                <div class="alert alert-info">
+                    <p><strong>Ruta:</strong> Admin → Vstore → Categorías</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        Organizar la tienda con categorías
+                    </div>
+                    <div class="card-body">
+                        <p>Las categorías organizan los productos y pueden anidarse (categoría padre y subcategorías). Cree al menos una antes de añadir productos.</p>
+                        <ol>
+                            <li>Vaya a <strong>Vstore → Categorías → Crear categoría</strong></li>
+                            <li>Indique el nombre, la descripción y la imagen</li>
+                            <li>Si es una subcategoría, elija la categoría padre</li>
+                            <li>Haga clic en <strong>Guardar</strong></li>
+                        </ol>
+                        <div class="alert alert-warning">
+                            <strong>Visibilidad:</strong> restrinja una categoría a una clase de usuario para ocultarla al resto de visitantes (por ejemplo, una tienda solo para socios).
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Variaciones -->
+            <section id="variaciones" class="section">
+                <h2 class="section-title"><i class="bi bi-palette"></i> Variaciones de Productos</h2>
+
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#inicio">Inicio</a></li>
+                        <li class="breadcrumb-item active">Variaciones</li>
+                    </ol>
+                </nav>
+
+                <div class="alert alert-info">
+                    <p><strong>Ruta:</strong> Admin → Vstore → Variaciones</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        Tallas, colores y otros atributos
+                    </div>
+                    <div class="card-body">
+                        <p>Cree un grupo de variaciones una sola vez (por ejemplo <em>Talla</em> con S, M y L) y asígnelo a los productos que lo necesiten. Cada producto admite hasta dos grupos.</p>
+                        <ol>
+                            <li>Vaya a <strong>Vstore → Variaciones → Crear variación</strong> y defina el grupo y sus valores</li>
+                            <li>Abra el producto y asigne el grupo en la pestaña de variaciones</li>
+                            <li>Si lo necesita, indique el inventario de cada variación</li>
+                        </ol>
+                        <ul>
+                            <li>Una variación puede modificar el precio con un <strong>importe fijo</strong> o un <strong>porcentaje</strong>.</li>
+                            <li>El cliente elige la variación en la página del producto antes de añadirlo al carrito.</li>
+                        </ul>
                     </div>
                 </div>
             </section>
@@ -852,6 +920,275 @@ composer install</code></pre>
                 </div>
             </section>
 
+            <!-- Pasarelas de Pago -->
+            <section id="pagos" class="section">
+                <h2 class="section-title"><i class="bi bi-credit-card"></i> Pasarelas de Pago</h2>
+
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#inicio">Inicio</a></li>
+                        <li class="breadcrumb-item active">Pasarelas de Pago</li>
+                    </ol>
+                </nav>
+
+                <div class="alert alert-info">
+                    <p><strong>Ruta:</strong> Admin → Vstore → Pasarelas de Pago</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        Pasarelas disponibles
+                    </div>
+                    <div class="card-body">
+                        <p>Cada pasarela tiene su propia pestaña con las credenciales y un interruptor de activación. Active al menos una.</p>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th style="width: 25%;">Pasarela</th>
+                                    <th>Qué necesita</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>PayPal</strong> (estándar y REST)</td>
+                                    <td>Credenciales de API de su cuenta de PayPal. Use el modo Sandbox para las pruebas.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Mollie</strong></td>
+                                    <td>Clave de API (de prueba <code>test_...</code> o de producción <code>live_...</code>). Permite elegir los métodos que se ofrecen: tarjeta, PayPal, MB WAY, Multibanco, iDEAL, Bancontact, transferencia, etc.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Transferencia bancaria</strong></td>
+                                    <td>Los datos de la cuenta que verá el cliente. El pedido queda pendiente hasta que usted lo marque como pagado.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="alert alert-warning">
+                            <strong>Moneda:</strong> los métodos de Mollie que solo aceptan euros (MB WAY, Multibanco, iDEAL, Bancontact, transferencia, domiciliación y tarjeta regalo) no se ofrecen en el checkout si la moneda de la tienda no es EUR. La pestaña de pasarelas indica cuáles se ocultan.
+                        </div>
+                        <div class="alert alert-info">
+                            <strong>Mollie y los pagos pendientes:</strong> con métodos como MB WAY o Multibanco el cliente puede tardar en pagar. Vstore crea el pedido al momento y Mollie avisa del pago (webhook), de modo que el pedido se actualiza aunque el cliente no vuelva a la tienda. En un pedido de Mollie aún nuevo puede usar el botón <em>Comprobar el pago en Mollie</em>.
+                        </div>
+                        <p class="mb-0">Pruebe siempre cada pasarela en modo de pruebas antes de pasar a producción.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Envíos -->
+            <section id="envios" class="section">
+                <h2 class="section-title"><i class="bi bi-truck"></i> Envíos</h2>
+
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#inicio">Inicio</a></li>
+                        <li class="breadcrumb-item active">Envíos</li>
+                    </ol>
+                </nav>
+
+                <div class="alert alert-info">
+                    <p><strong>Ruta:</strong> Admin → Vstore → Preferencias → Envíos</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        Costes de envío
+                    </div>
+                    <div class="card-body">
+                        <p>Active los envíos en la pestaña <strong>Envíos</strong> de las Preferencias y elija cómo se calcula el coste:</p>
+                        <ul>
+                            <li><strong>Suma de todos los artículos:</strong> suma el coste de envío de cada artículo del carrito.</li>
+                            <li><strong>Suma de artículos únicos:</strong> suma el coste de cada producto distinto una sola vez.</li>
+                            <li><strong>Escalonado:</strong> el coste depende de umbrales del precio o del peso del pedido. Empiece por el umbral más bajo y haga que el último supere su pedido más grande.</li>
+                        </ul>
+                        <p class="mb-0">El coste de envío propio de cada producto se indica en la ficha del producto.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Órdenes -->
+            <section id="ordenes" class="section">
+                <h2 class="section-title"><i class="bi bi-cart-check"></i> Gestión de Órdenes</h2>
+
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#inicio">Inicio</a></li>
+                        <li class="breadcrumb-item active">Órdenes</li>
+                    </ol>
+                </nav>
+
+                <div class="alert alert-info">
+                    <p><strong>Ruta:</strong> Admin → Vstore → Ventas</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        Estados del pedido
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr><th style="width: 25%;">Estado</th><th>Significado</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><span class="badge bg-primary">Nuevo</span></td><td>Pedido recibido; puede estar pendiente de pago</td></tr>
+                                <tr><td><span class="badge bg-info">En proceso</span></td><td>Se está preparando</td></tr>
+                                <tr><td><span class="badge bg-warning">En espera</span></td><td>Detenido, por ejemplo a la espera de una transferencia</td></tr>
+                                <tr><td><span class="badge bg-success">Completado</span></td><td>Entregado o enviado; el cliente puede descargar los archivos del pedido</td></tr>
+                                <tr><td><span class="badge bg-secondary">Cancelado</span></td><td>Anulado</td></tr>
+                                <tr><td><span class="badge bg-dark">Reembolsado</span></td><td>El pago se ha devuelto</td></tr>
+                            </tbody>
+                        </table>
+                        <p>Cada cambio de estado envía al cliente el correo correspondiente (ver <a href="#emails">Plantillas de Email</a>).</p>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-header">
+                        Reembolsos y factura
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li><strong>Reembolso:</strong> con las pasarelas que lo permiten (Mollie, PayPal) el pago se devuelve desde el propio pedido. Con transferencia bancaria el pedido se marca como reembolsado, pero la devolución del dinero la hace usted.</li>
+                            <li><strong>Factura:</strong> el icono de la factura abre o genera el PDF del pedido (ver <a href="#facturas">Facturas</a>).</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Clientes -->
+            <section id="clientes" class="section">
+                <h2 class="section-title"><i class="bi bi-people"></i> Clientes</h2>
+
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#inicio">Inicio</a></li>
+                        <li class="breadcrumb-item active">Clientes</li>
+                    </ol>
+                </nav>
+
+                <div class="alert alert-info">
+                    <p><strong>Ruta:</strong> Admin → Vstore → Clientes</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        Datos de los clientes
+                    </div>
+                    <div class="card-body">
+                        <p>Vstore guarda los datos del último pedido de cada cliente registrado para rellenar el formulario del checkout. Desde esta pestaña puede consultarlos y corregirlos:</p>
+                        <ul>
+                            <li><strong>Facturación:</strong> nombre, empresa, NIF/IVA, código fiscal, dirección, correo y teléfono.</li>
+                            <li><strong>Envío:</strong> la última dirección de envío y si se usa.</li>
+                            <li><strong>Campos adicionales:</strong> los que defina en las Preferencias del checkout.</li>
+                            <li><strong>Notas:</strong> anotaciones internas que el cliente no ve.</li>
+                        </ul>
+                        <p class="mb-0">El cliente también puede editar sus datos y ver sus pedidos desde su panel en la tienda.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Plantillas de Email -->
+            <section id="emails" class="section">
+                <h2 class="section-title"><i class="bi bi-envelope"></i> Plantillas de Email</h2>
+
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#inicio">Inicio</a></li>
+                        <li class="breadcrumb-item active">Plantillas de Email</li>
+                    </ol>
+                </nav>
+
+                <div class="alert alert-info">
+                    <p><strong>Ruta:</strong> Admin → Vstore → Plantillas de Email</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        Un correo por cada situación
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr><th style="width: 30%;">Plantilla</th><th>Cuándo se envía</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Confirmación del pedido</td><td>Al recibir el pedido (con las instrucciones de pago si es por transferencia)</td></tr>
+                                <tr><td>Pedido completado</td><td>Al marcar el pedido como completado</td></tr>
+                                <tr><td>Pedido cancelado</td><td>Al cancelar el pedido</td></tr>
+                                <tr><td>Pedido reembolsado</td><td>Al reembolsar el pago</td></tr>
+                            </tbody>
+                        </table>
+                        <ul>
+                            <li>Cada plantilla puede desactivarse y puede enviarle una copia (CC).</li>
+                            <li>Los textos vienen traducidos; el botón <strong>Restablecer plantilla</strong> recupera el original.</li>
+                            <li>Los correos usan una estructura de tablas con estilos en línea, apta para Gmail, Outlook y móviles. Si ya había guardado una plantilla propia, restablézcala para adoptar el diseño nuevo.</li>
+                            <li>Las plantillas completas pueden sobrescribirse desde el tema (<code>templates/vstore/vstore_email_template.php</code> y <code>vstore_email_layout_template.php</code>).</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Facturas -->
+            <section id="facturas" class="section">
+                <h2 class="section-title"><i class="bi bi-file-earmark-text"></i> Facturas</h2>
+
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#inicio">Inicio</a></li>
+                        <li class="breadcrumb-item active">Facturas</li>
+                    </ol>
+                </nav>
+
+                <div class="alert alert-info">
+                    <p><strong>Ruta:</strong> Admin → Vstore → Configuración de Facturas</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        Facturas en PDF
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>Compruebe que ejecutó <code>composer install</code> en la carpeta del plugin (instala la librería TCPDF)</li>
+                            <li>Active <strong>Crear factura en PDF</strong></li>
+                            <li>Defina el prefijo de numeración, el siguiente número, el plazo de pago y el formato de fecha</li>
+                            <li>Escriba el texto de despedida y los cuatro bloques del pie (contacto, datos fiscales, datos bancarios...)</li>
+                            <li>Revise el resultado en la pestaña <strong>Vista previa</strong></li>
+                        </ol>
+                        <p>La factura se adjunta al correo del cliente y está disponible en su panel. Desde el administrador, el icono de factura del pedido la abre o la regenera.</p>
+                        <div class="alert alert-warning mb-0">
+                            <strong>Si la factura no se adjunta:</strong> revise que la creación de PDF esté activada y que exista <code>vendor/tecnickcom/tcpdf</code>.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Estadísticas -->
+            <section id="estadisticas" class="section">
+                <h2 class="section-title"><i class="bi bi-graph-up"></i> Estadísticas</h2>
+
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#inicio">Inicio</a></li>
+                        <li class="breadcrumb-item active">Estadísticas</li>
+                    </ol>
+                </nav>
+
+                <div class="alert alert-info">
+                    <p><strong>Ruta:</strong> Admin → Vstore → Panel</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        Panel de ventas
+                    </div>
+                    <div class="card-body">
+                        <p>El panel resume la actividad de la tienda: ingresos del mes, pedidos del mes y un gráfico personalizable por periodo. También se muestra un resumen en el panel de control de e107.</p>
+                    </div>
+                </div>
+            </section>
+
             <!-- FAQs -->
             <section id="faq" class="section">
                 <h2 class="section-title"><i class="bi bi-question-circle"></i> Preguntas Frecuentes</h2>
@@ -872,7 +1209,7 @@ composer install</code></pre>
                         </h2>
                         <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
                             <div class="accordion-body">
-                                <p>Vaya a <strong>Admin → Vstore → Pasarelas de Pago</strong> y configure las credenciales API de su pasarela preferida (PayPal, Mollie, Stripe, etc.).</p>
+                                <p>Vaya a <strong>Admin → Vstore → Pasarelas de Pago</strong> y configure las credenciales API de su pasarela preferida (PayPal, Mollie).</p>
                             </div>
                         </div>
                     </div>
@@ -913,7 +1250,7 @@ composer install</code></pre>
                         </h2>
                         <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                             <div class="accordion-body">
-                                <p>Sí, las facturas se generan y adjuntan automáticamente a los emails de confirmación de pedido si el plugin PDF está instalado.</p>
+                                <p>Sí, las facturas se generan y adjuntan automáticamente a los emails de confirmación de pedido si la creación de PDF está activada en Configuración de Facturas.</p>
                             </div>
                         </div>
                     </div>
@@ -987,7 +1324,7 @@ composer install</code></pre>
             <footer class="mt-5 pt-4 border-top">
                 <div class="row">
                     <div class="col-md-6">
-                        <p class="text-muted">&copy; 2025 Vstore para e107 CMS</p>
+                        <p class="text-muted">&copy; 2026 Vstore para e107 CMS</p>
                     </div>
                     <div class="col-md-6 text-end">
                         <a href="#inicio" class="btn btn-primary btn-sm"><i class="bi bi-arrow-up"></i> Volver arriba</a>

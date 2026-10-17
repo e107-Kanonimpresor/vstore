@@ -8,11 +8,12 @@
 
 		function chart()
 		{
+			e107::lan('vstore', 'hooks', true);
 
 			$config = array(
 				0 => array(
 					'text'		=> $this->renderChart(),
-					'caption'	=> e107::getParser()->toGlyph('fa-shopping-cart').' Vstore Open/Payed orders',
+					'caption'	=> e107::getParser()->toGlyph('fa-shopping-cart').' '.LAN_VSTORE_HOOK_DASH_CHART,
 				),
 			);
 
@@ -27,6 +28,7 @@
 		 */
 		function renderChart()
 		{
+			e107::lan('vstore', 'hooks', true);
 			$sql = e107::getDb();
 
 			$week_start    = strtotime('1 week ago');
@@ -37,7 +39,7 @@
 			$groupby = 'GROUP BY DATE(FROM_UNIXTIME(order_date))';
 			if(!$sql->select('vstore_orders', $fields, $where.' '.$groupby))
 			{
-				return 'No orders available for the last week.';
+				return LAN_VSTORE_HOOK_DASH_NO_ORDERS;
 			}
 
 			$dbdata = array();
@@ -50,7 +52,7 @@
 
 			}
 
-			$this->title = 'Payed & Open orders';
+			$this->title = LAN_VSTORE_HOOK_DASH_CHART;
 			$data = array();
 
 			$data['labels'] = $dbdata['COL'];
@@ -61,7 +63,7 @@
 				'pointColor '		=> "rgba(220,220,220,1)",
 				'pointStrokeColor'	=> "#fff",
 				'data'				=> $dbdata['A'],
-				'title'				=> 'Open'
+				'title'				=> LAN_VSTORE_HOOK_DASH_PAID
 			);
 
 			$data['datasets'][]	= array(
@@ -70,7 +72,7 @@
 				'pointColor '		=> "rgba(151,187,205,1)",
 				'pointStrokeColor'	=> "#fff",
 				'data'				=> $dbdata['B'],
-				'title'				=> 'Payed'
+				'title'				=> LAN_VSTORE_HOOK_DASH_OPEN
 			);
 
 
@@ -87,8 +89,8 @@
 			$text = $cht->render('vstore_canvas', '100%', '200px');
 
 			$text .= "<div class='center'><small>
-			<span style='color:rgba(220,220,220,1);' class='fa fa-shopping-cart'></span> Open&nbsp;&nbsp;
-			<span style='color:rgba(151,187,205,1);' class='fa fa-shopping-cart'></span> Payed
+			<span style='color:rgba(220,220,220,1);' class='fa fa-shopping-cart'></span> ".LAN_VSTORE_HOOK_DASH_PAID."&nbsp;&nbsp;
+			<span style='color:rgba(151,187,205,1);' class='fa fa-shopping-cart'></span> ".LAN_VSTORE_HOOK_DASH_OPEN."
 			</small></div>";
 
 
@@ -111,9 +113,10 @@
 
 		function latest() // Latest panel in the admin area.
 		{
+			e107::lan('vstore', 'hooks', true);
 			$count = e107::getDb()->count('vstore_orders', '(*)', 'FIND_IN_SET(order_status, "N,P,H")');
 			$var[0]['icon'] 	= "<img src='".e_PLUGIN."vstore/images/vstore_16.png' alt='' />";
-			$var[0]['title'] 	= "Open orders";
+			$var[0]['title'] 	= LAN_VSTORE_HOOK_DASH_OPEN_ORDERS;
 			$var[0]['url']		= e_PLUGIN_ABS."vstore/admin_config.php?searchquery=&filter_options=order_status__open&mode=orders&action=list";
 			$var[0]['total'] 	= $count;
 
@@ -122,6 +125,7 @@
 
 		public function revenue()
 		{
+			e107::lan('vstore', 'hooks', true);
 			$cht = e107::getChart()->setProvider('google');
 			$sql = e107::getDb();
 			$id = 'vstore'.ucfirst(__FUNCTION__);
@@ -136,7 +140,7 @@
 
 			if(!$sql->gen("SELECT * FROM #vstore_orders WHERE order_pay_status = 'complete' AND  order_date BETWEEN ".$month_start." AND ".$month_end."  "))
 			{
-				return "<div class='alert alert-block alert-info'>No Transactions Found</div>";
+				return "<div class='alert alert-block alert-info'>".LAN_VSTORE_HOOK_DASH_NO_TRANS."</div>";
 			}
 
 			$total = 0;
@@ -168,8 +172,8 @@
 			$sum = $total;
 
 			$data = array();
-			$data[0] = array('Day', "Complete", /*'Tentative', 'To Reschedule', 'Discounts Given'*/);
-			$data[0][] = array('type'=>'string', 'label'=>'Total', 'role'=>'annotation', 'p'=> array('html'=>true));
+			$data[0] = array(LAN_VSTORE_HOOK_DASH_DAY, LAN_VSTORE_HOOK_DASH_COMPLETE, /*'Tentative', 'To Reschedule', 'Discounts Given'*/);
+			$data[0][] = array('type'=>'string', 'label'=>LAN_VSTORE_HOOK_DASH_TOTAL, 'role'=>'annotation', 'p'=> array('html'=>true));
 
 
 		//	$this->title = 'Revenue ('.$sum.')';
@@ -201,7 +205,7 @@
 			}
 
 		//	e107::getDebug()->log($data);
-			$label = "Monthly Revenue ";
+			$label = LAN_VSTORE_HOOK_DASH_REVENUE." ";
 			$label .= date('M Y', $month_start)." - ".date('M Y', $month_end)." (".number_format($sum).")";
 
 			$options = array(
@@ -231,6 +235,8 @@
 
 		public function orders()
 		{
+			e107::lan('vstore', 'hooks', true);
+			e107::lan('vstore', 'global', true);
 			$cht = e107::getChart()->setProvider('google');
 			$sql = e107::getDb();
 			$id = 'vstore'.ucfirst(__FUNCTION__);
@@ -245,7 +251,7 @@
 
 			if(!$sql->gen("SELECT * FROM #vstore_orders WHERE order_date BETWEEN ".$month_start." AND ".$month_end."  "))
 			{
-				return "<div class='alert alert-block alert-info'>No Transactions Found</div>";
+				return "<div class='alert alert-block alert-info'>".LAN_VSTORE_HOOK_DASH_NO_TRANS."</div>";
 			}
 
 			$total = 0;
@@ -279,7 +285,12 @@
 			$sum = $total;
 
 			$data = array();
-			$data[0] = array('Day', "New", "Processing", "Completed", "On Hold", "Cancelled", "Refunded");
+			$st = array();
+			foreach(array('N', 'P', 'C', 'H', 'X', 'R') as $code)
+			{
+				$st[$code] = defset('LAN_VSTORE_STATUS_' . $code, $code);
+			}
+			$data[0] = array(LAN_VSTORE_HOOK_DASH_DAY, $st['N'], $st['P'], $st['C'], $st['H'], $st['X'], $st['R']);
 	//		$data[0][] = array('type'=>'string', 'label'=>'Total', 'role'=>'annotation', 'p'=> array('html'=>true));
 
 			// Create items for each day of the month.
@@ -313,7 +324,7 @@
 			}
 
 		//	e107::getDebug()->log($data);
-			$label = "Number of Sales ";
+			$label = LAN_VSTORE_HOOK_DASH_SALES." ";
 		//	$label .= date('M Y', $month_start)." - ".date('M Y', $month_end)." (".number_format($sum).")";
 
 			$options = array(

@@ -17,9 +17,44 @@
 e107::js('vstore', 'js/vstore.js');
 
 require_once('vendor/autoload.php');
+require_once(__DIR__ . '/src/autoload.php');
 
 use Omnipay\Omnipay;
 use Ibericode\Vat\Exception;
+use Vstore\Pdf\InvoicePdf;
+use Vstore\Repository\CartRepository;
+use Vstore\Repository\CouponRepository;
+use Vstore\Repository\CustomerRepository;
+use Vstore\Repository\ItemRepository;
+use Vstore\Repository\ItemVarRepository;
+use Vstore\Repository\OrderCouponUsageRepository;
+use Vstore\Repository\OrderRepository;
+use Vstore\Service\CartService;
+use Vstore\Service\CheckoutService;
+use Vstore\Service\CouponService;
+use Vstore\Service\InventoryService;
+use Vstore\Service\InvoiceNumberService;
+use Vstore\Service\InvoiceService;
+use Vstore\Service\ItemVarTypeService;
+use Vstore\Service\OrderService;
+use Vstore\Service\PaymentService;
+use Vstore\Service\ShippingService;
+use Vstore\Service\TaxService;
+use Vstore\Service\UserclassService;
+use Vstore\Service\VatService;
+use Vstore\Support\Catalog;
+use Vstore\Support\ItemVars;
+use Vstore\Support\MolliePayment;
+use Vstore\Support\PhoneNumber;
+use Vstore\Support\Result;
+use Vstore\Support\ResultTranslator;
+use Vstore\Support\Translatable;
+
+e107::lan('vstore', 'global', true);
+e107::lan('vstore', false, true);
+e107::lan('vstore', 'front_shop', true);
+e107::lan('vstore', 'front_msg', true);
+e107::lan('vstore', 'front_mail', true);
 
 class vstore
 {
@@ -56,41 +91,14 @@ class vstore
 	 *
 	 * @var array
 	 */
-	protected static $currencies = array(
-		'USD' => array(
-			'title'  => 'US Dollars',
-			'symbol' => '$'
-		),
-		'CAN' => array(
-			'title'  => 'Canadian Dollars',
-			'symbol' => '$'
-		),
-		'EUR' => array(
-			'title'  => 'Euros',
-			'symbol' => '€'
-		),
-		'GBP' => array(
-			'title'  => 'GB Pounds',
-			'symbol' => '£'
-		),
-		'BTC' => array(
-			'title' => 'Bitcoin',
-			'glyph' => 'fa-btc'
-		),
-	);
+	protected static $currencies = Catalog::CURRENCIES;
 
 	/**
 	 * Array with the available gateways and their corresponding icons
 	 *
 	 * @var array The available gateways
 	 */
-	protected static $gateways = array(
-		'paypal'        => array('title' => 'Paypal', 'icon' => 'fa-paypal'),
-		'paypal_rest'   => array('title' => 'Paypal', 'icon' => 'fa-paypal'),
-		'mollie'        => array('title' => 'Mollie', 'icon' => 'fa-laptop'),
-
-		'bank_transfer' => array('title' => 'Bank Transfer', 'icon' => 'fa-bank'),
-	);
+	protected static $gateways = Catalog::GATEWAYS;
 
 	/**
 	 * Array with the payment methods of Mollie
@@ -103,155 +111,37 @@ class vstore
 	 *
 	 * @var array The available payment methods of the Mollie gateway
 	 */
-	protected static $mollie_payment_methods = array(
-		'mollie_bancontact'     => array(
-			'title' => 'Bancontact',
-			'icon'  => 'images/bancontact.svg'
-		),
-		'mollie_banktransfer'   => array(
-			'title' => 'SEPA Bank transfer',
-			'icon'  => 'images/sepa.svg'
-		),
-		'mollie_belfius'        => array(
-			'title' => 'Belfius Direct Net',
-			'icon'  => 'images/belfius.svg'
-		),
-		// 'mollie_bitcoin' => array(
-		//     'title' => 'Bitcoin',
-		//     'icon' => 'bitcoin'
-		// ),
-		'mollie_creditcard'     => array(
-			'title' => 'Creditcard',
-			'icon'  => 'images/amex.svg'
-		),
-		'mollie_directdebit'    => array(
-			'title' => 'SEPA Direct debit',
-			'icon'  => 'images/sepa.svg'
-		),
-		'mollie_eps'            => array(
-			'title' => 'EPS',
-			'icon'  => 'images/eps.svg'
-		),
-		'mollie_giftcard'       => array(
-			'title' => 'Gift Cards',
-			'icon'  => 'images/giftcards.svg'
-		),
-		'mollie_giropay'        => array(
-			'title' => 'Giropay',
-			'icon'  => 'images/giropay.svg'
-		),
-		'mollie_ideal'          => array(
-			'title' => 'iDeal',
-			'icon'  => 'images/ideal.svg'
-		),
-		'mollie_inghomepay'     => array(
-			'title' => 'Ing Homepay',
-			'icon'  => 'images/inghomepay.svg'
-		),
-		'mollie_kbc'            => array(
-			'title' => 'Kbc Payment Button',
-			'icon'  => 'images/kbc.svg'
-		),
-		'mollie_klarnapaylater' => array(
-			'title' => 'Klarna Pay Later',
-			'icon'  => 'images/klarnapaylater.svg'
-		),
-		'mollie_klarnasliceit'  => array(
-			'title' => 'Klarna Slice it',
-			'icon'  => 'images/klarnasliceit.svg'
-		),
-		'mollie_paypal'         => array(
-			'title' => 'Paypal',
-			'icon'  => 'images/paypal.svg'
-		),
-		'mollie_paysafecard'    => array(
-			'title' => 'Paysafecard',
-			'icon'  => 'images/paysafecard.svg'
-		),
-		// 'mollie_przelewy24' => array(
-		//     'title' => 'Przelewy24',
-		//     'icon' => 'images/klarnasliceit.svg'
-		// ),
-		'mollie_sofort'         => array(
-			'title' => 'SOFORT Banking',
-			'icon'  => 'images/sofort.svg'
-		),
-	);
+	protected static $mollie_payment_methods = Catalog::MOLLIE_PAYMENT_METHODS;
 
-	protected static $status = array(
-		'N' => 'New',
-		'P' => 'Processing',
-		'H' => 'On Hold',
-		'C' => 'Completed',
-		'X' => 'Cancelled',
-		'R' => 'Refunded'
-	);
+	protected static $status = Catalog::STATUS;
 
 	/**
 	 * @var array Array with email types
 	 */
-	protected static $emailTypes = array(
-		'default'   => 'Order confirmation',
-		'completed' => 'Order completed',
-		'cancelled' => 'Order cancelled',
-		'refunded'  => 'Order refunded'
-	);
+	protected static $emailTypes = Catalog::EMAIL_TYPES;
 
 	/**
 	 * @var array Array with shipping fieldnames
 	 */
-	protected static $shippingFields = array(
-		'firstname',
-		'lastname',
-		'phone',
-		'company',
-		'address',
-		'city',
-		'state',
-		'zip',
-		'country',
-		'notes' // Shipping notes
-	);
+	protected static $shippingFields = Catalog::SHIPPING_FIELDS;
 
 	/**
 	 * @var array Array with customer fieldnames
 	 */
-	protected static $customerFields = array(
-		'title',
-		'firstname',
-		'lastname',
-		'company',
-		'vat_id',
-		'taxcode',
-		'address',
-		'city',
-		'state',
-		'zip',
-		'country',
-		'email',
-		'phone',
-		'fax',
-		'additional_fields',
-		//  'notes' // Customer notes are for internal use only
-	);
+	protected static $customerFields = Catalog::CUSTOMER_FIELDS;
 
 	/**
 	 * @var array Array with official tay classes
 	 */
-	protected static $official_tax_classes = array(
-		'none',
-		'reduced',
-		'reduced1',
-		'reduced2',
-		'super_reduced',
-		'standard',
-		'parking'
-	);
+	protected static $official_tax_classes = Catalog::TAX_CLASSES;
 
 	/**
-	 * @var array This array keeps track of the item vars types during inventory checks
+	 * @var array Item variation types are cached by Vstore\Service\ItemVarTypeService
 	 */
-	protected static $itemVarsTypes = array();
+	private static $itemVarTypeService = null;
+
+	/** @var VatService|null Shared so the VIES answers are remembered within the request */
+	private static $vatService = null;
 
 
 	public function __construct()
@@ -328,13 +218,31 @@ class vstore
 	 */
 	public static function getStatus($key = null)
 	{
+		e107::lan('vstore', 'global', true);
+
+		$list = array();
+		foreach(self::$status as $code => $label)
+		{
+			$list[$code] = defset('LAN_VSTORE_STATUS_' . $code, $label);
+		}
 
 		if(!empty($key))
 		{
-			return self::$status[$key];
+			return $list[$key];
 		}
 
-		return self::$status;
+		return $list;
+	}
+
+	/**
+	 * Untranslated lower-case status name, used as key for logic such as email template selection
+	 *
+	 * @param string $key Status code (N, P, H, C, X, R)
+	 * @return string
+	 */
+	public static function getStatusSlug($key)
+	{
+		return Catalog::statusSlug($key);
 	}
 
 	/**
@@ -345,13 +253,20 @@ class vstore
 	 */
 	public static function getEmailTypes($type = null)
 	{
+		e107::lan('vstore', 'global', true);
+
+		$list = array();
+		foreach(self::$emailTypes as $key => $label)
+		{
+			$list[$key] = defset('LAN_VSTORE_EMAILTYPE_' . strtoupper($key), $label);
+		}
 
 		if(!empty($type))
 		{
-			return self::$emailTypes[$type];
+			return $list[$type];
 		}
 
-		return self::$emailTypes;
+		return $list;
 	}
 
 	/**
@@ -389,13 +304,25 @@ class vstore
 
 	public static function getCurrencies()
 	{
+		e107::lan('vstore', 'global', true);
 
-		return self::$currencies;
+		$list = self::$currencies;
+		foreach($list as $code => $row)
+		{
+			if(isset($row['title']))
+			{
+				$list[$code]['title'] = defset('LAN_VSTORE_CURRENCY_' . $code, $row['title']);
+			}
+		}
+
+		return $list;
 	}
 
 	public static function getCurrencyTitle($currency)
 	{
-		return vartrue(self::$currencies[$currency]['title']);
+		$list = self::getCurrencies();
+
+		return vartrue($list[$currency]['title']);
 	}
 
 	public static function getCurrencySymbol($currency, $size = '1x')
@@ -490,7 +417,7 @@ class vstore
 	public static function isMollie($type = '')
 	{
 
-		return substr($type, 0, 6) == 'mollie';
+		return Catalog::isMollie($type);
 	}
 
 	/**
@@ -507,18 +434,22 @@ class vstore
 		{
 			if(vartrue($json['status']) == 'canceled')
 			{
-				return 'You have canceled your payment, but your cart is still available for further reference.';
+				return LAN_VSTORE_MSG_MOLLIE_CANCELED;
 			}
 			elseif(vartrue($json['status']) == 'failed')
 			{
-				return 'Your payment failed for some reason, but your cart is still available for further reference.';
+				return LAN_VSTORE_MSG_MOLLIE_FAILED;
+			}
+			elseif(vartrue($json['status']) == 'expired')
+			{
+				return LAN_VSTORE_MSG_MOLLIE_EXPIRED;
 			}
 			elseif(vartrue($json['detail']))
 			{
 				return $json['detail'];
 			}
 
-			return 'Generic error';
+			return LAN_VSTORE_MSG_GENERIC_ERROR;
 		}
 
 		return $str;
@@ -542,7 +473,7 @@ class vstore
 				// Add item to cart
 				$itemid = $this->get['add'];
 				$itemvars = $this->get['itemvar'];
-				if(!$this->addToCart($itemid, $itemvars))
+				if(!$this->addToCart($itemid, $itemvars, varset($this->get['qty'], 1)))
 				{
 					$msg = e107::getMessage()->render('vstore');
 					ob_clean();
@@ -585,9 +516,32 @@ class vstore
 			}
 
 			// Order processing
-			if(isset($this->post['order']) && intval($this->post['id']) > 0 && ADMIN)
+			if(isset($this->post['order']) && intval($this->post['id']) > 0 && getperms('P'))
 			{
 				$this->order->load($this->post['id']);
+				if($this->post['order'] === 'checkpayment')
+				{
+					// Ask Mollie for the payment of the order, access only for Admins!
+					$sync = $this->syncMolliePayment((string) $this->order->order_pay_transid);
+
+					if($sync['state'] === 'updated')
+					{
+						$text = $sync['outcome'] === MolliePayment::PAID ? LAN_VSTORE_MSG_PAYMENT_CHECK_PAID : LAN_VSTORE_MSG_PAYMENT_CHECK_FAILED;
+					}
+					elseif($sync['state'] === 'unchanged' || $sync['state'] === 'no_order')
+					{
+						$text = sprintf(LAN_VSTORE_MSG_PAYMENT_CHECK_UNCHANGED, $sync['status']);
+					}
+					else
+					{
+						$text = LAN_VSTORE_MSG_PAYMENT_CHECK_ERROR;
+					}
+
+					ob_clean();
+					$js->sendTextResponse($text);
+					exit;
+				}
+
 				if($this->post['order'] === 'refund')
 				{
 					// Refund a payment, $order_refund contains the orderId, access only for Admins!
@@ -634,7 +588,7 @@ class vstore
 					$js->sendTextResponse(
 						EMESSLAN_TITLE_SUCCESS . "\n" .
 						e107::getParser()->lanVars(
-							'Order updated to "[x]"',
+							LAN_VSTORE_MSG_ORDER_UPDATED,
 							self::getStatus($status)
 						)
 					);
@@ -646,7 +600,7 @@ class vstore
 						($this->order->getLastError()
 							? $this->order->getLastError()
 							: EMESSLAN_TITLE_ERROR . "\n" . e107::getParser()->lanVars(
-								'Order couldn\'t be updated to "[x]"',
+								LAN_VSTORE_MSG_ORDER_UPDATE_FAIL,
 								self::getStatus($status)
 							)
 						)
@@ -679,25 +633,25 @@ class vstore
 			$this->setMode($this->post['mode']);
 			if(empty($this->getGatewayType(true)))
 			{
-				e107::getMessage()->addError('No payment method selected!', 'vstore');
+				e107::getMessage()->addError(LAN_VSTORE_MSG_NO_PAYMENT, 'vstore');
 
 				return;
 			}
 			elseif(empty($this->getCheckoutData()))
 			{
-				e107::getMessage()->addError('No items to checkout!', 'vstore');
+				e107::getMessage()->addError(LAN_VSTORE_MSG_NO_ITEMS, 'vstore');
 
 				return;
 			}
 			elseif(empty(vstore::getCustomerData(true)))
 			{
-				e107::getMessage()->addError('No customer data set!', 'vstore');
+				e107::getMessage()->addError(LAN_VSTORE_MSG_NO_CUSTOMER, 'vstore');
 
 				return;
 			}
 			elseif(empty($this->getShippingData(true)))
 			{
-				e107::getMessage()->addError('No shipping data set!', 'vstore');
+				e107::getMessage()->addError(LAN_VSTORE_MSG_NO_SHIPPING, 'vstore');
 
 				return;
 			}
@@ -725,25 +679,11 @@ class vstore
 		}
 
 
-		// Only update cart quantities if we're not just applying a coupon
-		// Check if cartQty has valid data (not empty arrays)
-		if(varset($this->post['cartQty']) && empty($this->post['cart_coupon_code']))
+		// Quantities and the coupon field share one form; the coupon field keeps the active code,
+		// so it must not stop the quantities from being saved.
+		if(!empty($this->post['cartQty']) && is_array($this->post['cartQty']))
 		{
-			// Verify that cartQty has actual data before processing
-			$hasValidQty = false;
-			foreach($this->post['cartQty'] as $item)
-			{
-				if(!empty($item['qty']) || !empty($item['id']))
-				{
-					$hasValidQty = true;
-					break;
-				}
-			}
-			
-			if($hasValidQty)
-			{
-				$this->updateCart('modify', $this->post['cartQty'], $this->post['cartVars']);
-			}
+			$this->updateCart('modify', $this->post['cartQty']);
 		}
 
 		if(varset($this->post['cartRemove']))
@@ -755,7 +695,7 @@ class vstore
 		{
 			if(!e_AJAX_REQUEST)
 			{
-				$this->addToCart($this->get['add'], $this->get['itemvar']);
+				$this->addToCart($this->get['add'], $this->get['itemvar'], varset($this->get['qty'], 1));
 			}
 		}
 
@@ -774,7 +714,7 @@ class vstore
 					'datestamp' => time(),
 					'user_id'   => USERID,
 					'user_name' => USERNAME,
-					'text'      => 'Order cancelled by user'
+					'text'      => LAN_VSTORE_MSG_LOG_CANCELLED
 				);
 
 				$update = array(
@@ -812,7 +752,7 @@ class vstore
 						if(isset($this->post['cust']['add_field' . $key]))
 						{
 							$add['add_field' . $key] = array(
-								'caption' => strip_tags($value['caption'][e_LANGUAGE]),
+								'caption' => strip_tags(Translatable::pick(varset($value['caption']), e_LANGUAGE)),
 								'value'   => ($value['type'] == 'text'
 									? $this->post['cust']['add_field' . $key]
 									: ($this->post['cust']['add_field' . $key] ? 'X' : '-'))
@@ -846,14 +786,14 @@ class vstore
 				else
 				{
 					$save = false;
-					e107::getMessage()->addError('Something went wrong! Unable to save changes!', 'vstore', true);
+					e107::getMessage()->addError(LAN_VSTORE_MSG_SAVE_FAIL, 'vstore', true);
 				}
 
 				if($save)
 				{
 					$update['WHERE'] = 'cust_e107_user = ' . USERID;
 					$result = e107::getDb()->update('vstore_customer', $update);
-					e107::getMessage()->addSuccess('Changes successfully saved!', 'vstore', true);
+					e107::getMessage()->addSuccess(LAN_VSTORE_MSG_SAVE_OK, 'vstore', true);
 					e107::redirect(e107::url('vstore', 'dashboard', array('dash' => 'addresses')));
 					exit;
 				}
@@ -949,7 +889,7 @@ class vstore
 							$fieldvalue,
 							100,
 							array(
-								'placeholder' => varset($v['placeholder'][e_LANGUAGE]),
+								'placeholder' => Translatable::pick(varset($v['placeholder']), e_LANGUAGE),
 								'required'    => ($v['required'] ? 1 : 0)
 							)
 						);
@@ -968,14 +908,14 @@ class vstore
 						{
 							$field .= ' <label for="' .
 								$frm->name2id($fieldname) . '-1" class="text-muted">&nbsp;' .
-								$tp->toHTML($v['placeholder'][e_LANGUAGE]) . '</label>';
+								$tp->toHTML(Translatable::pick($v['placeholder'], e_LANGUAGE)) . '</label>';
 						}
 						$field .= '</div>';
 					}
 
 					$this->sc->addVars(array(
 						'fieldname'     => $fieldname,
-						'fieldcaption'  => $tp->toHTML(varset($v['caption'][e_LANGUAGE], 'Additional field ' . $k)),
+						'fieldcaption'  => $tp->toHTML(Translatable::pick(varset($v['caption']), e_LANGUAGE, 'Additional field ' . $k)),
 						'field'         => $field,
 						'fieldcount'    => $addFieldActive,
 						'fieldrequired' => $v['required']
@@ -1119,7 +1059,7 @@ class vstore
 				// Not needed but ...
 				// $bread = $this->setBreadcrumb();
 				$this->setBreadcrumb();
-				$msg = e107::getMessage()->addSuccess('File successfully downloaded!')->render('vstore');
+				$msg = e107::getMessage()->addSuccess(LAN_VSTORE_MSG_FILE_DOWNLOADED)->render('vstore');
 
 				// $ns->tablerender($this->captionBase, $bread . $msg, 'vstore-download-done');
 				$ns->tablerender($this->captionBase, $msg, 'vstore-download-done');
@@ -1197,7 +1137,7 @@ class vstore
 				}
 				else
 				{
-					$text .= e107::getMessage()->addError('Billing address is missing!', 'vstore')->render('vstore');
+					$text .= e107::getMessage()->addError(LAN_VSTORE_MSG_BILLING_MISSING, 'vstore')->render('vstore');
 				}
 
 				// $ns->tablerender($this->captionBase, $bread . $text, 'vstore-cart-list');
@@ -1232,15 +1172,15 @@ class vstore
 				}
 			}				if(empty(vstore::getCustomerData(true)))
 				{
-					$text .= e107::getMessage()->addError('Billing address is missing!', 'vstore')->render('vstore');
+					$text .= e107::getMessage()->addError(LAN_VSTORE_MSG_BILLING_MISSING, 'vstore')->render('vstore');
 				}
 				elseif(vartrue($this->post['order_use_shipping']) && empty($this->getShippingData(true)))
 				{
-					$text .= e107::getMessage()->addError('No shipping address set!', 'vstore')->render('vstore');
+					$text .= e107::getMessage()->addError(LAN_VSTORE_MSG_SHIPPING_MISSING, 'vstore')->render('vstore');
 				}
 				elseif(empty($this->getCheckoutData()))
 				{
-					$text .= e107::getMessage()->addError('No items to checkout!', 'vstore')->render('vstore');
+					$text .= e107::getMessage()->addError(LAN_VSTORE_MSG_NO_ITEMS, 'vstore')->render('vstore');
 				}
 				else
 				{
@@ -1263,7 +1203,7 @@ class vstore
 
 				if(empty($this->getCheckoutData()))
 				{
-					$text .= e107::getMessage()->addError('No items to checkout!', 'vstore')->render('vstore');
+					$text .= e107::getMessage()->addError(LAN_VSTORE_MSG_NO_ITEMS, 'vstore')->render('vstore');
 				}
 				else
 				{
@@ -1419,7 +1359,7 @@ class vstore
 			}
 			elseif(!empty($this->get['invoice']))
 			{
-				$array[] = array('url' => e107::url('vstore', 'index'), 'text' => 'Invoice');
+				$array[] = array('url' => e107::url('vstore', 'index'), 'text' => LAN_VSTORE_MSG_BC_INVOICE);
 				$array[] = array(
 					'url'  => e107::url('vstore', 'invoice', array('order_invoice_nr' => $this->get['invoice'])),
 					'text' => self::formatInvoiceNr($this->get['invoice'])
@@ -1455,13 +1395,13 @@ class vstore
 
 		if(!empty($this->get['add']) || varset($this->get['mode']) === 'cart')
 		{
-			$array[] = array('url' => null, 'text' => "Shopping Cart");
+			$array[] = array('url' => null, 'text' => LAN_VSTORE_MSG_BC_CART);
 		}
 
 		if(varset($this->get['mode']) === 'checkout')
 		{
-			$array[] = array('url' => e107::url('vstore', 'cart'), 'text' => "Shopping Cart");
-			$array[] = array('url' => null, 'text' => "Checkout");
+			$array[] = array('url' => e107::url('vstore', 'cart'), 'text' => LAN_VSTORE_MSG_BC_CART);
+			$array[] = array('url' => null, 'text' => LAN_VSTORE_FR_CHECKOUT);
 		}
 
 		if(varset($this->get['mode']) === 'dashboard')
@@ -1490,7 +1430,7 @@ class vstore
 			{
 				$array[] = array(
 					'url'  => e107::url('vstore', 'dashboard', array('dash' => 'dashboard')),
-					'text' => "My Dashboard"
+					'text' => LAN_VSTORE_FR_MY_DASHBOARD
 				);
 			}
 		}
@@ -1524,6 +1464,97 @@ class vstore
 		return $this->active;
 	}
 
+
+	/**
+	 * Remove the Mollie payment methods that are not enabled in the Mollie website profile.
+	 * Offering them ends in "The payment method is not enabled in your website profile".
+	 * When Mollie cannot be asked, every method stays available.
+	 *
+	 * @param array $active payment method => icon
+	 * @return array
+	 */
+	private function hideDisabledMollieMethods(array $active)
+	{
+		$mollie = array_filter(array_keys($active), array('Vstore\Support\Catalog', 'isMollie'));
+
+		if(!$mollie)
+		{
+			return $active;
+		}
+
+		$enabled = $this->getMollieEnabledMethods();
+
+		if($enabled === null)
+		{
+			return $active;
+		}
+
+		foreach($mollie as $key)
+		{
+			if(!in_array(substr($key, 7), $enabled, true))
+			{
+				unset($active[$key]);
+			}
+		}
+
+		return $active;
+	}
+
+	/**
+	 * Payment methods enabled in the Mollie website profile, kept in the cache for 10 minutes.
+	 *
+	 * @return array|null ids such as paypal or banktransfer, null when Mollie could not be asked
+	 */
+	private function getMollieEnabledMethods()
+	{
+		$mode = !empty($this->pref['mollie_testmode']) ? 'test' : 'live';
+		$key = (string) varset($this->pref['mollie_api_key_' . $mode], '');
+		$tag = 'vstore_mollie_methods_' . $mode . '_' . substr(md5($key), 0, 12);
+
+		$cache = e107::getCache();
+		if($cached = $cache->retrieve($tag, 10, true))
+		{
+			$list = json_decode($cached, true);
+
+			if(is_array($list))
+			{
+				return $list;
+			}
+		}
+
+		list($gateway) = self::createGateway('mollie', $this->pref);
+
+		if(!is_object($gateway))
+		{
+			return null;
+		}
+
+		try
+		{
+			$response = $gateway->fetchPaymentMethods(array())->send();
+
+			if(!$response->isSuccessful())
+			{
+				return null;
+			}
+
+			$list = array();
+			foreach($response->getPaymentMethods() as $method)
+			{
+				$list[] = $method->getId();
+			}
+		}
+		catch(\Exception $e)
+		{
+			e107::getMessage()->addDebug('Mollie payment methods: ' . $e->getMessage(), 'vstore');
+
+			return null;
+		}
+
+		$cache->set($tag, json_encode($list), true);
+
+		return $list;
+	}
 
 	/**
 	 * Render checkout complete message
@@ -1576,9 +1607,11 @@ class vstore
 		}
 
 
+		$active = $this->hideDisabledMollieMethods($active);
+
 		if(empty($active))
 		{
-			return "No Payment Options Set";
+			return LAN_VSTORE_MSG_NO_PAY_OPTIONS;
 		}
 
 		$text = e107::getForm()->open(
@@ -1590,12 +1623,12 @@ class vstore
 
 		$text .= $this->renderCustomerForm();
 		$text .= "<hr /><p>";
-		$text .= "<i class='fa fa-truck' aria-hidden='true'></i> <a id='shipping-view-toggle' class='e-expandit' href='#shipping-view'>Add a different shipping address</a>";
+		$text .= "<i class='fa fa-truck' aria-hidden='true'></i> <a id='shipping-view-toggle' class='e-expandit' href='#shipping-view'>".LAN_VSTORE_MSG_ADD_SHIPPING."</a>";
 		$text .= "</p><div id='shipping-view' style='display:none'>";
 		$text .= $this->renderShippingForm();
 		$text .= "</div>";
 
-		$text .= "<hr /><h3>Select payment method to continue</h3><div class='vstore-gateway-list row'>";
+		$text .= "<hr /><h3>".LAN_VSTORE_MSG_SELECT_PAYMENT."</h3><div class='vstore-gateway-list row'>";
 
 		if(count($active) == 1 && empty($curGateway))
 		{
@@ -1631,8 +1664,8 @@ class vstore
        
             <div class="row mt-5 mb-5">
                 <div class="col-12 col-xs-12">
-                    <a class="btn btn-default btn-secondary vstore-btn-back-confirm" href="' . e107::url('vstore', 'cart', 'sef') . '">&laquo; Back</a>
-                    <button class="btn btn-primary vstore-btn-buy-now pull-right float-right float-end" type="submit" name="mode" value="confirm">Continue &raquo;</button>
+                    <a class="btn btn-default btn-secondary vstore-btn-back-confirm" href="' . e107::url('vstore', 'cart', 'sef') . '">&laquo; ' . LAN_VSTORE_FR_BACK . '</a>
+                    <button class="btn btn-primary vstore-btn-buy-now pull-right float-right float-end" type="submit" name="mode" value="confirm">' . LAN_VSTORE_MSG_CONTINUE . ' &raquo;</button>
                 </div>
             </div>';
 
@@ -1710,8 +1743,8 @@ class vstore
             <div class="row">
                 <div class="col-12 col-xs-12">
                     <input type="hidden" name="order_use_shipping" value="1">
-                    <a class="btn btn-default btn-secondary vstore-btn-back-confirm" href="' . e107::url('vstore', 'checkout', 'sef') . '">&laquo; Back</a>
-                    <button class="btn btn-primary vstore-btn-buy-now pull-right float-right float-end" type="submit" name="mode" value="confirm">Continue &raquo;</button>
+                    <a class="btn btn-default btn-secondary vstore-btn-back-confirm" href="' . e107::url('vstore', 'checkout', 'sef') . '">&laquo; ' . LAN_VSTORE_FR_BACK . '</a>
+                    <button class="btn btn-primary vstore-btn-buy-now pull-right float-right float-end" type="submit" name="mode" value="confirm">' . LAN_VSTORE_MSG_CONTINUE . ' &raquo;</button>
                 </div>
             </div>';
 
@@ -1721,7 +1754,7 @@ class vstore
 			return $text;
 		}
 
-		return "No Payment Options Set";
+		return LAN_VSTORE_MSG_NO_PAY_OPTIONS;
 	}
 
 
@@ -1759,7 +1792,7 @@ class vstore
 
 		if(empty($type))
 		{
-			e107::getMessage()->addError("Invalid Payment Type", 'vstore');
+			e107::getMessage()->addError(LAN_VSTORE_MSG_INVALID_PAYMENT, 'vstore');
 			trigger_error("Invalid payment type");  // debug only
 			return false;
 		}
@@ -1777,13 +1810,19 @@ class vstore
 		{
 			$mode = 'halt';
 		}
+		elseif(!is_object($gateway))
+		{
+			e107::getMessage()->addError($message ?: LAN_VSTORE_MSG_PAY_ERROR, 'vstore');
+
+			return false;
+		}
 
 		$cardInput = null;
 		$data = $this->getCheckoutData();
 
 		if(empty($data['items']))
 		{
-			e107::getMessage()->addError("Shopping Cart Empty", 'vstore');
+			e107::getMessage()->addError(LAN_VSTORE_MSG_CART_EMPTY_ERR, 'vstore');
 			trigger_error("Shopping Cart Empty"); // debug only
 			return false;
 		}
@@ -1866,6 +1905,26 @@ class vstore
 			if($type == 'mollie')
 			{
 				$_data['paymentMethod'] = $paymentMethod;
+
+				// Mollie reports later payment changes (MB WAY approval, Multibanco payment) to this URL; it must be reachable from the internet
+				$webhookUrl = e107::url('vstore', 'webhook', null, array('mode' => 'full'));
+				if(MolliePayment::isPublicUrl($webhookUrl))
+				{
+					$_data['notifyUrl'] = $webhookUrl;
+				}
+
+				// Contact data sent to Mollie as billingAddress (the phone only when it is a valid international number)
+				$billing = (array) self::getCustomerData(true);
+				if(!empty($billing['email']))
+				{
+					$_data['billingEmail'] = $billing['email'];
+				}
+
+				$phone = PhoneNumber::toE164(varset($billing['phone']), varset($billing['country']));
+				if($phone !== null)
+				{
+					$_data['billingPhone'] = $phone;
+				}
 			}
 
 			e107::getSession('vstore')->set('_data', $_data);
@@ -1897,19 +1956,31 @@ class vstore
 			/** @var \Omnipay\Common\Message\AbstractResponse $response */
 			$response = $gateway->$method($_data)->send();
 		}
-		catch(Exception $e)
+		catch(\Exception $e)
 		{
+			// Plugin classes import Ibericode\Vat\Exception as Exception, so the global one needs the backslash
 			$message = $e->getMessage();
 			if($type == 'mollie')
 			{
-				-$message = $this->getMollieErrorMessage($message);
+				$message = $this->getMollieErrorMessage($message);
 			}
-			e107::getMessage()->addError($message, 'vstore');
+
+			e107::getLog()->add('Vstore', 'Payment error (' . $type . '): ' . $e->getMessage(), E_LOG_WARNING);
+			e107::getMessage()->addError(ADMIN ? $message : LAN_VSTORE_MSG_PAY_ERROR, 'vstore');
 
 			return false;
 		}
 
-		if($response->isRedirect())
+		$pending = false;
+		$existingOrderId = 0;
+		if($mode === 'return' && $type == 'mollie')
+		{
+			$paymentData = (array) $response->getData();
+			$pending = MolliePayment::outcome(varset($paymentData['status'])) === MolliePayment::PENDING;
+			$existingOrderId = (new OrderRepository())->orderIdFromMollieTransaction((string) $response->getTransactionReference());
+		}
+
+		if(!$pending && $response->isRedirect())
 		{
 			// Get transaction ID from the Authorize response.
 			if($transID = $response->getTransactionReference())
@@ -1919,28 +1990,46 @@ class vstore
 			//	$_SESSION['vstore']['_data']['transactionReference'] = $transID;
 			}
 
+			if($type == 'mollie' && $mode === 'init' && $transID)
+			{
+				// The order exists before the customer pays, so a payment made without coming back is never lost
+				if(!$this->saveTransaction($transID, (array) $response->getData(), $items, 'N', 'incomplete', true))
+				{
+					e107::getMessage()->addError(LAN_VSTORE_MSG_TRANS_FAIL, 'vstore');
+
+					return false;
+				}
+			}
+
 			// Redirect to offsite payment gateway.
 			$response->redirect();
 		}
-		elseif($response->isSuccessful())
+		elseif($existingOrderId)
 		{
-			$order_status = 'P';
-			if($response->isPending())
-			{
-				// is pending => set order status to a new different status
-				//$order_status = 'P';
-			}
+			$this->finishMollieReturn($response);
+		}
+		elseif($response->isSuccessful() || $pending)
+		{
+			// A pending payment (MB WAY not approved yet, Multibanco reference) is registered as a new order waiting for its payment
+			$order_status = $pending ? 'N' : 'P';
 			$transData = $response->getData();
 			$transID = $response->getTransactionReference();
 			$message = $response->getMessage();
 			if($type == 'mollie')
 			{
-				$message = $this->getMollieErrorMessage($message);
+				$message = $pending ? LAN_VSTORE_MSG_MOLLIE_PENDING : LAN_VSTORE_MSG_MOLLIE_PAID;
 			}
 
-			e107::getMessage()->addSuccess($message, 'vstore');
+			if($pending)
+			{
+				e107::getMessage()->addInfo($message, 'vstore');
+			}
+			else
+			{
+				e107::getMessage()->addSuccess($message, 'vstore');
+			}
 
-			$this->saveTransaction($transID, $transData, $items, $order_status); // Order payed > save as Processing
+			$this->saveTransaction($transID, $transData, $items, $order_status, $pending ? 'incomplete' : ''); // Order payed > save as Processing
 			$this->resetCart();
 
 			e107::getSession('vstore')->clear('_data');
@@ -1958,6 +2047,160 @@ class vstore
 	}
 
 	/**
+	 * Mollie payment notification: updates the order of a payment that was still pending when the customer came back.
+	 *
+	 * @return void
+	 */
+	public function handleMollieWebhook()
+	{
+		$result = $this->syncMolliePayment((string) varset($_POST['id']));
+
+		if($result['state'] === 'error')
+		{
+			// An error status makes Mollie send the notification again
+			http_response_code(500);
+		}
+	}
+
+	/**
+	 * Ask Mollie for the real status of a payment and update the order that waits for it.
+	 * The id is never trusted: the status always comes from the Mollie API with the shop's own key.
+	 *
+	 * @param string $paymentId Mollie payment id (tr_...)
+	 * @return array state: invalid|error|no_order|unchanged|updated, status: Mollie status, outcome: MolliePayment outcome
+	 */
+	public function syncMolliePayment($paymentId)
+	{
+		$result = array('state' => 'invalid', 'status' => '', 'outcome' => MolliePayment::UNKNOWN);
+
+		if(!preg_match('/^tr_[A-Za-z0-9]{4,40}$/', $paymentId))
+		{
+			return $result;
+		}
+
+		list($gateway) = self::createGateway('mollie', $this->pref);
+		$result['state'] = 'error';
+
+		if(!is_object($gateway))
+		{
+			return $result;
+		}
+
+		try
+		{
+			$response = $gateway->fetchTransaction(array('transactionReference' => $paymentId))->send();
+			$payment = (array) $response->getData();
+		}
+		catch(\Exception $e)
+		{
+			e107::getLog()->add('Vstore', 'Mollie payment ' . $paymentId . ': ' . $e->getMessage(), E_LOG_WARNING);
+
+			return $result;
+		}
+
+		$status = (string) varset($payment['status']);
+		$result['status'] = $status;
+		$result['outcome'] = MolliePayment::outcome($status);
+
+		if($result['outcome'] === MolliePayment::UNKNOWN)
+		{
+			// Mollie answered with an error document instead of a payment
+			return $result;
+		}
+
+		$orderId = (new OrderRepository())->orderIdFromMollieTransaction($paymentId);
+
+		if(!$orderId)
+		{
+			if($result['outcome'] === MolliePayment::PAID)
+			{
+				e107::getLog()->add('Vstore', 'Mollie payment ' . $paymentId . ' is paid but no order has it (the customer did not return to the shop)', E_LOG_WARNING);
+			}
+
+			$result['state'] = 'no_order';
+
+			return $result;
+		}
+
+		$this->order->clear();
+		if(!$this->order->load($orderId))
+		{
+			$result['state'] = 'no_order';
+
+			return $result;
+		}
+
+		$change = MolliePayment::orderChange($status, $this->order->order_status, $this->order->order_pay_status);
+		$result['state'] = 'unchanged';
+
+		if($change === null)
+		{
+			return $result;
+		}
+
+		$paid = $change['outcome'] === MolliePayment::PAID;
+
+		$this->order->order_pay_status = $change['order_pay_status'];
+		$this->order->setOrderLog($paid ? LAN_VSTORE_MSG_LOG_PAYMENT_PAID : LAN_VSTORE_MSG_LOG_PAYMENT_FAILED);
+		$this->order->setOrderStatus($change['order_status'], array('purchase' => $payment));
+
+		if($paid)
+		{
+			self::setCustomerUserclass($this->order->order_e107_user, (array) $this->order->order_items);
+		}
+		elseif($change['outcome'] === MolliePayment::FAILED)
+		{
+			// The stock was taken when the order was created
+			self::inventoryService()->restore((array) $this->order->order_items);
+		}
+
+		$result['state'] = 'updated';
+
+		return $result;
+	}
+
+	/**
+	 * The customer came back from Mollie and the order of the payment already exists: bring it up to date and say what happened.
+	 *
+	 * @param \Omnipay\Common\Message\ResponseInterface $response completePurchase response
+	 * @return void
+	 */
+	private function finishMollieReturn($response)
+	{
+		$payment = (array) $response->getData();
+		$sync = $this->syncMolliePayment((string) $response->getTransactionReference());
+		$mes = e107::getMessage();
+
+		if($sync['outcome'] === MolliePayment::FAILED)
+		{
+			// Keep the cart for another try
+			$mes->addError($this->getMollieErrorMessage(json_encode($payment)), 'vstore');
+
+			return;
+		}
+
+		if($sync['outcome'] === MolliePayment::PAID && in_array($sync['state'], array('updated', 'unchanged'), true))
+		{
+			$mes->addSuccess(LAN_VSTORE_MSG_MOLLIE_PAID, 'vstore');
+			$mes->addSuccess(sprintf(LAN_VSTORE_MSG_ORDER_COMPLETE, $this->order->order_refcode), 'vstore');
+
+			$pdf_data = $this->renderInvoice();
+			if(!$this->pref['invoice_create_pdf'] && !empty($pdf_data) && !is_array($pdf_data))
+			{
+				$this->html_invoice = $pdf_data;
+			}
+		}
+		else
+		{
+			// Waiting for the customer or for the bank: the webhook or the admin check will finish the order
+			$mes->addInfo(LAN_VSTORE_MSG_MOLLIE_PENDING, 'vstore');
+		}
+
+		$this->resetCart();
+		e107::getSession('vstore')->clear('_data');
+	}
+
+	/**
 	 * Build a order reference number out of the order_id, first- & lastname
 	 *
 	 * @param int $id
@@ -1967,13 +2210,7 @@ class vstore
 	 */
 	public function getOrderRef($id, $firstname, $lastname)
 	{
-
-		$text = substr($firstname, 0, 2);
-		$text .= substr($lastname, 0, 2);
-		// $text .= date('Y');
-		$text .= e107::getParser()->leadingZeros($id, 6);
-
-		return strtoupper($text);
+		return self::orderService()->reference($id, $firstname, $lastname);
 	}
 
 
@@ -1983,9 +2220,12 @@ class vstore
 	 * @param string $id transaction id
 	 * @param array $transData transaction data
 	 * @param array $items purchased item
-	 * @return void
+	 * @param string $order_status status of the new order
+	 * @param string $payStatus payment status of the new order, derived from the transaction data when empty
+	 * @param bool $quiet true to skip the on-screen message and the confirmation email (the customer has not paid yet)
+	 * @return bool|null false when the order could not be saved
 	 */
-	public function saveTransaction($id, $transData, $items, $order_status = 'N')
+	public function saveTransaction($id, $transData, $items, $order_status = 'N', $payStatus = '', $quiet = false)
 	{
 
 		$this->html_invoice = null;
@@ -1998,22 +2238,9 @@ class vstore
 
 		$customerData = vstore::getCustomerData();
 
-		$fields = $this->pref['additional_fields'];
-		$add = array();
-		foreach($fields as $key => $value)
-		{
-			if(isset($customerData['add_field' . $key]))
-			{
-				$add['add_field' . $key] = array(
-					'caption' => strip_tags($value['caption'][e_LANGUAGE]),
-					'value'   => ($value['type'] == 'text'
-						? $customerData['add_field' . $key]
-						: ($customerData['add_field' . $key] ? 'X' : '-'))
-				);
-				unset($customerData['add_field' . $key]);
-			}
-		}
-		$customerData['additional_fields'] = e107::serialize($add, 'json');
+		$split = self::orderService()->splitAdditionalFields((array) $this->pref['additional_fields'], (array) $customerData, e_LANGUAGE);
+		$customerData = $split['customer'];
+		$customerData['additional_fields'] = e107::serialize($split['additional'], 'json');
 
 
 		if(!$this->getShippingType())
@@ -2038,7 +2265,7 @@ class vstore
 		$this->order->order_shipping = $shippingData;
 
 		$this->order->order_pay_gateway = $this->getGatewayType(true);
-		$this->order->order_pay_status = empty($transData) ? 'incomplete' : 'complete';
+		$this->order->order_pay_status = $payStatus !== '' ? $payStatus : (empty($transData) ? 'incomplete' : 'complete');
 		$this->order->order_pay_transid = $id;
 		$this->order->order_pay_amount = $cartData['totals']['cart_grandTotal'];
 		$this->order->order_pay_currency = $cartData['currency'];
@@ -2048,9 +2275,10 @@ class vstore
 		$this->order->order_pay_coupon_amount = $cartData['totals']['cart_coupon']['amount'];
 		$this->order->order_pay_rawdata = array('purchase' => $transData);
 		$this->order->setInvoiceNr();
-		$this->order->setOrderLog('Order created' . (empty($transData) ? '' : ' and paid') . '.');
+		$this->order->setOrderLog($this->order->order_pay_status === 'complete' ? LAN_VSTORE_MSG_LOG_CREATED_PAID : ($payStatus === 'incomplete' && !empty($transData) ? LAN_VSTORE_MSG_LOG_CREATED_PENDING : LAN_VSTORE_MSG_LOG_CREATED));
 
 		$mes = e107::getMessage();
+		$saved = true;
 		if($this->order->save())
 		{
 			// Order saved, update inventory before doing any "secondary" work...
@@ -2063,7 +2291,7 @@ class vstore
 					$this->getGatewayType(true)
 				))
 			{
-				$mes->addError('Unable to save/Update customer data!', 'vstore');
+				$mes->addError(LAN_VSTORE_MSG_CUSTOMER_FAIL, 'vstore');
 			}
 
 			// Set order ref code
@@ -2081,67 +2309,43 @@ class vstore
 				$pdf_file = $this->pathToInvoicePdf($this->order->order_invoice_nr, $pdf_data['userid']);
 			}
 
-			$mes->addSuccess("Your order <b>#" . $this->order->order_refcode .
-				"</b> is complete and you will receive a order confirmation " .
-				"with all details within the next few minutes by email.", 'vstore');
+			if(!$quiet)
+			{
+				$mes->addSuccess(sprintf(LAN_VSTORE_MSG_ORDER_COMPLETE, $this->order->order_refcode), 'vstore');
 
-			$this->order->emailCustomer('default', $pdf_file);
+				$this->order->emailCustomer('default', $pdf_file);
+			}
 
-			if(!empty($transData))
+			if(!empty($transData) && $payStatus !== 'incomplete')
 			{
 				$this->setCustomerUserclass(USERID, $items);
 			}
 		}
 		else
 		{
-			$mes->addError("Unable to save transaction");
+			$mes->addError(LAN_VSTORE_MSG_TRANS_FAIL);
 			$this->order->emailCustomer('error');
+			$saved = false;
 		}
 		if(!$this->pref['invoice_create_pdf'] && !empty($pdf_data) && !is_array($pdf_data))
 		{
 			$this->html_invoice = $pdf_data;
 		}
 
-		return null;
+		return $saved;
 	}
 
 	private function saveCustomer($customerData, $shippingData, $use_shipping, $gateway)
 	{
-
-		$data = array();
-
-		foreach($customerData as $key => $value)
-		{
-			$data['cust_' . $key] = $value;
-		}
-
-
-		$data['cust_shipping'] = json_encode($shippingData, JSON_PRETTY_PRINT);
-		$data['cust_use_shipping'] = ($use_shipping ? 1 : 0);
-		$data['cust_gateway'] = $gateway;
-		$data['cust_datestamp'] = time();
-
-		$sql = e107::getDb();
-
-		if($sql->select('vstore_customer', 'cust_id', 'cust_e107_user=' . USERID))
-		{
-			$result = $sql->update('vstore_customer', array('data' => $data, 'WHERE' => 'cust_e107_user=' . USERID));
-		}
-		else
-		{
-			$data['cust_e107_user'] = USERID;
-			$result = $sql->insert('vstore_customer', $data);
-			if($result)
-			{
-				$ref = $this->getOrderRef($result, $customerData['firstname'], $customerData['lastname']);
-				$result = $sql->update('vstore_customer', array(
-					'data'  => array('cust_refcode' => $ref),
-					'WHERE' => 'cust_e107_user=' . USERID
-				));
-			}
-		}
-
-		return $result;
+		return self::orderService()->saveCustomer(
+			new CustomerRepository(),
+			USERID,
+			(array) $customerData,
+			(array) $shippingData,
+			$use_shipping,
+			$gateway,
+			time()
+		);
 	}
 
 	/**
@@ -2153,44 +2357,15 @@ class vstore
 	 */
 	public static function setCustomerUserclass($userid, $items)
 	{
+		$classes = self::userclassService()->classesFor($items, e107::pref('vstore', 'customer_userclass'));
 
-		$uc_global = e107::pref('vstore', 'customer_userclass');
-		if($uc_global == -1)
+		if($classes)
 		{
 			$usr = e107::getSystemUser($userid);
-			// set userclass as defined in product
-			if(!empty($items) && is_array($items))
+			foreach($classes as $class)
 			{
-				$sql = e107::getDb();
-				$ids = array();
-
-				foreach($items as $item)
-				{
-					$ids[] = intval($item['id']);
-				}
-
-				if($sql->select(
-					'vstore_items',
-					'item_userclass',
-					'FIND_IN_SET(item_id, "' . implode(',', $ids) . '")'
-				))
-				{
-					while($row = $sql->fetch())
-					{
-						$uc = intval($row['item_userclass']);
-						if($uc > 0 && $uc != 255)
-						{
-							$usr->addClass($uc);
-						}
-					}
-				}
+				$usr->addClass($class);
 			}
-		}
-		elseif($uc_global != 255)
-		{
-			$usr = e107::getSystemUser($userid);
-			// all classes except No One (inactive)
-			$usr->addClass($uc_global);
 		}
 	}
 
@@ -2202,37 +2377,9 @@ class vstore
 	 */
 	public static function getCustomerUserclass($items)
 	{
+		$classes = self::userclassService()->classesFor($items, e107::pref('vstore', 'customer_userclass'));
 
-		$uc_global = e107::pref('vstore', 'customer_userclass');
-		if($uc_global == -1)
-		{
-			// set userclass as defined in product
-			if(!empty($items) && is_array($items))
-			{
-				$sql = e107::getDb();
-				$ucs = array();
-				foreach($items as $item)
-				{
-					$uc = $sql->retrieve('vstore_items', 'item_userclass', 'item_id=' . intval($item['id']));
-					if($uc > 0 && $uc != 255)
-					{
-						$ucs[] = $uc;
-					}
-				}
-				$ucs = array_unique($ucs);
-				if($ucs && count($ucs))
-				{
-					return implode(',', $ucs);
-				}
-			}
-		}
-		elseif($uc_global != 255)
-		{
-			// all classes except No One (inactive)
-			return '' . $uc_global;
-		}
-
-		return false;
+		return $classes ? implode(',', $classes) : false;
 	}
 
 	/**
@@ -2243,153 +2390,9 @@ class vstore
 	 */
 	private function updateInventory($json)
 	{
+		$rows = is_array($json) ? $json : e107::unserialize($json);
 
-		$sql = e107::getDb();
-		if(!is_array($json))
-		{
-			$arr = e107::unserialize($json);
-		}
-		else
-		{
-			$arr = $json;
-		}
-
-
-		// todo: update item_vars_inventory (item_vars = cart_item_vars)
-
-		foreach($arr as $row)
-		{
-			// Update inventory
-			// item_vars: e.g. 1,2|iuitz,black
-			// item_vars_inventory: e.g. {"balu": {"black": "10", "white": "20"}, "iuitz": {"black": "30", "white": "40"}}
-
-			if(!empty($row['quantity']) && !empty($row['id']) && !empty($row['name']))
-			{
-				$reduceBy = (int) $row['quantity'];
-
-				$itemdata = $sql->retrieve(
-					'vstore_items',
-					'item_inventory, item_vars_inventory',
-					'item_id = ' . (int) $row['id']
-				);
-				$curQuantity = (int) $itemdata['item_inventory'];
-
-				$varsdata = '';
-				if(!empty($row['item_vars']))
-				{
-					$item_vars = array_values($this->item_vars_toArray($row['item_vars']));
-					$varsdata = e107::unserialize($itemdata['item_vars_inventory']);
-					$vars_quantity = -1;
-					if(count($item_vars) == 1)
-					{
-						$vars_quantity = (int) varset($varsdata[$item_vars[0]], -1);
-						if($vars_quantity > 0)
-						{
-							if($vars_quantity == -1)
-							{
-								$reduceToVars = -1;
-							}
-							elseif($reduceBy > $vars_quantity)
-							{
-								$reduceToVars = 0;
-							}
-							else
-							{
-								$reduceToVars = $vars_quantity - $reduceBy;
-							}
-							$varsdata[$item_vars[0]] = $reduceToVars;
-						}
-					}
-					elseif(count($item_vars) == 2)
-					{
-						$vars_quantity = (int) varset($varsdata[$item_vars[0]][$item_vars[1]], -1);
-						if($vars_quantity > 0)
-						{
-							if($vars_quantity == -1)
-							{
-								$reduceToVars = -1;
-							}
-							elseif($reduceBy > $vars_quantity)
-							{
-								$reduceToVars = 0;
-							}
-							else
-							{
-								$reduceToVars = $vars_quantity - $reduceBy;
-							}
-							$varsdata[$item_vars[0]][$item_vars[1]] = $reduceToVars;
-						}
-					}
-					$varsdata = e107::serialize($varsdata, 'json');
-				}
-
-
-				if($curQuantity > 0 || !empty($varsdata))
-				{
-					if($curQuantity == -1)
-					{
-						$reduceTo = -1;
-					}
-					elseif($reduceBy > $curQuantity)
-					{
-						$reduceTo = 0;
-					}
-					else
-					{
-						$reduceTo = $curQuantity - $reduceBy;
-					}
-
-					$update = array(
-						'data'  => array(
-							'item_inventory' => $reduceTo,
-						),
-						'WHERE' => 'item_id = "' . intval($row['id']) . '"'
-					);
-					if(!empty($varsdata))
-					{
-						$update['data']['item_vars_inventory'] = $varsdata;
-					}
-
-					// if ($sql->update(
-					//     'vstore_items',
-					//     'item_inventory = item_inventory - ' . $reduceBy .
-					//     ' WHERE item_id=' . intval($row['id']) . ' AND item_code="' . $row['name'] . '" LIMIT 1'
-					// )) {
-					if($sql->update('vstore_items', $update))
-					{
-						e107::getMessage()->addDebug(
-							"Updated item_inventory of " . $row['name'] . " to " . $reduceTo
-						);
-						if(!empty($varsdata))
-						{
-							e107::getMessage()->addDebug(
-								"Updated item_vars_inventory of " . $row['name'] . " to " . $reduceToVars
-							);
-						}
-					}
-					else
-					{
-						e107::getMessage()->addDebug(
-							"Was UNABLE to update item_inventory of " . $row['name'] .
-							" (" . $row['id'] . ") to " . $reduceTo
-						);
-						if(!empty($varsdata))
-						{
-							e107::getMessage()->addDebug(
-								"Was UNABLE to update item_vars_inventory of " . $row['name'] .
-								" (" . $row['id'] . ") to " . $reduceToVars
-							);
-						}
-					}
-				}
-				else
-				{
-					e107::getMessage()->addDebug(
-						"Unlimited item not reduced: " . $row['name'] . " (" . $row['id'] . ")"
-					);
-				}
-			}
-		}
+		self::inventoryService()->reduce(is_array($rows) ? $rows : array());
 	}
 /*
 	public static function getGateways()
@@ -2492,92 +2495,26 @@ class vstore
 	 */
 	protected function updateCart($type = 'modify', $array = array())
 	{
-
-		$sql = e107::getDb();
+		$service = self::cartService();
 
 		if($type == 'modify')
 		{
-			foreach($array as $id => $val)
+			$results = $service->updateQuantities($this->cartId, (array) $array, function ($vars)
 			{
-				$itemid = (int) $val['id'];
-				$qty = (int) $val['qty'];
-				$itemvars = $val['vars'];
-				
-				// Skip if qty is 0 or negative - don't update to 0, just skip
-				if($qty <= 0)
-				{
-					continue;
-				}
+				$prop = vstore::getItemVarProperties($vars, 0);
 
-				if(!empty($itemvars))
-				{
-					list($itemkeys, $itemvalues) = explode('|', $itemvars);
-					$itemkeys = explode(',', $itemkeys);
-					$itemvalues = explode(',', $itemvalues);
-					$itemvars = array();
+				return $prop ? $prop['variation'] : '';
+			});
 
-					foreach($itemkeys as $k => $v)
-					{
-						$itemvars[$v] = $itemvalues[$k];
-					}
-				}
-
-				// Check if item exists and is active
-				$iteminfo = $sql->retrieve('vstore_items', 'item_active, item_name', 'item_id=' . $itemid);
-
-				if($iteminfo && $iteminfo['item_active'] == 0)
-				{
-					// Item not found or not longer active => Remove from cart
-					e107::getMessage()->addWarning(
-						'We\'re sorry, but we could\'t find the selected item "' . $iteminfo['item_name'] .
-						'" or it is no longer active!',
-						'vstore'
-					);
-					$sql->delete(
-						'vstore_cart',
-						'cart_id = ' . intval($id) . ' AND cart_item = ' . intval($itemid) . ' LIMIT 1'
-					);
-					continue;
-				}
-
-				$itemname = $iteminfo['item_name'];
-
-				// check if item is in stock
-				$inStock = $this->getItemInventory($itemid, $itemvars);
-				if($qty > $inStock && $inStock >= 0)
-				{
-					$qty = $inStock;
-					$itemvarstring = '';
-					if(!empty($itemvars))
-					{
-						$itemprop = vstore::getItemVarProperties($itemvars, 0);
-
-						if($itemprop)
-						{
-							$itemvarstring = $itemprop['variation'];
-						}
-					}
-					$itemname .= $itemvarstring;
-					e107::getMessage()->addWarning(
-						'The entered quantity for "' . $itemname .
-						'" exceeds the number of items in stock!<br/>The quantity has been adjusted!',
-						'vstore'
-					);
-				}
-
-				$sql->update(
-					'vstore_cart',
-					'cart_qty = ' . intval($qty) . ' WHERE cart_id = ' . intval($id) . ' LIMIT 1'
-				);
+			foreach($results as $result)
+			{
+				self::addResultMessage($result);
 			}
 		}
 
 		if($type == 'remove')
 		{
-			foreach($array as $id => $qty)
-			{
-				$sql->delete('vstore_cart', 'cart_id = ' . intval($id) . ' LIMIT 1');
-			}
+			$service->remove($this->cartId, (array) $array);
 		}
 
 		return null;
@@ -2593,8 +2530,12 @@ class vstore
 	protected function resetCart()
 	{
 
-		// Delete cart from database
-		e107::getDb()->delete('vstore_cart', 'cart_id=' . varset($_COOKIE["cartId"]));
+		// Delete the cart of this visitor from the database
+		$sql = e107::getDb();
+		if(!empty($this->cartId))
+		{
+			$sql->delete('vstore_cart', 'cart_session = "' . $sql->escape($this->cartId) . '"');
+		}
 		$_COOKIE["cartId"] = false;
 		cookie("cartId", null, time() - 3600);
 		$this->cartId = null;
@@ -2612,7 +2553,8 @@ class vstore
 	protected function getCartId()
 	{
 
-		if(!empty($_COOKIE["cartId"]))
+		// The id comes from a cookie: only accept what this class generates
+		if(!empty($_COOKIE["cartId"]) && preg_match('/^[A-Za-z0-9_,-]{8,128}$/', $_COOKIE["cartId"]))
 		{
 			return $_COOKIE["cartId"];
 		}
@@ -2646,7 +2588,8 @@ class vstore
 	public function categoryList($parent = 0, $np = false)
 	{
 
-		$this->from = vartrue($this->get['frm'], 0);
+		$this->from = max(0, (int) varset($this->get['frm'], 0));
+		$parent = (int) $parent;
 
 		$query = 'SELECT *
         FROM #vstore_cat
@@ -2655,7 +2598,7 @@ class vstore
         LIMIT ' . $this->from . "," . $this->perPage;
 		if((!$data = e107::getDb()->retrieve($query, true)) && intval($parent) == 0)
 		{
-			return e107::getMessage()->addInfo('No categories available!', 'vstore')->render('vstore');
+			return e107::getMessage()->addInfo(LAN_VSTORE_MSG_NO_CATEGORIES, 'vstore')->render('vstore');
 		}
 		elseif(!$data)
 		{
@@ -2736,7 +2679,7 @@ class vstore
 			true
 		))
 		{
-			return e107::getMessage()->addInfo("No products available in this category", 'vstore')->render('vstore');
+			return e107::getMessage()->addInfo(LAN_VSTORE_MSG_NO_PRODUCTS, 'vstore')->render('vstore');
 		}
 
 		$count = e107::getDb()->foundRows();
@@ -2806,7 +2749,7 @@ class vstore
 			true
 		))
 		{
-			e107::getMessage()->addInfo("No products available in this category", 'vstore');
+			e107::getMessage()->addInfo(LAN_VSTORE_MSG_NO_PRODUCTS, 'vstore');
 
 			return null;
 		}
@@ -2833,7 +2776,7 @@ class vstore
 
 		if(!empty($data['item_details']))
 		{
-			$tabData['details'] = array('caption' => 'Details', 'text' => $tmpl['item']['details']);
+			$tabData['details'] = array('caption' => LAN_VSTORE_MSG_TAB_DETAILS, 'text' => $tmpl['item']['details']);
 		}
 
 		if($media = e107::unserialize($data['item_pic']))
@@ -2842,7 +2785,7 @@ class vstore
 			{
 				if($tp->isVideo($v['path']))
 				{
-					$tabData['videos'] = array('caption' => 'Videos', 'text' => $tmpl['item']['videos']);
+					$tabData['videos'] = array('caption' => LAN_VSTORE_MSG_TAB_VIDEOS, 'text' => $tmpl['item']['videos']);
 					break;
 				}
 			}
@@ -2850,7 +2793,7 @@ class vstore
 
 		if(!empty($data['item_reviews']))
 		{
-			$tabData['reviews'] = array('caption' => 'Reviews', 'text' => $tmpl['item']['reviews']);
+			$tabData['reviews'] = array('caption' => LAN_VSTORE_MSG_TAB_REVIEWS, 'text' => $tmpl['item']['reviews']);
 		}
 
 
@@ -2871,13 +2814,13 @@ class vstore
 			$tmp = e107::unserialize($data['item_files']);
 			if(!empty($tmp[0]['path']))
 			{
-				$tabData['files'] = array('caption' => 'Files', 'text' => $tmpl['item']['files']);
+				$tabData['files'] = array('caption' => LAN_VSTORE_MSG_TAB_FILES, 'text' => $tmpl['item']['files']);
 			}
 		}
 
 		if(!empty($this->pref['howtoorder']))
 		{
-			$tabData['howto'] = array('caption' => 'How to Order', 'text' => $tmpl['item']['howto']);
+			$tabData['howto'] = array('caption' => LAN_VSTORE_MSG_TAB_HOWTO, 'text' => $tmpl['item']['howto']);
 		}
 
 		if(!empty($tabData))
@@ -2891,106 +2834,24 @@ class vstore
 
 
 	/**
-	 * Add a single item to the cart
-	 * if the item is already on the list increase the quantity by 1
+	 * Add an item to the cart
+	 * if the item is already on the list the quantity is increased, never above the stock
 	 *
 	 * @param int $id item_id
 	 * @param array $itemvars array of item variations
+	 * @param int $qty quantity to add (at least 1)
 	 * @return bool true on success
 	 */
-	public function addToCart($id, $itemvars = false)
+	public function addToCart($id, $itemvars = false, $qty = 1)
 	{
+		$result = self::cartService()->add($this->cartId, USERID, $id, $itemvars, $qty);
 
-		// if (USERID === 0) {
-		//     // Allow only logged in users to add items to the cart
-		//     e107::getMessage()->addError('You must be logged in before adding products to the cart!', 'vstore');
-		//     return false;
-		// }
-
-		$itemvars = $this->fixItemVarArray($itemvars);
-		$sql = e107::getDb();
-
-		$iteminfo = $sql->retrieve('vstore_items', 'item_active, item_tax_class', 'item_id=' . intval($id));
-		if(!$iteminfo['item_active'])
+		if(!$result->isOk())
 		{
-			e107::getMessage()->addWarning('We\'re sorry, but this item is not longer available!', 'vstore');
-			$sql->delete('vstore_cart', 'cart_session="' . $this->cartId . '" AND cart_item=' . intval($id));
-
-			return false;
+			e107::getMessage()->addWarning(ResultTranslator::text($result), 'vstore');
 		}
 
-		$where = 'cart_session = "' . $this->cartId . '" AND cart_item = ' . intval($id);
-		if(is_array($itemvars))
-		{
-			$where .= ' AND cart_item_vars LIKE "' . self::item_vars_toDB($itemvars) . '"';
-		}
-
-
-		// Item Exists.
-		if($sql->select('vstore_cart', 'cart_qty, cart_item_vars', $where . ' LIMIT 1'))
-		{
-			$cart = $sql->fetch();
-
-			$inventory = $this->getItemInventory(intval($id), $itemvars);
-
-			if($inventory && (intval($cart['cart_qty']) + 1) <= $inventory)
-			{
-				if($sql->update('vstore_cart', 'cart_qty = cart_qty +1 WHERE ' . $where))
-				{
-					return true;
-				}
-			}
-			e107::getMessage()->addWarning('Quantity of selected product exceeds the number of items in stock!<br/>' .
-				'The quantity has been adjusted!', 'vstore');
-
-			return false;
-		}
-
-
-		$insert = array(
-			'cart_id'             => 0,
-			'cart_session'        => $this->cartId,
-			'cart_e107_user'      => USERID,
-			'cart_status'         => '',
-			'cart_item'           => intval($id),
-			'cart_item_vars'      => $itemvars ? self::item_vars_toDB($itemvars) : '',
-			'cart_item_tax_class' => vartrue($iteminfo['item_tax_class'], 'standard'),
-			'cart_qty'            => 1
-		);
-
-		// Add new Item.
-		return $sql->insert('vstore_cart', $insert);
-	}
-
-	/**
-	 * fix the item variation array to be used in following processes
-	 *
-	 * @param array $itemvars
-	 * @return array
-	 */
-	private function fixItemVarArray($itemvars)
-	{
-
-		if(!is_array($itemvars))
-		{
-			return false;
-		}
-		$result = array();
-		if(array_key_exists(0, $itemvars))
-		{
-			foreach($itemvars as $value)
-			{
-				list($id, $name) = explode('-', $value, 2);
-				$result[$id] = $name;
-			}
-		}
-		else
-		{
-			$result = $itemvars;
-		}
-		ksort($result);
-
-		return $result;
+		return $result->isOk();
 	}
 
 	/**
@@ -3001,15 +2862,7 @@ class vstore
 	 */
 	public static function item_vars_toDB($itemvarsarray)
 	{
-
-		if(!is_array($itemvarsarray))
-		{
-			return '';
-		}
-		$result = implode(',', array_keys($itemvarsarray));
-		$result .= '|' . implode(',', array_values($itemvarsarray));
-
-		return $result;
+		return ItemVars::toDb($itemvarsarray);
 	}
 
 	/**
@@ -3020,14 +2873,7 @@ class vstore
 	 */
 	public static function item_vars_toArray($itemvarsstring)
 	{
-
-		if(empty($itemvarsstring) || strpos($itemvarsstring, '|') === false)
-		{
-			return null;
-		}
-		list($k, $v) = explode('|', $itemvarsstring);
-
-		return array_combine(explode(',', $k), explode(',', $v));
+		return ItemVars::toArray($itemvarsstring);
 	}
 
 	/**
@@ -3039,59 +2885,7 @@ class vstore
 	 */
 	public function getItemInventory($itemid, $itemvars = false)
 	{
-
-		$itemvars = $this->fixItemVarArray($itemvars);
-
-		$sql = e107::getDb();
-
-		if($itemvars && count($itemvars))
-		{
-			$itemvarkeys = array_values($itemvars);
-			$where = 'item_id=' . intval($itemid);
-
-			if($sql->select('vstore_items', 'item_vars_inventory', $where))
-			{
-				$inventory = array_shift($sql->fetch());
-
-				$inventory = e107::unserialize($inventory);
-
-				if(count($itemvarkeys) == 1)
-				{
-					$qty = (int) $inventory[$itemvarkeys[0]];
-				}
-				elseif(count($itemvarkeys) == 2)
-				{
-					$qty = (int) $inventory[$itemvarkeys[0]][$itemvarkeys[1]];
-				}
-				else
-				{
-					e107::getMessage()->addDebug('Invalid number of item_vars!', 'vstore');
-
-					return 0;
-				}
-
-				if($qty < 0)
-				{
-					return 9999999;
-				}
-
-				return $qty;
-			}
-
-			e107::getMessage()->addDebug('Item not found!', 'vstore');
-
-			return 0;
-		}
-		else
-		{
-			$inventory = (int) $sql->retrieve('vstore_items', 'item_inventory', 'item_id = ' . intval($itemid));
-			if($inventory < 0)
-			{
-				return 9999999;
-			}
-
-			return $inventory;
-		}
+		return self::inventoryService()->available($itemid, $itemvars);
 	}
 
 	/**
@@ -3106,7 +2900,7 @@ class vstore
         FROM `#vstore_cart` AS c
         LEFT JOIN `#vstore_items` as i ON (c.cart_item = i.item_id)
         LEFT JOIN `#vstore_cat` as cat ON (i.item_cat = cat.cat_id)
-        WHERE c.cart_session = "' . $this->cartId . '" AND c.cart_status ="" ', true);
+        WHERE c.cart_session = "' . e107::getDb()->escape($this->cartId) . '" AND c.cart_status ="" ', true);
 	}
 
 
@@ -3120,7 +2914,7 @@ class vstore
 
 		if(!$data = $this->getCartData())
 		{
-			return e107::getMessage()->addInfo("Your cart is empty.", 'vstore')->render('vstore');
+			return e107::getMessage()->addInfo(LAN_VSTORE_FR_CART_EMPTY, 'vstore')->render('vstore');
 		}
 
 		$checkoutData = $this->prepareCheckoutData($data);
@@ -3173,109 +2967,71 @@ class vstore
 	public function prepareCheckoutData($data, $isCheckoutData = false, $fromSitelink = false)
 	{
 		$sql = e107::getDb();
-		$cust = vstore::getCustomerData();
-		$isBusiness = !empty($cust['vat_id']);
+		$cust = (array) vstore::getCustomerData();
+		$vatId = trim((string) varset($cust['vat_id']));
 
 		$taxCountry = varset($this->pref['tax_business_country']);
 
-		$country = isset($cust['country']) ? $cust['country'] : $taxCountry;
+		$country = !empty($cust['country']) ? $cust['country'] : $taxCountry;
 
-		$isLocal = ($country == $taxCountry);
+		$isLocal = (strtoupper($country) === strtoupper($taxCountry));
 
-		$coupon = '';
-		$checkoutData['coupon'] = array('code' => '', 'amount' => 0.0, 'amount_net' => 0.0);
-
+		// A posted (even empty) coupon field replaces the saved coupon, otherwise the saved one is reused
+		$couponCode = '';
 		$hasCoupon = false;
+		$posted = isset($this->post['cart_coupon_code']) ? trim($this->post['cart_coupon_code']) : null;
 
-		if(!empty($this->post['cart_coupon_code']))
+		if(!$isCheckoutData && !empty($posted))
 		{
-			$this->post['cart_coupon_code'] = trim($this->post['cart_coupon_code']);
+			$this->post['cart_coupon_code'] = $posted;
+			$couponCode = $posted;
 		}
-
-		if(!$isCheckoutData && !empty($this->post['cart_coupon_code']))
+		elseif($isCheckoutData || $posted === null)
 		{
-			// coupon code was posted
-			$coupon = e107::getDb()->retrieve(
-				'vstore_coupons',
-				'*',
-				sprintf('coupon_code="%s"', trim($this->post['cart_coupon_code']))
-			);
-			
-			if(deftrue('e_DEBUG_VSTORE'))
-			{
-				e107::getDebug()->log('[VSTORE_COUPON] Retrieved from POST: ' . print_r($coupon, true));
-			}
-			
-			$hasCoupon = true;
-		}
-		elseif($isCheckoutData || !isset($this->post['cart_coupon_code']))
-		{
-			// data is cart data
-			// or
-			// reuse saved coupon code
 			if($isCheckoutData)
 			{
-				$coupon = trim($data['coupon']['code']);
+				$couponCode = trim($data['coupon']['code']);
 			}
 			else
 			{
 				$chk = $this->getCheckoutData();
-				$coupon = !empty($chk['coupon']['code']) ? trim($chk['coupon']['code']) : '';
+				$couponCode = !empty($chk['coupon']['code']) ? trim($chk['coupon']['code']) : '';
 				unset($chk);
 			}
-			if($coupon)
+		}
+
+		$coupon = null;
+		if($couponCode !== '')
+		{
+			$hasCoupon = true;
+			$coupon = (new CouponRepository())->findByCode($couponCode);
+
+			if(deftrue('e_DEBUG_VSTORE'))
 			{
-				$coupon = e107::getDb()->retrieve('vstore_coupons', '*', sprintf('coupon_code="%s"', $coupon));
-				
-				if(deftrue('e_DEBUG_VSTORE'))
-				{
-					e107::getDebug()->log('[VSTORE_COUPON] Retrieved from DB: ' . print_r($coupon, true));
-				}
-				
-				$hasCoupon = true;
+				e107::getDebug()->log('[VSTORE_COUPON] Retrieved: ' . print_r($coupon, true));
 			}
 		}
 
-		if($coupon)
+		if(!$coupon && $hasCoupon)
 		{
-			// assign coupon code
-			$checkoutData['coupon']['code'] = strtoupper(trim($coupon['coupon_code']));
-		}
-		elseif($hasCoupon)
-		{
-			e107::getMessage()->addError('Invalid coupon-code!', 'vstore');
+			e107::getMessage()->addError(LAN_VSTORE_MSG_COUPON_INVALID, 'vstore');
 		}
 
-		$subTotal = 0;
-		$subTotalNet = 0;
-		$couponTotal = 0;
-		$netTotal = array();
-		$taxTotal = array();
-
-		$checkoutData['id'] = ($isCheckoutData ? $data['id'] : $this->getCartId());
-
-		$count_active = 0;
-		$items = $data;
-		if($isCheckoutData)
-		{
-			$items = $data['items'];
-		}
+		$items = $isCheckoutData ? $data['items'] : $data;
+		$id = ($isCheckoutData ? $data['id'] : $this->getCartId());
 		unset($data);
 
+		// Drop inactive items and add the price of the selected variations
+		$rows = array();
 		foreach($items as $row)
 		{
 			if(!$this->isItemActive($row['cart_item']))
 			{
-				e107::getMessage()->addWarning('We\'re sorry, but the item "' . $row['item_name'] .
-					'" is missing or not longer active and has been removed from the cart!', 'vstore');
-				$sql->delete('vstore_cart', 'cart_id=' . $row['cart_id'] . ' AND cart_item=' . $row['cart_item']);
+				e107::getMessage()->addWarning(sprintf(LAN_VSTORE_MSG_ITEM_REMOVED, $row['item_name']), 'vstore');
+				$sql->delete('vstore_cart', 'cart_id=' . (int) $row['cart_id'] . ' AND cart_item=' . (int) $row['cart_item']);
 				continue;
 			}
 
-			$count_active++;
-
-			// Handle item variations
-			$price = $row['item_price'];
 			$row['itemvarstring'] = '';
 			if(!empty($row['cart_item_vars']))
 			{
@@ -3284,110 +3040,51 @@ class vstore
 				{
 					if(!$isCheckoutData)
 					{
-						$price += $varinfo['price'];
-						$row['item_price'] = $price;
+						$row['item_price'] += $varinfo['price'];
 					}
 					$row['itemvarstring'] = $varinfo['variation'];
 				}
 			}
 
-			$item_total = $price * $row['cart_qty'];
-
-			// Calc coupon amount for this item
-			$coupon_amount = vstore::calcCouponAmount($coupon, $row);
-			$checkoutData['coupon']['amount'] += $coupon_amount;
-
-			$row['is_business']    = $isBusiness;
-			$row['is_local']       = $isLocal;
-			$row['tax_rate']       = vstore::getTaxRate($row['cart_item_tax_class'], varset($cust['country']));
-			$row['tax_amount']     = vstore::calcTaxAmount($item_total, $row['tax_rate']);
-			$row['item_price_net'] = $this->calcNetPrice($price, $row['tax_rate']);
-
-			$row['item_total']     = $item_total;
-			$row['item_total_net'] = $item_total; // $this->calcNetPrice($item_total, $row['tax_rate']);
-
-
-			$rateKey = ''.$row['tax_rate'];
-
-			if(!isset($taxTotal[$rateKey]))
-			{
-				$taxTotal[$rateKey] = 0;
-			}
-
-			if(!isset($netTotal[$rateKey]))
-			{
-				$netTotal[$rateKey] = 0;
-			}
-
-			if(!isset($taxTotal[$rateKey]))
-			{
-				$taxTotal[$rateKey] = 0;
-			}
-
-
-			$taxTotal[$rateKey] += vstore::calcTaxAmount($coupon_amount, $row['tax_rate']);
-			$checkoutData['coupon']['amount_net'] += $this->calcNetPrice($coupon_amount, $row['tax_rate']);
-
-			$netTotal[$rateKey] += $row['item_total_net'];
-			$taxTotal[$rateKey] += $row['tax_amount'];
-
-			$subTotal += $item_total;
-			$subTotalNet += $row['item_total_net'];
-
-			$checkoutData['items'][] = $row;
+			$rows[] = $row;
 		}
 
-
-		if($count_active == 0)
+		if(count($rows) == 0)
 		{
 			return ($fromSitelink
 				? null
-				: e107::getMessage()->addInfo("Your cart is empty.", 'vstore')->render('vstore'));
+				: e107::getMessage()->addInfo(LAN_VSTORE_FR_CART_EMPTY, 'vstore')->render('vstore'));
 		}
 
-
-		$shippingTotal = vstore::calcShippingCost($checkoutData['items'], $this->pref);
-		$shippingNet = 0.0;
-
-		// calc shipping tax
-		if(count($netTotal) > 0)
+		$session = e107::getSession('vstore')->get('_data');
+		$pref = $this->pref;
+		if(isset($pref['tax_classes']) && !is_array($pref['tax_classes']))
 		{
-			$sum = array_sum($netTotal);
-			foreach($netTotal as $tax_rate => $value)
-			{
-				$gross = ($value / $sum) * $shippingTotal;
-				$taxTotal['' . $tax_rate] += vstore::calcTaxAmount($gross, $tax_rate);
-				$shippingNet += $this->calcNetPrice($gross, $tax_rate);
-			}
+			$pref['tax_classes'] = e107::unserialize($pref['tax_classes']);
 		}
 
-		$grandTotal = $subTotal + $shippingTotal + $checkoutData['coupon']['amount'];
-		foreach($taxTotal as $amount)
+		$custCountry = !empty($cust['country']) ? $cust['country'] : varset($session['customer_country'], '');
+
+		$calc = self::checkoutService()->calculate($rows, $coupon ?: null, array(
+			'country'     => $custCountry,
+			'vat_id'      => $vatId,
+			// The net view is only for sales without tax: a VAT ID of another EU country that VIES accepts
+			'is_business' => self::taxService()->isReverseCharge($custCountry, $pref, $vatId),
+			'is_local'    => $isLocal,
+			'user_id'     => USERID,
+		), $pref);
+
+		foreach($calc['messages'] as $message)
 		{
-			$grandTotal += $amount;
+			self::addResultMessage($message);
 		}
 
-		$grandNet = $subTotalNet + $shippingNet + $checkoutData['coupon']['amount_net'];
-
-		$totals = array(
-			'is_business'        => $isBusiness,
-			'is_local'           => $isLocal,
-			'cart_taxTotal'      => $taxTotal,
-			'cart_subTotal'      => $subTotal,
-			'cart_shippingTotal' => $shippingTotal,
-			'cart_grandTotal'    => $grandTotal,
-
-			'cart_subNet'      => round($subTotalNet,2),
-			'cart_shippingNet' => $shippingNet,
-			'cart_grandNet'    => round($grandNet,2),
-
-			'cart_coupon' => $checkoutData['coupon']
+		return array(
+			'id'     => $id,
+			'coupon' => $calc['totals']['cart_coupon'],
+			'items'  => $calc['items'],
+			'totals' => $calc['totals'],
 		);
-
-
-		$checkoutData['totals'] = $totals;
-
-		return $checkoutData;
 	}
 
 	/**
@@ -3550,6 +3247,25 @@ class vstore
 	}
 
 	/**
+	 * Resolve the path stored for a downloadable item ({e_MEDIA_FILE}... or a plain path)
+	 * to a readable file in a directory e107 allows to serve.
+	 *
+	 * @param string $path
+	 * @return string|false canonical path or false when the file cannot be served
+	 */
+	public static function resolveDownloadPath($path)
+	{
+		if(!is_string($path) || $path === '')
+		{
+			return false;
+		}
+
+		$file = e107::getFile()->resolveSendPath(e107::getParser()->replaceConstants($path));
+
+		return ($file !== false && is_file($file) && is_readable($file)) ? $file : false;
+	}
+
+	/**
 	 * Process a download request of a downloadable item
 	 *
 	 * @param int $item_id
@@ -3580,6 +3296,13 @@ class vstore
 
 		if(varset($filepath))
 		{
+			if(self::resolveDownloadPath($filepath) === false)
+			{
+				e107::getMessage()->addError(sprintf(LAN_VSTORE_MSG_DL_NOT_FOUND, basename($filepath)), 'vstore');
+
+				return false;
+			}
+
 			e107::getFile()->send($filepath);
 
 			return true;
@@ -3587,7 +3310,7 @@ class vstore
 		else
 		{
 			e107::getMessage()->addError(
-				'Download id  "' . intval($item_id) . '" doesn\'t contain a file to download!',
+				sprintf(LAN_VSTORE_MSG_DL_NO_FILE, intval($item_id)),
 				'vstore'
 			);
 
@@ -3613,7 +3336,7 @@ class vstore
 
 		if(USERID === 0)
 		{
-			e107::getMessage()->addError('You need to login to download the file!', 'vstore');
+			e107::getMessage()->addError(LAN_VSTORE_MSG_DL_LOGIN, 'vstore');
 
 			return false;
 		}
@@ -3629,7 +3352,7 @@ class vstore
 		if(!$orders)
 		{
 			e107::getMessage()->addError(
-				'We were unable to find your order and therefore the download has been denied!',
+				LAN_VSTORE_MSG_DL_NO_ORDER,
 				'vstore'
 			);
 
@@ -3653,8 +3376,7 @@ class vstore
 		}
 		// Order not completed or payment not complete + order_status = New
 		e107::getMessage()->addError(
-			'Your order is still in a state (' . vstore::getStatus($order_status) .
-			') which doesn\'t allow to download the file!',
+			sprintf(LAN_VSTORE_MSG_DL_STATE, vstore::getStatus($order_status)),
 			'vstore'
 		);
 
@@ -3772,12 +3494,14 @@ class vstore
 	 */
 	public static function weightUnits($val = null)
 	{
+		e107::lan('vstore', 'global', true);
+
 		$opts = array(
-			'g'     => 'Grams',
-			'kg'    => 'Kilograms',
-			'lb'    => 'Pounds',
-			'oz'    => 'Ounces',
-			'carat' => 'Carats'
+			'g'     => defset('LAN_VSTORE_WEIGHT_G', 'Grams'),
+			'kg'    => defset('LAN_VSTORE_WEIGHT_KG', 'Kilograms'),
+			'lb'    => defset('LAN_VSTORE_WEIGHT_LB', 'Pounds'),
+			'oz'    => defset('LAN_VSTORE_WEIGHT_OZ', 'Ounces'),
+			'carat' => defset('LAN_VSTORE_WEIGHT_CARAT', 'Carats')
 		);
 
 		return !empty($val) ? varset($opts[$val]) : $opts;
@@ -3798,72 +3522,7 @@ class vstore
 			$pref = e107::pref('vstore');
 		}
 
-		// No shipping
-		if(empty($pref['shipping']))
-		{
-			return 0.0;
-		}
-
-		$shipping = 0.0;
-		$subtotal = 0.0;
-		$weight = 0.0;
-
-		foreach($items as $item)
-		{
-			if(varset($pref['shipping_method']) == 'sum_unique')
-			{
-				// sum_unique, sum_simple or tiered
-				$shipping += (double) $item['item_shipping'];
-			}
-			else
-			{
-				$shipping += (double) ($item['item_shipping'] * $item['cart_qty']);
-			}
-
-			$subtotal += (double) ($item['item_price'] * $item['cart_qty']);
-			$weight += (double) ($item['item_weight'] * $item['cart_qty']);
-		}
-
-		if(varset($pref['shipping_method']) === 'tiered'
-			&& !empty($pref['shipping_limit'])
-			&& !empty($pref['shipping_data'])
-		)
-		{
-			$data = $pref['shipping_data'];
-			unset($data['%ROW%']);
-			$val = $subtotal;
-			if(varset($pref['shipping_unit']) === 'weight')
-			{
-				// weight or subtotal
-				$val = $weight;
-			}
-
-			$found = false;
-			foreach($data as $v)
-			{
-
-				if($val <= floatval($v['unit']))
-				{
-					if($pref['shipping_limit'] === 'limit')
-					{
-						// limit or money
-						$shipping = (double) (floatval($v['cost']) > $shipping ? $shipping : $v['cost']);
-					}
-					else
-					{
-						$shipping = (double) $v['cost'];
-					}
-					$found = true;
-					break;
-				}
-			}
-			if(!$found)
-			{
-				$shipping = 0.0;
-			}
-		}
-
-		return $shipping;
+		return (new ShippingService())->calculate($items, $pref);
 	}
 
 	/**
@@ -3876,190 +3535,17 @@ class vstore
 	 */
 	public static function calcCouponAmount($coupon, $item)
 	{
-		if(empty($coupon) || empty($item))
+		// '' or false (no coupon / unknown code) must not reach the service: (array) '' is not empty
+		if(empty($coupon) || empty($item) || !is_array($coupon) || !is_array($item))
 		{
 			return 0.0;
 		}
 
-		// 1. Verify coupon is active
-		if(empty($coupon['coupon_active']))
-		{
-			e107::getMessage()->addError('Coupon is not available!', 'vstore');
-			return 0.0;
-		}
+		$userId = (defined('USERID') && USERID > 0) ? (int) USERID : 0;
+		$result = self::couponService()->calculate($coupon, $item, $userId);
+		self::addResultMessage($result);
 
-		// 2. Verify coupon date range
-		$currentTime = time();
-		
-		if(deftrue('e_DEBUG_VSTORE'))
-		{
-			e107::getDebug()->log('[VSTORE_COUPON] BEFORE conversion - Start: ' . var_export($coupon['coupon_start'], true) . ', End: ' . var_export($coupon['coupon_end'], true));
-		}
-		
-		// Convert dates if they are stored as datetime strings instead of timestamps
-		if(!empty($coupon['coupon_start']) && !is_numeric($coupon['coupon_start']))
-		{
-			$coupon['coupon_start'] = strtotime($coupon['coupon_start']);
-			if(deftrue('e_DEBUG_VSTORE'))
-			{
-				e107::getDebug()->log('[VSTORE_COUPON] Converted START to timestamp: ' . $coupon['coupon_start']);
-			}
-		}
-		if(!empty($coupon['coupon_end']) && !is_numeric($coupon['coupon_end']))
-		{
-			$coupon['coupon_end'] = strtotime($coupon['coupon_end']);
-			if(deftrue('e_DEBUG_VSTORE'))
-			{
-				e107::getDebug()->log('[VSTORE_COUPON] Converted END to timestamp: ' . $coupon['coupon_end']);
-			}
-		}
-		
-		if(deftrue('e_DEBUG_VSTORE'))
-		{
-			e107::getDebug()->log('[VSTORE_COUPON] Validating dates - Current: ' . $currentTime . ' (' . date('Y-m-d H:i:s', $currentTime) . '), Start: ' . $coupon['coupon_start'] . ' (' . (empty($coupon['coupon_start']) ? 'empty' : date('Y-m-d H:i:s', $coupon['coupon_start'])) . '), End: ' . $coupon['coupon_end'] . ' (' . (empty($coupon['coupon_end']) ? 'empty' : date('Y-m-d H:i:s', $coupon['coupon_end'])) . ')');
-			e107::getDebug()->log('[VSTORE_COUPON] Comparison - Start check: ' . ($currentTime < $coupon['coupon_start'] ? 'FAIL (too early)' : 'OK') . ', End check: ' . ($currentTime > $coupon['coupon_end'] ? 'FAIL (expired)' : 'OK'));
-		}
-		
-		if(!empty($coupon['coupon_start']) && $currentTime < $coupon['coupon_start'])
-		{
-			$availableDate = date('Y-m-d H:i:s', $coupon['coupon_start']);
-			e107::getMessage()->addError('Coupon is not yet available! It will be active from: ' . $availableDate, 'vstore');
-			return 0.0;
-		}
-
-		if(!empty($coupon['coupon_end']) && $currentTime > $coupon['coupon_end'])
-		{
-			$expiredDate = date('Y-m-d H:i:s', $coupon['coupon_end']);
-			e107::getMessage()->addError('Coupon is no longer available! It expired on: ' . $expiredDate, 'vstore');
-			return 0.0;
-		}
-
-		// 3. Verify global usage limit
-		if($coupon['coupon_limit_coupon'] > -1)
-		{
-			$usageCount = self::getCouponUsageCount($coupon['coupon_code']);
-			if($usageCount >= $coupon['coupon_limit_coupon'])
-			{
-				e107::getMessage()->addError(
-					'Coupon has exceeded its allowed number of usage!',
-					'vstore'
-				);
-				return 0.0;
-			}
-		}
-
-		// 4. Verify per-user usage limit
-		if($coupon['coupon_limit_user'] > -1 && defined('USERID') && USERID > 0)
-		{
-			$userUsageCount = self::getCouponUsageCountByUser($coupon['coupon_code'], USERID);
-			if($userUsageCount >= $coupon['coupon_limit_user'])
-			{
-				e107::getMessage()->addError(
-					'You have exceeded the allowed number of usage for this coupon!',
-					'vstore'
-				);
-				return 0.0;
-			}
-		}
-
-		// Parse category and item restrictions
-		$coupon['coupon_items'] = array_filter(explode(',', $coupon['coupon_items']));
-		$coupon['coupon_items_ex'] = array_filter(explode(',', $coupon['coupon_items_ex']));
-		$coupon['coupon_cats'] = array_filter(explode(',', $coupon['coupon_cats']));
-		$coupon['coupon_cats_ex'] = array_filter(explode(',', $coupon['coupon_cats_ex']));
-
-		$itemID = (int) $item['item_id'];
-		$itemCat = (int) $item['item_cat'];
-
-		// 5. Check category exclusions FIRST (highest priority)
-		if(count($coupon['coupon_cats_ex']) > 0 && in_array($itemCat, $coupon['coupon_cats_ex']))
-		{
-			// Category excluded - no discount
-			if(deftrue('e_DEBUG_VSTORE'))
-			{
-				e107::getDebug()->log("Coupon excluded: item category {$itemCat} in exclusion list", 'VSTORE_COUPON');
-			}
-			return 0.0;
-		}
-
-		// 6. Check item exclusions (high priority)
-		if(count($coupon['coupon_items_ex']) > 0 && in_array($itemID, $coupon['coupon_items_ex']))
-		{
-			// Item excluded - no discount
-			if(deftrue('e_DEBUG_VSTORE'))
-			{
-				e107::getDebug()->log("Coupon excluded: item {$itemID} in exclusion list", 'VSTORE_COUPON');
-			}
-			return 0.0;
-		}
-
-		// 7. Check category inclusions (if defined, must match)
-		if(count($coupon['coupon_cats']) > 0)
-		{
-			if(!in_array($itemCat, $coupon['coupon_cats']))
-			{
-				// Category not in inclusion list - no discount
-				return 0.0;
-			}
-		}
-
-		// 8. Check item inclusions (if defined, must match)
-		if(count($coupon['coupon_items']) > 0)
-		{
-			if(!in_array($itemID, $coupon['coupon_items']))
-			{
-				// Item not in inclusion list - no discount
-				return 0.0;
-			}
-		}
-
-		// 9. Calculate discount amount
-		$qty = (int) $item['cart_qty'];
-		$itemPrice = (float) $item['item_price'];
-		$amount = 0.0;
-
-		if($coupon['coupon_type'] === '%')
-		{
-			// Percentage discount
-			$discountPct = (float) $coupon['coupon_amount'];
-			$amount = -1 * ($itemPrice * $qty) * ($discountPct / 100.0);
-		}
-		else
-		{
-			// Fixed amount discount
-			$discountPerItem = (float) $coupon['coupon_amount'];
-			
-			// CRITICAL: Ensure discount doesn't exceed item price
-			if($discountPerItem > $itemPrice)
-			{
-				$discountPerItem = $itemPrice;
-				
-				e107::getMessage()->addWarning(
-					'Coupon discount has been capped to item price for: ' . $item['item_name'],
-					'vstore'
-				);
-			}
-			
-			$amount = -1 * ($discountPerItem * $qty);
-		}
-
-		// 10. Ensure amount is never positive
-		if($amount > 0)
-		{
-			$amount = 0.0;
-		}
-
-		if(deftrue('e_DEBUG_VSTORE'))
-		{
-			e107::getDebug()->log(array(
-				'coupon_code' => $coupon['coupon_code'],
-				'item_id' => $itemID,
-				'qty' => $qty,
-				'discount_amount' => $amount
-			), 'VSTORE_COUPON');
-		}
-
-		return $amount;
+		return (float) $result->value();
 	}
 
 	/**
@@ -4077,234 +3563,159 @@ class vstore
 			$pref = e107::pref('vstore');
 		}
 
-		$result = 0.0;
+		$sessionData = e107::getSession('vstore')->get('_data');
 
-		// 1. Check if tax calculation is enabled
-		if(empty($pref['tax_calculate']))
-		{
-			return $result;
-		}
-
-		// 2. Handle 'none' tax class
-		$tax_class = strtolower(varset($tax_class, 'standard'));
-		if($tax_class === 'none')
-		{
-			return $result;
-		}
-
-		// 3. Get customer country (CRITICAL: from form data, NOT from IP geolocation)
+		// The country comes from the billing form (session), never from the IP
 		if(empty($customer_country))
 		{
-			// Try to get from session data
-			$sessionData = e107::getSession('vstore')->get('_data');
 			$customer_country = varset($sessionData['customer_country'], '');
-			
-			// Fallback to business country if still empty
-			if(empty($customer_country))
-			{
-				$customer_country = $pref['tax_business_country'];
-				
-				if(deftrue('e_DEBUG_VSTORE'))
-				{
-					e107::getDebug()->log('[VSTORE_TAX] Customer country empty, using business country: ' . $customer_country);
-				}
-			}
 		}
 
-		$customer_country = strtoupper($customer_country);
-		$businessCountry = strtoupper($pref['tax_business_country']);
-
-		$countries = new \Ibericode\Vat\Countries();
-
-		// 4. Same country as business - use local tax rates
-		if($customer_country === $businessCountry)
+		if(isset($pref['tax_classes']) && !is_array($pref['tax_classes']))
 		{
-			$tax_classes = e107::unserialize($pref['tax_classes']);
-			
-			if(!is_array($tax_classes))
-			{
-				if(deftrue('e_DEBUG_VSTORE'))
-				{
-					e107::getDebug()->log('[VSTORE_TAX] tax_classes is not an array!');
-				}
-				return $result;
-			}
-
-			foreach($tax_classes as $tclass)
-			{
-				if(varset($tclass['name']) === $tax_class)
-				{
-					$result = floatval($tclass['value']);
-					break;
-				}
-			}
-
-			if(deftrue('e_DEBUG_VSTORE'))
-			{
-				e107::getDebug()->log('[VSTORE_TAX] same_country - tax_class: ' . $tax_class . ', tax_rate: ' . $result);
-			}
-
-			return $result;
+			$pref['tax_classes'] = e107::unserialize($pref['tax_classes']);
 		}
 
-		// 5. Business in EU
-		if($countries->isCountryCodeInEU($businessCountry))
-		{
-			// 5a. Customer outside EU - no tax
-			if(!$countries->isCountryCodeInEU($customer_country))
-			{
-				if(deftrue('e_DEBUG_VSTORE'))
-				{
-					e107::getDebug()->log('[VSTORE_TAX] Customer outside EU, no tax');
-				}
-				return $result;
-			}
+		$cust = (array) self::getCustomerData();
+		$vatId = trim((string) varset($cust['vat_id'], varset($sessionData['vat_id'], '')));
 
-			// 5b. Customer in EU - check for reverse charge (B2B intra-community)
-			$sessionData = e107::getSession('vstore')->get('_data');
-			$vatId = varset($sessionData['vat_id'], '');
-			
-			if(!empty($vatId) && !empty($pref['tax_check_vat']))
-			{
-				// Validate VAT ID
-				$vatValidation = self::validateVATID($vatId, $customer_country);
-				
-				if($vatValidation['valid'])
+		$result = self::taxService()->rate($tax_class, $customer_country, $pref, $vatId);
+		self::addResultMessage($result);
+
+		return (float) $result->value();
+	}
+
+	/** Debug logger for the services, or null when e_DEBUG_VSTORE is off. */
+	private static function debugLogger($tag)
+	{
+		if(!deftrue('e_DEBUG_VSTORE'))
+		{
+			return null;
+		}
+
+		return function ($message) use ($tag)
+		{
+			e107::getDebug()->log($message, $tag);
+		};
+	}
+
+	private static function couponService()
+	{
+		return new CouponService(new OrderCouponUsageRepository(), self::debugLogger('VSTORE_COUPON'));
+	}
+
+	private static function inventoryService()
+	{
+		return new InventoryService(new ItemRepository(), function ($message)
+		{
+			e107::getMessage()->addDebug($message, 'vstore');
+		});
+	}
+
+	private static function userclassService()
+	{
+		return new UserclassService(new ItemRepository());
+	}
+
+	private static function cartService()
+	{
+		return new CartService(new CartRepository(), self::inventoryService());
+	}
+
+	private static function checkoutService()
+	{
+		return new CheckoutService(self::taxService(), self::couponService(), new ShippingService(), self::vatService());
+	}
+
+	private static function orderService()
+	{
+		return new OrderService();
+	}
+
+	private static function paymentService()
+	{
+		return new PaymentService(array(Omnipay::class, 'create'), self::debugLogger('VSTORE_PAYMENT'));
+	}
+
+	private static function invoiceService()
+	{
+		return new InvoiceService(new InvoiceNumberService());
+	}
+
+	/** Title of an invoice: shop title in the current language plus the formatted number. */
+	private static function invoiceTitle($invoiceNr)
+	{
+		return self::invoiceService()->title((array) e107::pref('vstore'), e_LANGUAGE, LAN_VSTORE_INV_TITLE, $invoiceNr);
+	}
+
+	/** Kept for the whole request: the variation types are loaded once. */
+	private static function itemVarTypes()
+	{
+		if(self::$itemVarTypeService === null)
+		{
+			self::$itemVarTypeService = new ItemVarTypeService(new ItemVarRepository());
+		}
+
+		return self::$itemVarTypeService;
+	}
+
+	private static function vatService()
+	{
+		if(self::$vatService === null)
+		{
+			self::$vatService = new VatService(null, self::debugLogger('VSTORE_VAT'));
+
+			// VIES answers are kept for an hour: the cart is rendered again and again
+			$memo = array();
+			self::$vatService->setStore(
+				function ($key) use (&$memo)
 				{
-					// Valid VAT ID - reverse charge applies (0% tax)
-					if(deftrue('e_DEBUG_VSTORE'))
+					if(!isset($memo[$key]))
 					{
-						e107::getDebug()->log('[VSTORE_TAX] reverse_charge_b2b - vat_id: ' . $vatId . ', valid: true, tax_rate: 0.0');
+						$cached = e107::getCache()->retrieve('vstore_vies_' . md5($key), 60, true);
+						$memo[$key] = $cached ? json_decode($cached, true) : null;
 					}
-					
-					return 0.0;
-				}
-			}
 
-			// No valid VAT ID - apply customer country tax rate
-			$mapped_tax_class = self::getTaxClass($tax_class, $customer_country);
-			
-			if(empty($mapped_tax_class))
-			{
-				if(deftrue('e_DEBUG_VSTORE'))
+					return $memo[$key];
+				},
+				function ($key, $result) use (&$memo)
 				{
-				e107::getDebug()->log('[VSTORE_TAX] Tax class mapping failed for ' . $tax_class . ' in ' . $customer_country);
-			}
-			return 0.0;
+					$memo[$key] = $result;
+					e107::getCache()->set('vstore_vies_' . md5($key), json_encode($result), true);
+				}
+			);
 		}
 
-		$rates = new \Ibericode\Vat\Rates();
-		try
+		return self::$vatService;
+	}
+
+	private static function taxService()
+	{
+		// Rates are cached on disk; without a file the library would query the remote service on every call
+		$file = defined('e_CACHE') ? e_CACHE . 'vstore_vat_rates.cache' : '';
+
+		return new TaxService(new \Ibericode\Vat\Rates($file, 12 * 3600), self::vatService(), self::debugLogger('VSTORE_TAX'));
+	}
+
+	/** Show the message of a service Result, translated with LAN_VSTORE_MSG_<CODE>. */
+	private static function addResultMessage(Result $result)
+	{
+		if(!$result->hasMessage())
 		{
-			$result = $rates->getRateForCountry($customer_country, $mapped_tax_class);
-			$result /= 100.0; // Convert percentage to decimal
+			return;
 		}
-		catch(Exception $ex)
+
+		$text = ResultTranslator::text($result);
+
+		$mes = e107::getMessage();
+		if($result->severity() === Result::WARNING)
 		{
-			e107::getMessage()->addError('Invalid tax class! Please inform the shop administrator!', 'vstore');				if(deftrue('e_DEBUG_VSTORE'))
-				{
-					e107::getDebug()->log('[VSTORE_TAX] Tax rate exception: ' . $ex->getMessage());
-				}
-				
-				return 0.0;
-			}
-
-			if(deftrue('e_DEBUG_VSTORE'))
-			{
-				e107::getDebug()->log('[VSTORE_TAX] intra_eu_b2c - customer: ' . $customer_country . ', tax_class: ' . $tax_class . ', mapped: ' . $mapped_tax_class . ', rate: ' . $result);
-			}
-
-			return $result;
+			$mes->addWarning($text, 'vstore');
 		}
 		else
 		{
-			// 6. Business outside EU - no tax for foreign customers
-			if(deftrue('e_DEBUG_VSTORE'))
-			{
-				e107::getDebug()->log('[VSTORE_TAX] Business outside EU, no tax');
-			}
-			return $result;
+			$mes->addError($text, 'vstore');
 		}
-	}
-
-	/**
-	 * Check if the tax class is available in the customers country
-	 * otherwise get the next "similar" class
-	 *
-	 * @param string $tax_class
-	 * @param string $country
-	 * @return string
-	 */
-	private function getTaxClass($tax_class, $country)
-	{
-		$country = strtoupper($country);
-
-		// Map the tax classes from one country to another
-		// e.g. in Germany there is only the reduced class
-		// in Austria they have no reduced, only reduced1 and reduced2
-		// The method will try to substitute the non existing class with
-		// an existing one (e.g. reduced2 in the previous example)
-		$map_classes = array(
-			'reduced'       => array('reduced2', 'reduced1', 'super_reduced'),
-			'reduced1'      => array('reduced', 'super_reduced', 'reduced2'),
-			'reduced2'      => array('reduced', 'reduced1', 'super_reduced'),
-			'super_reduced' => array('reduced', 'reduced1', 'super_reduced'),
-		);
-
-		// Try to get the rate for the requested tax class
-		$rates = new \Ibericode\Vat\Rates('', 0); // No caching needed for single lookup
-		
-		try
-		{
-			// If this doesn't throw an exception, the tax class exists
-			$rates->getRateForCountry($country, $tax_class);
-			return $tax_class;
-		}
-		catch(\Exception $ex)
-		{
-			// Tax class not found in this country
-			// Try to map to a similar class
-			if(!isset($map_classes[$tax_class]))
-			{
-				// Unknown tax class, fallback to standard
-				return 'standard';
-			}
-			
-			foreach($map_classes[$tax_class] as $alternative)
-			{
-				try
-				{
-					$rates->getRateForCountry($country, $alternative);
-					return $alternative; // Found a working alternative
-				}
-				catch(\Exception $ex2)
-				{
-					// This alternative doesn't exist either, try next
-					continue;
-				}
-			}
-			
-			// No alternative found, fallback to standard
-			return 'standard';
-		}
-	}
-
-	/**
-	 * calc the net price of the item depending on the tax_rate for this item
-	 *
-	 * e.g.
-	 * grossprice: 120€
-	 * tax_rate: 0.2
-	 * net price: 100€
-	 *
-	 * @param number $grossprice
-	 * @param number $tax_rate
-	 * @return number
-	 */
-	private function calcNetPrice($grossprice, $tax_rate)
-	{
-
-		return round($grossprice / (1 + $tax_rate), 2);
 	}
 
 	/**
@@ -4321,62 +3732,7 @@ class vstore
 	 */
 	public static function calcTaxAmount($netPrice, $tax_rate)
 	{
-		return round(($netPrice * $tax_rate) , 2);
-	}
-
-	/**
-	 * Check if the given VAT ID exists in the EU and is in the correct format
-	 *
-	 * @param string $vat_id the VAT ID to check
-	 * @return bool true if exists, $vat_id is empty or checking is disabled; false otherwise
-	 */
-	private function checkVAT_ID($vat_id, $country)
-	{
-
-		if(empty(trim($vat_id)))
-		{
-			// no VAT = VALID
-			return true;
-		}
-		if(empty(trim($country)))
-		{
-			// Country missing = INVALID
-			return false;
-		}
-
-		// Should the VAT ID be checked?
-		if($this->pref['tax_check_vat'])
-		{
-			$country = trim(strtoupper($country));
-			$vat_country = trim(strtoupper(substr($vat_id, 0, 2)));
-
-			// Check if the countries match
-			if($vat_country != $country)
-			{
-				// countrycode of the given vat_id
-				// doesn't match the given country
-				return false;
-			}
-
-			// Check if the VAT ID is from a EU country
-			$countries = new \Ibericode\Vat\Countries();
-			if(!$countries->isCountryCodeInEU($vat_country))
-			{
-				// VAT ID is only used in the EU
-				return true;
-			}
-
-			// Validate the given VAT ID
-			$validator = new \Ibericode\Vat\Validator();
-			if(!$validator->validateVatNumber($vat_id))
-			{
-				// Invalid VAT ID (checks format + existence)
-				return false;
-			}
-		}
-
-		// VAT ID ok, or not checked => return true
-		return true;
+		return self::taxService()->taxAmount($netPrice, $tax_rate);
 	}
 
 	/**
@@ -4387,117 +3743,55 @@ class vstore
 	 */
 	private function validateCustomerData($data, $type = 'billing')
 	{
-
-		$mes = e107::getMessage();
-		if(empty($data) || !is_array($data))
+		$language = e_LANGUAGE;
+		$addFields = array();
+		foreach((array) varset($this->pref['additional_fields'], array()) as $i => $addField)
 		{
-			$mes->addError('Customer data is missing or invalid!', 'vstore');
-
-			return false;
-		}
-		if(empty($type) || !in_array($type, array('billing', 'shipping')))
-		{
-			$mes->addError('Invalid type!', 'vstore');
-
-			return false;
+			$addField['caption'] = is_array(varset($addField['caption'])) ? Translatable::pick($addField['caption'], $language) : varset($addField['caption'], '');
+			$addFields[$i] = $addField;
 		}
 
-		$result = array();
-		$fields = array();
-		if($type == 'billing')
-		{
-			$fields = self::$customerFields;
-		}
-		elseif($type == 'shipping')
-		{
-			$fields = self::$shippingFields;
-		}
+		$result = self::checkoutService()->validateCustomer(
+			$data,
+			$type,
+			array('billing' => self::$customerFields, 'shipping' => self::$shippingFields),
+			$addFields,
+			!empty($this->pref['tax_check_vat']),
+			(string) varset($this->pref['tax_business_country'])
+		);
 
-		foreach($fields as $field)
+		if($result->isOk())
 		{
-			if(substr($field, 0, 9) == 'add_field')
+			$validated = $result->value();
+
+			// MB WAY sends the payment request to a Portuguese mobile number
+			if($type === 'billing' && varset($this->post['gateway']) === 'mollie_mbway')
 			{
-				continue;
+				$phone = PhoneNumber::toE164(varset($validated['phone']), varset($validated['country']));
+
+				if(!PhoneNumber::isPortugueseMobile($phone))
+				{
+					e107::getMessage()->addError(LAN_VSTORE_MSG_MBWAY_PHONE, 'vstore');
+
+					return false;
+				}
 			}
 
-			$result[$field] = trim(strip_tags($data[$field]));
-			switch($field)
-			{
-				// REQUIRED
-				case 'firstname':
-				case 'lastname':
-				case 'address':
-				case 'city':
-				case 'zip':
-				case 'country':
-				case 'email':
-					if(empty($result[$field]))
-					{
-						$mes->addError('The field ' . ucfirst($field) . ' is required!', 'vstore');
-
-						return false;
-					}
-					if($field == 'email' && !filter_var($result[$field], FILTER_VALIDATE_EMAIL))
-					{
-						$mes->addError('The given email address is invalid!', 'vstore');
-
-						return false;
-					}
-					break;
-
-				// OPTIONAL
-				case 'title':
-				case 'company':
-				case 'state':
-				case 'taxcode':
-				case 'phone':
-				case 'fax':
-				case 'notes':
-					break;
-
-				// VAT ID
-				case 'vat_id':
-					$result[$field] = strtoupper($result[$field]);
-					if(!empty($result[$field]))
-					{
-						if(!$this->checkVAT_ID($result[$field], $data['country']))
-						{
-							$mes->addError('The VAT-ID is invalid or doesn\'t match the selected country!', 'vstore');
-
-							return false;
-						}
-					}
-					break;
-
-				// ADDITIONAL FIELDS
-				case 'additional_fields':
-					$addFields = $this->pref['additional_fields'];
-					foreach($addFields as $i => $addField)
-					{
-						if($addField['active'])
-						{
-							$fieldName = 'add_field' . $i;
-							if($addField['type'] == 'text')
-							{
-								$result[$fieldName] = trim(strip_tags($data[$fieldName]));
-							}
-							else
-							{
-								$result[$fieldName] = ($data[$fieldName] ? '1' : '');
-							}
-							if($addField['required'] && empty($result[$fieldName]))
-							{
-								$mes->addError('The field ' . $addField['caption'] . ' is required!', 'vstore');
-
-								return false;
-							}
-						}
-					}
-					break;
-			}
+			return $validated;
 		}
 
-		return $result;
+		if($result->code() === 'FIELD_REQUIRED')
+		{
+			$field = $result->value();
+			$label = $field['caption'] !== null ? $field['caption'] : defset('LAN_VSTORE_FR_' . strtoupper($field['field']), ucfirst($field['field']));
+			e107::getMessage()->addError(sprintf(LAN_VSTORE_MSG_FIELD_REQUIRED, $label), 'vstore');
+		}
+		else
+		{
+			e107::getMessage()->addError(ResultTranslator::text($result), 'vstore');
+		}
+
+		return false;
 	}
 
 	/**
@@ -4507,20 +3801,10 @@ class vstore
 	 */
 	public static function getNextInvoiceNr()
 	{
-
-		// Get last used invoice nr.
-		$last_nr = e107::getDB()->retrieve('vstore_orders', 'MAX(order_invoice_nr) AS last');
-		// Get next nr. from prefs
-		$pref = (int) e107::pref('vstore', 'invoice_next_nr');
-		// if the pref nr is higher ...
-		if(vartrue($pref) > (int) $last_nr['last'])
-		{
-			// ... use pref
-			return $pref;
-		}
-
-		// ... otherwise return next higher
-		return (int) ($last_nr['last'] + 1);
+		return (new InvoiceNumberService())->next(
+			(new OrderRepository())->lastInvoiceNr(),
+			(int) e107::pref('vstore', 'invoice_next_nr')
+		);
 	}
 
 
@@ -4532,11 +3816,7 @@ class vstore
 	 */
 	public static function formatInvoiceNr($invoice_nr)
 	{
-
-		$text = e107::pref('vstore', 'invoice_nr_prefix');
-		$text .= e107::getParser()->leadingZeros($invoice_nr, 6);
-
-		return $text;
+		return (new InvoiceNumberService())->format($invoice_nr, (string) e107::pref('vstore', 'invoice_nr_prefix'));
 	}
 
 
@@ -4548,8 +3828,7 @@ class vstore
 	 */
 	public function getOrderIdFromInvoiceNr($invoice_nr)
 	{
-
-		return e107::getDb()->retrieve('vstore_orders', 'order_id', 'order_invoice_nr=' . intval($invoice_nr));
+		return (new OrderRepository())->orderIdFromInvoiceNr($invoice_nr);
 	}
 
 
@@ -4569,28 +3848,18 @@ class vstore
 			return false;
 		}
 
-		// check if the invoice belongs to the user (or is admin)
-		if($this->order->order_e107_user != USERID)
-		{
-			// is user an admin
-			if(!ADMIN)
-			{
-				e107::getMessage()->addError('Access denied!', 'vstore');
+		// check access (owner or admin) and status of the order: New, Complete or Processing
+		$access = self::invoiceService()->checkAccess(
+			$this->order->order_e107_user,
+			$this->order->order_status,
+			USERID,
+			ADMIN,
+			self::getStatus($this->order->order_status)
+		);
 
-				return false;
-			}
-		}
-
-		// check status of order: Invoice should be rendered only in status: N=New, C=Complete, P=Processing
-		if(!self::validInvoiceOrderState($this->order->order_status))
+		if(!$access->isOk())
 		{
-			e107::getMessage()->addError(
-				e107::getParser()->lanVars(
-					'Order in status "[x]". Invoice not available!',
-					self::getStatus($this->order->order_status)
-				),
-				'vstore'
-			);
+			e107::getMessage()->addError(ResultTranslator::text($access), 'vstore');
 
 			return false;
 		}
@@ -4627,21 +3896,20 @@ class vstore
 			$taxBusinessCountry = $this->pref['tax_business_country'];
 		}
 
-		$this->order->is_business = !empty($this->order->order_billing['vat_id']);
-		$this->order->is_local = (vartrue($billingCountry, $taxBusinessCountry) === $taxBusinessCountry);
+		$this->order->is_business = self::isReverseChargeOrder($this->order->order_billing, $this->order->order_pay_tax);
+		$this->order->is_local = (strtoupper(vartrue($billingCountry, $taxBusinessCountry)) === strtoupper($taxBusinessCountry));
 
 		return $this->renderInvoiceTemplate($pdf_invoice);
 
 	}
 
 	/**
-	 * Check if pdf creation ie enabled and
-	 * a pdf plugin is installed
+	 * Check if pdf creation is enabled and the TCPDF library (Composer package of Vstore) is available.
+	 * The e107 pdf plugin is not needed any more.
 	 *
 	 * @param bool $checkPref (optional) true (default) checks first if the pdf creation is enabled
 	 *
-	 * @return bool true if the pdf plugin is installed,
-	 *              false if pdf creation is deactivated or no pdf plugin is installed
+	 * @return bool true if invoices can be created as pdf
 	 */
 	public static function checkPdfPlugin($checkPref = true)
 	{
@@ -4653,22 +3921,9 @@ class vstore
 			return false;
 		}
 
-		// Check if the pdf plugin is installed
-		if(!e107::isInstalled('pdf'))
-		{ // || !is_dir(e_PLUGIN . 'pdf/')) {
-			//e107::getAdminLog()->addWarning(
-			//    'PDF plugin not installed!<br/>This plugin is required by vstore to create invoice pdf\'s!',
-			//    true,
-			//    true
-			//)->save('Vstore Pdf');
-			e107::getMessage()->addWarning(
-				e107::getParser()->lanVars(
-					'PDF plugin not installed!\n' .
-					'This plugin is required to create invoice pdf\'s!\n' .
-					'You can download it from here: [x]',
-					'<a href="https://github.com/e107inc/pdf">e107inc/pdf</a>'
-				)
-			);
+		if(!class_exists('TCPDF'))
+		{
+			e107::getMessage()->addWarning(LAN_VSTORE_MSG_PDF_PLUGIN);
 
 			return false;
 		}
@@ -4691,16 +3946,14 @@ class vstore
 			return;
 		}
 
-		require_once('inc/vstore_pdf.class.php'); //require the vstore_pdf class
-
-		$pdf = new vstore_pdf();
+		$dir = '';
 
 		if($saveToDisk)
 		{
 			// Make sure the path is absolute
-			$pdf->pdf_path = realpath(e107::getFile()->getUserDir($data['userid'], true));
+			$dir = realpath(e107::getFile()->getUserDir($data['userid'], true));
 
-			if($pdf->pdf_path == false || trim($pdf->pdf_path) == '')
+			if($dir == false || trim($dir) == '')
 			{
 				e107::getLog()->add(
 					'Vstore',
@@ -4708,37 +3961,43 @@ class vstore
 					e107::getFile()->getUserDir($data['userid']) . '"',
 					E_LOG_WARNING
 				);
-				e107::getMessage()->addError('Unable to create invoice user folder!', 'vstore');
+				e107::getMessage()->addError(LAN_VSTORE_MSG_PDF_FOLDER, 'vstore');
 
 				return;
 			}
-			$pdf->pdf_output = 'F';
 		}
-		else
+
+		$tp = e107::getParser();
+		$title = str_replace(array(':', '*', '?', '"', '<', '>', '|'), '-', InvoicePdf::decodeEntities($data['subject']));
+		$file = e107::getForm()->name2id($title) . '.pdf';
+
+		$pdf = new InvoicePdf(array(
+			'logo'         => $data['logo'],
+			'site_name'    => html_entity_decode(SITENAME, ENT_QUOTES, 'UTF-8'),
+			'site_tag'     => html_entity_decode(defset('SITETAG', ''), ENT_QUOTES, 'UTF-8'),
+			'footer_html'  => $data['footer'],
+			'page_label'   => LAN_VSTORE_PDF_PAGE,
+			'created_text' => LAN_VSTORE_PDF_CREATED . ' ' . e107::getDateConvert()->convert_date(time(), 'short'),
+		));
+
+		$pdf->build(
+			InvoicePdf::decodeEntities($tp->toHTML($data['text'], true, 'BODY')),
+			array(
+				'creator'  => SITENAME,
+				'author'   => varset($this->pref['sender_name'], 'Sales'),
+				'title'    => $title,
+				'subject'  => $title,
+			)
+		);
+
+		if($saveToDisk)
 		{
-			$pdf->pdf_path = '';
+			$pdf->Output($dir . DIRECTORY_SEPARATOR . $file, 'F');
+
+			return;
 		}
 
-		$text = $data['text'];
-		$footer = $data['footer'];
-		$creator = SITENAME;
-		$author = varset($this->pref['sender_name'], 'Sales');
-		$title = $data['subject'];
-		$subject = $data['subject'];
-		$keywords = '';
-		$url = $data['url'];
-		$logo = $data['logo'];
-
-		$pdf->makePDF($text, $footer, $creator, $author, $title, $subject, $keywords, $url, $logo);
-
-		// Clean up output buffer opened by vstore_pdf.class.php (line 26)
-		// This prevents "ob_*() level 2 at end instead of (1)" error
-		if(ob_get_level() > 0)
-		{
-			ob_end_clean();
-		}
-
-		return;
+		$pdf->Output($file, 'I');
 	}
 
 	/**
@@ -4748,17 +4007,17 @@ class vstore
 	 * @param int $e107_user_id userid of the customer
 	 * @return string empty string if file doesn't exists
 	 */
-	public function pathToInvoicePdf($invoice_nr, $e107_user_id = null)
+	public static function pathToInvoicePdf($invoice_nr, $e107_user_id = null)
 	{
-
 		if(is_null($e107_user_id))
 		{
 			$e107_user_id = USERID;
 		}
-		$title = varset($this->pref['invoice_title'][e_LANGUAGE], 'Invoice') . ' ' . self::formatInvoiceNr($invoice_nr);
-		$file = e107::getFile()->getUserDir($e107_user_id) . e107::getForm()->name2id($title) . '.pdf';
 
-		return (is_readable($file) ? $file : '');
+		return self::invoiceService()->existingPdf(
+			e107::getFile()->getUserDir($e107_user_id),
+			e107::getForm()->name2id(self::invoiceTitle($invoice_nr))
+		);
 	}
 
 
@@ -4808,8 +4067,31 @@ class vstore
 		}
 		else
 		{
-			e107::getMessage()->addWarning('Invoice pdf not found!', 'vstore');
+			e107::getMessage()->addWarning(LAN_VSTORE_MSG_PDF_NOT_FOUND, 'vstore');
 		}
+	}
+
+	/**
+	 * Was the order sold without tax to a business of another country (a VAT ID and no tax charged)?
+	 *
+	 * @param array|string $billing order_billing
+	 * @param array|string $payTax  order_pay_tax: rate => amount
+	 * @return bool
+	 */
+	public static function isReverseChargeOrder($billing, $payTax)
+	{
+		$billing = is_array($billing) ? $billing : (array) e107::unserialize($billing);
+		$business = strtoupper((string) e107::pref('vstore', 'tax_business_country'));
+		$country = strtoupper((string) varset($billing['country'], $business));
+
+		if(empty($billing['vat_id']) || $country === $business)
+		{
+			return false;
+		}
+
+		$tax = is_array($payTax) ? $payTax : (array) e107::unserialize($payTax);
+
+		return abs(array_sum(array_map('floatval', $tax))) < 0.005;
 	}
 
 	/**
@@ -4820,8 +4102,7 @@ class vstore
 	 */
 	public static function validInvoiceOrderState($order_status)
 	{
-
-		return in_array(strtoupper($order_status), array('N', 'C', 'P'));
+		return (new InvoiceNumberService())->isValidState($order_status);
 	}
 
 	/**
@@ -4832,28 +4113,7 @@ class vstore
 	 */
 	public static function isInventoryTrackingVar($varId)
 	{
-
-		// Init itemsVarsTypes array
-		if(empty(self::$itemVarsTypes))
-		{
-			if($data = e107::getDb()->retrieve('vstore_items_vars', 'item_var_id, item_var_compulsory', null, true))
-			{
-				foreach($data as $row)
-				{
-					self::$itemVarsTypes[$row['item_var_compulsory']][] = $row['item_var_id'];
-				}
-			}
-		}
-
-		foreach(self::$itemVarsTypes as $type => $ids)
-		{
-			if(in_array($varId, $ids))
-			{
-				return ($type == 1);
-			}
-		}
-
-		return false;
+		return self::itemVarTypes()->isTracking($varId);
 	}
 
 
@@ -4867,40 +4127,7 @@ class vstore
 	 */
 	public static function filterItemVarsByType($curVal, $type = 0, $asArray = false)
 	{
-
-		$curArr = array_filter(is_array($curVal) ? $curVal : explode(',', $curVal));
-		if(count($curArr) == 0)
-		{
-			return $asArray ? array() : '';
-		}
-
-		// Init itemsVarsTypes array
-		if(empty(self::$itemVarsTypes))
-		{
-			if($data = e107::getDb()->retrieve('vstore_items_vars', 'item_var_id, item_var_compulsory', null, true))
-			{
-				foreach($data as $row)
-				{
-					self::$itemVarsTypes[$row['item_var_compulsory']][] = $row['item_var_id'];
-				}
-			}
-		}
-
-		if(!isset(self::$itemVarsTypes[$type]))
-		{
-			return $asArray ? array() : '';
-		}
-
-		$result = array();
-		foreach(self::$itemVarsTypes[$type] as $item)
-		{
-			if(in_array($item, $curArr))
-			{
-				$result[] = $item;
-			}
-		}
-
-		return $asArray ? $result : implode(',', $result);
+		return self::itemVarTypes()->filter($curVal, $type, $asArray);
 	}
 
 
@@ -4931,7 +4158,7 @@ class vstore
 			'datestamp' => time(),
 			'user_id'   => USERID,
 			'user_name' => USERNAME,
-			'text'      => e107::getParser()->lanVars('Changed [x] from [y] to [z].', array(
+			'text'      => e107::getParser()->lanVars(LAN_VSTORE_ORD_LOG_CHANGED, array(
 				'x' => $title,
 				'y' => $oldVal,
 				'z' => $newVal
@@ -4987,6 +4214,11 @@ class vstore
 		{
 			foreach($this->pref['gateways'] as $gate => $var)
 			{
+				if(Catalog::isRetiredGateway($gate))
+				{
+					continue;
+				}
+
 				self::$gateways[$gate] = $var;
 
 				if(!empty($var['active']))
@@ -5000,6 +4232,8 @@ class vstore
 		$this->order = e107::getSingleton('vstore_order', e_PLUGIN . 'vstore/inc/vstore_order.class.php');
 
 		$this->currency = vartrue($this->pref['currency'], 'USD');
+		$this->captionCategories = LAN_VSTORE_MSG_CAPTION_CATEGORIES;
+		$this->captionOutOfStock = LAN_VSTORE_003;
 
 		if(!empty($this->pref['caption']) && !empty($this->pref['caption'][e_LANGUAGE]))
 		{
@@ -5097,6 +4331,17 @@ class vstore
 		}
 
 
+		$currency = vartrue($this->pref['currency'], 'USD');
+
+		// Mollie refuses euro-only methods in other currencies ("The currency is not supported by this payment method").
+		foreach(array_keys($active) as $method)
+		{
+			if(!Catalog::supportsCurrency($method, $currency))
+			{
+				unset($active[$method]);
+			}
+		}
+
 		$this->active = $active;
 	}
 
@@ -5107,117 +4352,54 @@ class vstore
 	 */
 	public function loadGateway($name)
 	{
-		$mode = '';
-		$message = '';
-		$gateway = null;
+		list($gateway, $message, $mode) = self::createGateway($name, $this->pref);
 
-		switch($name)
+		if($mode)
 		{
-			case "mollie":
-				/** @var \Omnipay\Mollie\Gateway $gateway */
-				$gateway = Omnipay::create('Mollie');
-
-				if(!empty($this->pref['mollie']['testmode']))
-				{
-					$gateway->setApiKey($this->pref['mollie']['api_key_test']);
-					$gateway->setTestMode(true);
-				}
-				else
-				{
-					$gateway->setApiKey($this->pref['mollie']['api_key_live']);
-				}
-				break;
-/*
-			case "paypal":
-
-				$gateway = Omnipay::create('PayPal_Express'); // @var \Omnipay\PayPal\ExpressGateway $gateway
-
-				if(!empty($this->pref['paypal']['testmode']))
-				{
-					$gateway->setTestMode(true);
-				}
-
-				$gateway->setUsername($this->pref['paypal']['username']);
-				$gateway->setPassword($this->pref['paypal']['password']);
-				$gateway->setSignature($this->pref['paypal']['signature']);
-				break;
-
-			case "paypal_rest":
-
-				$gateway = Omnipay::create('PayPal_Rest'); // @var \Omnipay\PayPal\RestGateway $gateway
-
-				if(!empty($this->pref['paypal_rest']['testmode']))
-				{
-					$gateway->setTestMode(true);
-				}
-
-				$gateway->setClientId($this->pref['paypal_rest']['clientId']);
-				$gateway->setSecret($this->pref['paypal_rest']['secret']);
-				break;*/
-
-			case "bank_transfer":
-				$this->setMode('return');
-
-				if(!empty(self::$gateways['bank_transfer']['details']))
-				{
-					$message = '<br />Use the following bank account information for your payment:<br />';
-					$message .= e107::getParser()->toHTML(self::$gateways['bank_transfer']['details'], true);
-				}
-				break;
-
-
-			default:
-
-				if(empty(self::$gateways[$name]['name']))
-				{
-					$message = "There was a configuration problem.";
-					$gateway = null;
-					trigger_error($message. ' Missing prefs for '.$name.".\n".print_r(self::$gateways,true));
-				}
-				else
-				{
-					$gatewayClass = self::$gateways[$name]['name'];
-
-					try
-					{
-						$gateway = Omnipay::create($gatewayClass);
-					}
-					catch (Exception $e)
-					{
-					     $message = "Sorry, there is a problem loading the ".$name." payment option. Please notify the administrator.";
-					     $message .= (ADMIN) ? $e->getMessage() : '';
-					}
-
-					if(is_object($gateway) && !empty(self::$gateways[$name]))
-					{
-						if(empty(self::$gateways[$name]['prefs']))
-						{
-							trigger_error('$gateways[$name][\'prefs\'] was empty.');
-						}
-
-						foreach(self::$gateways[$name]['prefs'] as $k=>$v)
-						{
-							$method = 'set'.ucfirst($k);
-							try
-							{
-								$gateway->$method($v);
-							}
-							catch (Exception $e)
-							{
-								$message = "Sorry, there was a configuration issue. Please notify the administrator.";
-							    $message .= (ADMIN) ? $e->getMessage() : '';
-							    trigger_error($message, E_USER_WARNING);
-							}
-
-
-						}
-
-					}
-				}
-				//return false;
+			$this->setMode($mode);
 		}
 
 		return array($gateway, $message);
+	}
+
+	/**
+	 * Create the gateway of a payment method without touching the state of the shop.
+	 *
+	 * @param string $name paypal | mollie | bank_transfer | etc.
+	 * @param array|null $pref Plugin preferences (loaded when empty)
+	 * @return array gateway object or null, message to show, mode the shop should switch to ('' = none)
+	 */
+	public static function createGateway($name, $pref = null)
+	{
+		if(empty($pref))
+		{
+			$pref = e107::pref('vstore');
+		}
+
+		$result = self::paymentService()->load($name, (array) $pref);
+		$value = $result->value();
+		$message = '';
+
+		if($value['bank_details'] !== '')
+		{
+			$message = '<br />' . LAN_VSTORE_MSG_BANK_INSTRUCTIONS . '<br />' . e107::getParser()->toHTML($value['bank_details'], true);
+		}
+
+		if($result->hasMessage())
+		{
+			$message = ResultTranslator::text($result);
+			if($value['detail'] !== '' && ADMIN)
+			{
+				$message .= $value['detail'];
+			}
+
+			if($result->code() !== 'GW_CREDENTIALS')
+			{
+				trigger_error($message . ' [' . $name . ']', $result->isOk() ? E_USER_WARNING : E_USER_NOTICE);
+			}
+		}
+
+		return array($value['gateway'], $message, $value['mode']);
 	}
 
 	/**
@@ -5269,8 +4451,7 @@ class vstore
 		{
 			$result = array(
 				'userid'  => $this->order->order_e107_user,
-				'subject' => varset($this->pref['invoice_title'][e_LANGUAGE], 'Invoice') . ' ' .
-					self::formatInvoiceNr($this->order->order_invoice_nr),
+				'subject' => self::invoiceTitle($this->order->order_invoice_nr),
 				'text'    => $text,
 				'footer'  => $footer,
 				'logo'    => $logo,
@@ -5306,14 +4487,7 @@ class vstore
 	 */
 	public static function getCouponUsageCount($couponCode)
 	{
-		$sql = e107::getDb();
-		$count = $sql->count(
-			'vstore_orders',
-			'(*)',
-			sprintf('order_pay_coupon_code="%s"', $sql->escape($couponCode))
-		);
-		
-		return (int) $count;
+		return (new OrderCouponUsageRepository())->totalUsage($couponCode);
 	}
 
 	/**
@@ -5325,18 +4499,7 @@ class vstore
 	 */
 	public static function getCouponUsageCountByUser($couponCode, $userId)
 	{
-		$sql = e107::getDb();
-		$count = $sql->count(
-			'vstore_orders',
-			'(*)',
-			sprintf(
-				'order_e107_user=%d AND order_pay_coupon_code="%s"',
-				(int) $userId,
-				$sql->escape($couponCode)
-			)
-		);
-		
-		return (int) $count;
+		return (new OrderCouponUsageRepository())->userUsage($couponCode, $userId);
 	}
 
 	/**
@@ -5348,64 +4511,8 @@ class vstore
 	 */
 	public static function validateVATID($vatId, $countryCode)
 	{
-		$result = array(
-			'valid' => false,
-			'name' => '',
-			'address' => '',
-			'error' => ''
-		);
-
-		// Check if VAT validation is enabled
 		$pref = e107::pref('vstore');
-		if(empty($pref['tax_check_vat']))
-		{
-			// VAT validation disabled - accept without checking
-			$result['valid'] = true;
-			$result['error'] = 'VAT validation disabled in settings';
-			return $result;
-		}
 
-		// Clean VAT ID (remove spaces and country prefix if duplicated)
-		$vatId = strtoupper(str_replace(' ', '', $vatId));
-		$countryCode = strtoupper($countryCode);
-
-		// Remove country code from beginning if present
-		if(strpos($vatId, $countryCode) === 0)
-		{
-			$vatId = substr($vatId, 2);
-		}
-
-		try
-		{
-			// Use ibericode/vat library
-			$validator = new \Ibericode\Vat\Validator();
-			$isValid = $validator->validateVatNumber($countryCode . $vatId);
-
-			if($isValid)
-			{
-				$result['valid'] = true;
-				
-				// Note: validateDetails() no longer exists in ibericode/vat 2.x
-				// Company details retrieval would require direct VIES API call
-				// For now, we just validate the VAT number format and existence
-			}
-			else
-			{
-				$result['error'] = 'Invalid VAT ID';
-			}
-		}
-		catch(Exception $e)
-		{
-			// VIES service error - accept VAT ID as failsafe
-			$result['valid'] = true;
-			$result['error'] = 'VIES service unavailable: ' . $e->getMessage();
-			
-			if(deftrue('e_DEBUG_VSTORE'))
-			{
-				e107::getDebug()->log($result['error'], 'VSTORE_VAT');
-			}
-		}
-
-		return $result;
+		return self::vatService()->validate($vatId, $countryCode, !empty($pref['tax_check_vat']));
 	}
 }

@@ -1,9 +1,13 @@
 <?php
+e107::lan('vstore', 'admin_statistics', true);
+
 /**
  * Adminarea module statistics
  */
 class vstore_statistics_ui extends e_admin_ui
 {
+	use vstore_admin_common;
+
 
 		protected $pluginTitle		= 'Vstore';
 		protected $pluginName		= 'vstore';
@@ -46,7 +50,7 @@ class vstore_statistics_ui extends e_admin_ui
 											<i class="fa fa-folder-open fa-4x text-info"></i>
 										</div>
 										<div class="col-xs-9 text-right">
-											<div class="text-muted">Open orders</div>
+											<div class="text-muted">'.LAN_VSTORE_ADMIN_STAT_OPEN_ORDERS.'</div>
 											<h3 class="m-t-0 m-b-0">'.number_format($count_open).'</h3>
 										</div>
 									</div>
@@ -63,7 +67,7 @@ class vstore_statistics_ui extends e_admin_ui
 											<i class="fa fa-calendar fa-4x text-success"></i>
 										</div>
 										<div class="col-xs-9 text-right">
-											<div class="text-muted">Orders last 7 days</div>
+											<div class="text-muted">'.LAN_VSTORE_ADMIN_STAT_ORDERS_7.'</div>
 											<h3 class="m-t-0 m-b-0">'.number_format($count_orders_7).'</h3>
 										</div>
 									</div>
@@ -80,7 +84,7 @@ class vstore_statistics_ui extends e_admin_ui
 											<i class="fa fa-money fa-4x text-warning"></i>
 										</div>
 										<div class="col-xs-9 text-right">
-											<div class="text-muted">Gross sales last 7 days</div>
+											<div class="text-muted">'.LAN_VSTORE_ADMIN_STAT_GROSS_7.'</div>
 											<h3 class="m-t-0 m-b-0">'.$sc->getCurrencySymbol() . number_format($gross_7, 2).'</h3>
 										</div>
 									</div>
@@ -97,7 +101,7 @@ class vstore_statistics_ui extends e_admin_ui
 											<i class="fa fa-line-chart fa-4x text-primary"></i>
 										</div>
 										<div class="col-xs-9 text-right">
-											<div class="text-muted">Gross sales last 31 days</div>
+											<div class="text-muted">'.LAN_VSTORE_ADMIN_STAT_GROSS_31.'</div>
 											<h3 class="m-t-0 m-b-0">'.$sc->getCurrencySymbol() . number_format($gross_31, 2).'</h3>
 										</div>
 									</div>
@@ -114,7 +118,7 @@ class vstore_statistics_ui extends e_admin_ui
 					<div class="col-6 col-md-12 col-lg-6">
 						<div class="panel panel-default">
 						<div class="panel-heading">
-							<h3 class="panel-title">Monthly Revenue</h3>
+							<h3 class="panel-title">'.LAN_VSTORE_ADMIN_STAT_MONTHLY.'</h3>
 						</div>
 						<div class="panel-body">'.
 						e107::getAddon('vstore', 'e_dashboard')->revenue()
@@ -125,7 +129,7 @@ class vstore_statistics_ui extends e_admin_ui
 					<div class="col-6 col-md-12 col-lg-6">
 						<div class="panel panel-default">
 						<div class="panel-heading">
-							<h3 class="panel-title">Orders this month</h3>
+							<h3 class="panel-title">'.LAN_VSTORE_ADMIN_STAT_ORDERS_MONTH.'</h3>
 						</div>
 						<div class="panel-body">'.
 						e107::getAddon('vstore', 'e_dashboard')->orders()
@@ -138,7 +142,7 @@ class vstore_statistics_ui extends e_admin_ui
 					<div class="col-6 col-xs-12 col-md-12">
 						<div class="panel panel-default">
 						<div class="panel-heading">
-							<h3 class="panel-title">Custom Chart</h3>
+							<h3 class="panel-title">'.LAN_VSTORE_ADMIN_STAT_CUSTOM.'</h3>
 						</div>
 						<div class="panel-body">
 						'.$this->legacyChart().'
@@ -183,7 +187,7 @@ class vstore_statistics_ui extends e_admin_ui
 
 		// Define the chart types
 		$opt_types = array(
-			'amount' => 'Payed & Open orders',
+			'amount' => LAN_VSTORE_ADMIN_STAT_TYPE_AMOUNT,
 		);
 
 
@@ -239,7 +243,7 @@ class vstore_statistics_ui extends e_admin_ui
 			// The data fields (must be named A, B, C, and so on)
 			$fields = 'SUM(IF(order_status="C", order_pay_amount, 0)) AS A, SUM(IF(order_status!="C", order_pay_amount, 0)) AS B';
 			// The legend references the fieldnames and their "readable name"
-			$legend = array('A' => 'Payed', 'B' => 'Open');
+			$legend = array('A' => LAN_VSTORE_ADMIN_STAT_PAID, 'B' => LAN_VSTORE_ADMIN_STAT_OPEN);
 			// Type of chart to display
 			$chart_type = 'line';
 			// Set y axis caption (value unit)
@@ -253,7 +257,7 @@ class vstore_statistics_ui extends e_admin_ui
 		$diff = $posted['chart_end'] - $posted['chart_start'];
 
 		// define WHERE clause for sql query (date range)
-		$where = 'order_date >= ' . $posted['chart_start'] . ' AND order_date <= ' . ($posted['chart_end'] + (24 * 60 * 60));
+		$where = 'order_date >= ' . (int) $posted['chart_start'] . ' AND order_date <= ' . ((int) $posted['chart_end'] + (24 * 60 * 60));
 
 		// Define the labels
 		// Define GROUP BY and group column depending on the date range to display
@@ -269,7 +273,7 @@ class vstore_statistics_ui extends e_admin_ui
 			$data['labels'][] = date('d', $start);
 			$fields .= ', DAY(FROM_UNIXTIME(order_date)) AS `COL`';
 			$groupby = ' GROUP BY DAY(FROM_UNIXTIME(order_date))';
-			$xAxis = 'Day';
+			$xAxis = LAN_VSTORE_ADMIN_STAT_DAY;
 		}
 		elseif($diff <= (31 * 24 * 60 * 60)) // <= 31 days (show weeks)
 		{
@@ -282,7 +286,7 @@ class vstore_statistics_ui extends e_admin_ui
 			$data['labels'][] = date('W', $start);
 			$fields .= ', WEEK(FROM_UNIXTIME(order_date), 1) AS COL';
 			$groupby = ' GROUP BY WEEK(FROM_UNIXTIME(order_date), 1)';
-			$xAxis = 'Week';
+			$xAxis = LAN_VSTORE_ADMIN_STAT_WEEK;
 		}
 		elseif($diff <= (365 * 24 * 60 * 60)) // <= 1 year (show month)
 		{
@@ -295,7 +299,7 @@ class vstore_statistics_ui extends e_admin_ui
 			$data['labels'][] = date('n/Y', $start);
 			$fields .= ', CONCAT(MONTH(FROM_UNIXTIME(order_date)), "/", YEAR(FROM_UNIXTIME(order_date))) AS COL';
 			$groupby = ' GROUP BY MONTH(FROM_UNIXTIME(order_date)), YEAR(FROM_UNIXTIME(order_date)) ORDER BY YEAR(FROM_UNIXTIME(order_date)), MONTH(FROM_UNIXTIME(order_date))';
-			$xAxis = 'Month';
+			$xAxis = LAN_VSTORE_ADMIN_STAT_MONTH;
 		}
 		else // > 1 year (show years)
 		{
@@ -308,7 +312,7 @@ class vstore_statistics_ui extends e_admin_ui
 			$data['labels'][] = date('Y', $start);
 			$fields .= ', YEAR(FROM_UNIXTIME(order_date)) AS COL';
 			$groupby = ' GROUP BY YEAR(FROM_UNIXTIME(order_date))';
-			$xAxis = 'Year';
+			$xAxis = LAN_VSTORE_ADMIN_STAT_YEAR;
 		}
 
 		// Make sure the labels array contains unique values
@@ -433,7 +437,7 @@ class vstore_statistics_ui extends e_admin_ui
 		}
 		else
 		{
-			$chart = e107::getMessage()->addWarning('No data for chart available!')->render();
+			$chart = e107::getMessage()->addWarning(LAN_VSTORE_ADMIN_STAT_NO_DATA)->render();
 		}
 
 
@@ -442,18 +446,18 @@ class vstore_statistics_ui extends e_admin_ui
 			<div class="col-md-12">
 			<div class="well" style="display:table; margin-left:auto; margin-right:auto">
 				<div class="form-group row">
-					<div class="col-sm-1">Type:</div>
+					<div class="col-sm-1">'.LAN_VSTORE_ADMIN_STAT_TYPE.'</div>
 					<div class="col-sm-11">' . $frm->select('chart_type', $opt_types, $posted['chart_type'], ['size'=>'xlarge']) . '</div>
 				</div>
 
 				
 				<div class="form-group row">
-					<div class="col-sm-1 ">Range:</div>
-					<div class="col-sm-11 form-inline">' . $frm->datepicker('chart_start', $posted['chart_start']) . ' and '. $frm->datepicker('chart_end', $posted['chart_end']).
-			'<div style="margin-top:5px">' . $frm->button('plus1', 'Yesterday', 'button', '', array('class' => 'btn btn-primary btn-sm vstore-range', 'data-value' => '1'))
-			. ' ' . $frm->button('plus7', 'Week', 'button', '', array('class' => 'btn btn-primary btn-sm vstore-range', 'data-value' => '7'))
-			. ' ' . $frm->button('plus31', 'Month', 'button', '', array('class' => 'btn btn-primary btn-sm vstore-range', 'data-value' => '31'))
-			. ' ' . $frm->button('plus365', 'Year', 'button', '', array('class' => 'btn btn-primary btn-sm vstore-range', 'data-value' => '365'))
+					<div class="col-sm-1 ">'.LAN_VSTORE_ADMIN_STAT_RANGE.'</div>
+					<div class="col-sm-11 form-inline">' . $frm->datepicker('chart_start', $posted['chart_start']) . ' '.LAN_VSTORE_ADMIN_STAT_AND.' '. $frm->datepicker('chart_end', $posted['chart_end']).
+			'<div style="margin-top:5px">' . $frm->button('plus1', LAN_VSTORE_ADMIN_STAT_YESTERDAY, 'button', '', array('class' => 'btn btn-primary btn-sm vstore-range', 'data-value' => '1'))
+			. ' ' . $frm->button('plus7', LAN_VSTORE_ADMIN_STAT_WEEK, 'button', '', array('class' => 'btn btn-primary btn-sm vstore-range', 'data-value' => '7'))
+			. ' ' . $frm->button('plus31', LAN_VSTORE_ADMIN_STAT_MONTH, 'button', '', array('class' => 'btn btn-primary btn-sm vstore-range', 'data-value' => '31'))
+			. ' ' . $frm->button('plus365', LAN_VSTORE_ADMIN_STAT_YEAR, 'button', '', array('class' => 'btn btn-primary btn-sm vstore-range', 'data-value' => '365'))
 			.
 
 					'</div>
@@ -463,7 +467,7 @@ class vstore_statistics_ui extends e_admin_ui
 				<div  class="row">
 					
 					<div class="text-center">'
-					 . $frm->button('chart_update', '<i class="fa fa-refresh" aria-hidden="true"></i> Update') . '
+					 . $frm->button('chart_update', '<i class="fa fa-refresh" aria-hidden="true"></i> '.LAN_VSTORE_ADMIN_STAT_UPDATE) . '
 					</div>
 				
 					</div>
