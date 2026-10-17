@@ -1,4 +1,10 @@
 <?php
+/**
+ * Vstore - shopping cart plugin for e107.
+ * Based on e107inc/vstore (CaMerOn, Achim Ennenbach, e107 Inc). Modified by Kanonimpresor, 2025-2026.
+ *
+ * @license GPL-3.0 https://www.gnu.org/licenses/gpl-3.0.html
+ */
 e107::lan('vstore', 'admin_orders', true);
 
 /**

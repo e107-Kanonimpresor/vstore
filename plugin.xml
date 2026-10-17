@@ -8,7 +8,7 @@
 		<word>shopping</word>
 	</keywords>
 	<category>content</category>
-	<copyright>Copyright (c) 2026 Kanonimpresor / Marketing de Performance — GPL v3</copyright>
+	<copyright>Based on Vstore by e107 Inc (CaMerOn, Achim Ennenbach), https://github.com/e107inc/vstore. Modifications copyright (c) 2025-2026 Kanonimpresor / Marketing de Performance. Licensed under GPL v3.</copyright>
 	<adminLinks>
 		<link url="admin_config.php" description="" icon="images/vstore_32.png" iconSmall="images/vstore_16.png" icon128="images/vstore_128.png" primary="true" >LAN_CONFIGURE</link>
 	</adminLinks>

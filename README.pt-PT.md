@@ -15,7 +15,8 @@
 ![License](https://img.shields.io/badge/license-GPL--3.0-orange)
 
 **Autor:** [Kanonimpresor](https://marketingdeperformance.online) — Marketing de Performance  
-**Licença:** GPL-3.0
+**Licença:** GPL-3.0  
+**Baseado em:** [e107inc/vstore](https://github.com/e107inc/vstore) (CaMerOn, Achim Ennenbach, e107 Inc). Modificado por Kanonimpresor, 2025-2026.
 
 ---
 
