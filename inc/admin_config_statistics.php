@@ -37,8 +37,9 @@ class vstore_statistics_ui extends e_admin_ui
 
 
 			// Get data for the top summary boxes
-			$count_open = (int) $sql->count('vstore_orders', "(*)", 'order_status != "X"');
-			$count_orders_7 = (int) $sql->count('vstore_orders', '(*)', sprintf('order_date >= %d', $date_7));
+			$count_open = (int) $sql->count('vstore_orders', "(*)", 'order_status NOT IN ("X", "Q", "M", "A", "F")');
+			$count_quotes = (int) $sql->count('vstore_orders', '(*)', 'order_status = "Q"');
+			$count_orders_7 = (int) $sql->count('vstore_orders', '(*)', sprintf('order_date >= %d AND order_status NOT IN ("Q", "M", "A", "F")', $date_7));
 			$gross_7 = (double) $sql->retrieve('vstore_orders', 'SUM(order_pay_amount)', sprintf('order_date >= %d', $date_7));
 			$gross_31 = (double) $sql->retrieve('vstore_orders', 'SUM(order_pay_amount)', sprintf('order_date >= %d', $date_31));
 
@@ -46,8 +47,8 @@ class vstore_statistics_ui extends e_admin_ui
 
 			// render page
 			$text =  '
-				<div class="row">
-					<div class="col-6 col-md-6 col-lg-3">
+				<div class="row" style="display:flex; flex-wrap:wrap;">
+					<div class="vstore-kpi" style="flex:1 1 200px; padding:0 15px;">
 						<div class="panel panel-default">
 							<div class="panel-body">
 								<a href="admin_config.php?filter_options=order_status__open&mode=orders&action=list" style="text-decoration:none; color:inherit;">
@@ -64,7 +65,7 @@ class vstore_statistics_ui extends e_admin_ui
 							</div>
 						</div>	
 					</div>			
-					<div class="col-6 col-md-6 col-lg-3">
+					<div class="vstore-kpi" style="flex:1 1 200px; padding:0 15px;">
 						<div class="panel panel-default">
 							<div class="panel-body">
 								<a href="admin_config.php?filter_options=datestamp__order_date__week&mode=orders&action=list" style="text-decoration:none; color:inherit;">
@@ -81,7 +82,7 @@ class vstore_statistics_ui extends e_admin_ui
 							</div>
 						</div>	
 					</div>
-					<div class="col-6 col-md-6 col-lg-3">		
+					<div class="vstore-kpi" style="flex:1 1 200px; padding:0 15px;">		
 						<div class="panel panel-default">
 							<div class="panel-body">
 								<a href="admin_config.php?filter_options=datestamp__order_date__week&mode=orders&action=list" style="text-decoration:none; color:inherit;">
@@ -98,7 +99,7 @@ class vstore_statistics_ui extends e_admin_ui
 							</div>
 						</div>	
 					</div>	
-					<div class="col-6 col-md-6 col-lg-3">		
+					<div class="vstore-kpi" style="flex:1 1 200px; padding:0 15px;">		
 						<div class="panel panel-default">
 							<div class="panel-body">
 								<a href="admin_config.php?filter_options=datestamp__order_date__month&mode=orders&action=list" style="text-decoration:none; color:inherit;">
@@ -115,6 +116,23 @@ class vstore_statistics_ui extends e_admin_ui
 							</div>
 						</div>	
 					</div>			
+					<div class="vstore-kpi" style="flex:1 1 200px; padding:0 15px;">
+						<div class="panel panel-default">
+							<div class="panel-body">
+								<a href="admin_config.php?filter_options=order_status__Q&mode=orders&action=list" style="text-decoration:none; color:inherit;">
+									<div class="row" style="display: flex; align-items: center;">
+										<div class="col-xs-3 text-center">
+											<i class="fa fa-file-text-o fa-4x '.($count_quotes ? 'text-danger' : 'text-muted').'"></i>
+										</div>
+										<div class="col-xs-9 text-right">
+											<div class="text-muted">'.LAN_VSTORE_ADMIN_STAT_NEW_QUOTES.'</div>
+											<h3 class="m-t-0 m-b-0">'.number_format($count_quotes).'</h3>
+										</div>
+									</div>
+								</a>
+							</div>
+						</div>
+					</div>
 				</div>	
 				';
 

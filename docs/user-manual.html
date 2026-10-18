@@ -250,6 +250,7 @@
             <li><a href="#instalacion"><i class="bi bi-download"></i> Instalación</a></li>
             <li><a href="#configuracion"><i class="bi bi-gear"></i> Configuración Inicial</a></li>
             <li><a href="#productos"><i class="bi bi-box-seam"></i> Gestión de Productos</a></li>
+            <li><a href="#presupuestos"><i class="bi bi-file-earmark-text"></i> Presupuestos</a></li>
             <li><a href="#categorias"><i class="bi bi-folder"></i> Categorías</a></li>
             <li><a href="#variaciones"><i class="bi bi-palette"></i> Variaciones de Productos</a></li>
             <li><a href="#cupones"><i class="bi bi-tag"></i> Cupones de Descuento</a></li>
@@ -615,6 +616,75 @@ composer install</code></pre>
                             <h6><i class="bi bi-shield-check"></i> Seguridad</h6>
                             <p class="mb-0">Los archivos descargables están protegidos y solo son accesibles por clientes que han completado la compra.</p>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Presupuestos -->
+            <section id="presupuestos" class="section">
+                <h2 class="section-title"><i class="bi bi-file-earmark-text"></i> Presupuestos</h2>
+
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#inicio">Inicio</a></li>
+                        <li class="breadcrumb-item active">Presupuestos</li>
+                    </ol>
+                </nav>
+
+                <div class="alert alert-info">
+                    <p><strong>Ruta:</strong> Admin → Vstore → Productos (precio vacío) y Admin → Vstore → Ventas</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        Venta o presupuesto
+                    </div>
+                    <div class="card-body">
+                        <p>Cada producto puede venderse o pedirse como presupuesto:</p>
+                        <ul>
+                            <li><strong>Con precio</strong>: se vende como siempre (carrito, pago y factura).</li>
+                            <li><strong>Con el precio vacío</strong> (no 0): el producto muestra <em>Precio bajo presupuesto</em> y el botón <strong>Presupuesto</strong> en lugar de <em>Añadir al carrito</em>. Un precio de <code>0</code> es un producto gratuito, no un presupuesto.</li>
+                        </ul>
+                        <div class="alert alert-info">
+                            <strong>Compra y presupuesto pueden ir en el mismo carrito.</strong> El carrito muestra dos bloques: <em>Productos para comprar</em> (con precios, cupón y total, botón <em>Finalizar compra</em>) y <em>Productos para presupuesto</em> (sin precios, botón <em>Solicitar presupuesto</em>). Cada botón tramita solo sus líneas; las otras siguen en el carrito para el paso siguiente. Una compra se paga y se factura como siempre y el presupuesto se guarda aparte, sin pago ni número de factura.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-header">
+                        Qué ve el cliente
+                    </div>
+                    <div class="card-body">
+                        <p>El proceso es el mismo que al comprar, pero sin valores:</p>
+                        <ol>
+                            <li>Pulsa <strong>Presupuesto</strong> en los productos que necesita y abre el carrito, que solo lista productos y cantidades.</li>
+                            <li>Pulsa <strong>Solicitar presupuesto</strong>, indica sus datos y la dirección y revisa el resumen. No hay precios, cupón, envío, impuestos ni método de pago.</li>
+                            <li>Pulsa <strong>Enviar solicitud de presupuesto</strong>. Recibe un correo con la lista de material pedido y la tienda recibe una copia del mismo mensaje.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-header">
+                        Seguimiento en el administrador
+                    </div>
+                    <div class="card-body">
+                        <p>Cada solicitud queda guardada en <strong>Ventas</strong> (filtro <em>Presupuestos</em>; en <strong>Estadísticas</strong> la tarjeta <em>Presupuestos nuevos</em> cuenta los pendientes y enlaza a ellos) como un registro que no consume números de factura, no modifica el stock y no cuenta como venta en las estadísticas. Estados:</p>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr><th style="width: 30%;">Estado</th><th>Significado</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><span class="badge bg-primary">Presupuesto solicitado</span></td><td>Solicitud recibida online</td></tr>
+                                <tr><td><span class="badge bg-info">Migrado a la app</span></td><td>Pasado a la aplicación externa de presupuestos y facturación</td></tr>
+                                <tr><td><span class="badge bg-success">Presupuesto aprobado</span></td><td>El cliente ha aprobado el presupuesto</td></tr>
+                                <tr><td><span class="badge bg-secondary">Facturado</span></td><td>Se ha emitido la factura certificada en la aplicación externa</td></tr>
+                                <tr><td><span class="badge bg-danger">Cancelado</span></td><td>Rechazado o anulado (el cliente también puede cancelarlo desde su panel)</td></tr>
+                            </tbody>
+                        </table>
+                        <p>Los botones de la ficha del pedido avanzan el estado paso a paso. Vstore <strong>no emite facturas</strong> de presupuestos: la factura certificada se emite en la aplicación externa. Tras el primer correo, los cambios de estado no envían más correos.</p>
+                        <p class="mb-0">El correo se personaliza en <strong>Plantillas de Email → Solicitud de presupuesto</strong>.</p>
                     </div>
                 </div>
             </section>

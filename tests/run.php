@@ -644,6 +644,17 @@ check('another variation is another line', count($cartRepo->lines), 2);
 
 $cartRepo->lines = array();
 $cartRepo->nextId = 1;
+$cartRepo->items[4] = array('item_active' => 1, 'item_tax_class' => 'standard', 'item_name' => 'Custom job', 'item_price' => null);
+$stock->items[4] = array('item_inventory' => -1, 'item_vars_inventory' => array());
+check('quote item goes into an empty cart', $cart->add('Q1', 0, 4)->isOk(), true);
+check('a purchase item can join a cart with quote items', $cart->add('Q1', 0, 1)->isOk(), true);
+check('a second quote item is accepted', $cart->add('Q1', 0, 4, false, 2)->isOk(), true);
+check('quote items and purchase items live in the same cart', count($cartRepo->lines), 2);
+check('a zero price is a sale, not a quote', array(Catalog::isQuotePrice(null), Catalog::isQuotePrice(''), Catalog::isQuotePrice(' '), Catalog::isQuotePrice('0.00'), Catalog::isQuotePrice(0)), array(true, true, true, false, false));
+check('quote statuses', array(Catalog::isQuoteStatus('Q'), Catalog::isQuoteStatus('f'), Catalog::isQuoteStatus('N'), Catalog::statusSlug('Q')), array(true, true, false, 'quote'));
+
+$cartRepo->lines = array();
+$cartRepo->nextId = 1;
 $cart->add('S1', 0, 1, false, 2);
 $cart->add('S1', 0, 3, false, 2);
 $res = $cart->updateQuantities('S1', array(1 => array('id' => 1, 'qty' => 6, 'vars' => ''), 2 => array('id' => 3, 'qty' => 0, 'vars' => '')));
@@ -798,7 +809,7 @@ check('existing customer is updated without a new reference', array($custRepo->r
 echo "Catalog\n";
 
 check('status slug', Catalog::statusSlug('H'), 'on hold');
-check('every status has an email slug', count(Catalog::STATUS), 6);
+check('every status has a slug', count(Catalog::STATUS), count(array_unique(array_map('strtolower', Catalog::STATUS))));
 check('mollie detection', array(Catalog::isMollie('mollie_ideal'), Catalog::isMollie('paypal')), array(true, false));
 check('retired gateways', array(Catalog::isRetiredGateway('stripe'), Catalog::isRetiredGateway('Braintree'), Catalog::isRetiredGateway('mollie'), Catalog::isRetiredGateway('paypal')), array(true, true, false, false));
 check('euro-only Mollie methods', array(Catalog::supportsCurrency('mollie_mbway', 'EUR'), Catalog::supportsCurrency('mollie_mbway', 'USD'), Catalog::supportsCurrency('mollie_creditcard', 'USD'), Catalog::supportsCurrency('paypal', 'USD'), Catalog::supportsCurrency('mollie_multibanco', 'usd')), array(true, false, true, true, false));

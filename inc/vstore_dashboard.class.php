@@ -150,7 +150,75 @@ class vstore_dashboard
 	 */
     private function dashboard()
     {
+        $this->sc->addVars(array('stats' => $this->stats()));
+
         return $this->tp->parseTemplate($this->template['dashboard'], true, $this->sc);
+    }
+
+
+	/**
+	 * Figures of the landing page: totals, spending per month of the last six months and the latest orders.
+	 * Quotes are not purchases: they only count as open quotes.
+	 *
+	 * @return array
+	 */
+    private function stats()
+    {
+        $uid = (int) USERID;
+        $quotes = "'" . implode("','", \Vstore\Support\Catalog::QUOTE_STATUSES) . "'";
+        $sales = "order_e107_user = {$uid} AND order_status NOT IN ('X','R',{$quotes})";
+
+        $totals = (array) $this->sql->retrieve(
+            "SELECT COUNT(*) AS orders,
+                COALESCE(SUM(IF(order_pay_status = 'complete', order_pay_amount, 0)), 0) AS spent,
+                COALESCE(SUM(order_status IN ('N','P','H')), 0) AS open
+            FROM `#vstore_orders` WHERE {$sales}"
+        );
+
+        $openQuotes = (int) $this->sql->count('vstore_orders', '(*)', "order_e107_user = {$uid} AND order_status IN ('Q','M','A')");
+
+        $first = mktime(0, 0, 0, (int) date('n') - 5, 1, (int) date('Y'));
+        $perMonth = array();
+        $rows = $this->sql->retrieve(
+            "SELECT DATE_FORMAT(FROM_UNIXTIME(order_date), '%Y-%m') AS ym, SUM(order_pay_amount) AS total
+            FROM `#vstore_orders` WHERE {$sales} AND order_pay_status = 'complete' AND order_date >= {$first}
+            GROUP BY ym",
+            true
+        );
+        foreach ((array) $rows as $row)
+        {
+            $perMonth[$row['ym']] = (float) $row['total'];
+        }
+
+        $names = e107::getDate()->terms('month-short');
+        $months = array();
+        $max = 0;
+        for ($i = 0; $i < 6; $i++)
+        {
+            $ts = mktime(0, 0, 0, (int) date('n', $first) + $i, 1, (int) date('Y', $first));
+            $value = varset($perMonth[date('Y-m', $ts)], 0);
+            $max = max($max, $value);
+            $months[] = array('label' => varset($names[(int) date('n', $ts)], date('M', $ts)), 'value' => $value);
+        }
+        foreach ($months as $k => $month)
+        {
+            $months[$k]['pct'] = $max > 0 ? max(4, round($month['value'] / $max * 100)) : 0;
+        }
+
+        $recent = (array) $this->sql->retrieve(
+            "SELECT * FROM `#vstore_orders` WHERE order_e107_user = {$uid} ORDER BY order_id DESC LIMIT 5",
+            true
+        );
+
+        return array(
+            'orders' => (int) varset($totals['orders']),
+            'spent'  => (float) varset($totals['spent']),
+            'open'   => (int) varset($totals['open']),
+            'quotes' => $openQuotes,
+            'months' => $months,
+            'peak'   => $max,
+            'recent' => $recent,
+        );
     }
 
 
@@ -212,7 +280,7 @@ class vstore_dashboard
     {
         $text = '';
         // Order actions (view, cancel)
-        $data = $this->sql->retrieve('vstore_orders', '*', 'order_invoice_nr='.$this->id.' AND order_e107_user='.USERID);
+        $data = $this->sql->retrieve('vstore_orders', '*', vstore::orderViewWhere($this->id));
         if (!$data)
         {
             // Order not found or not assigned to user
@@ -237,7 +305,7 @@ class vstore_dashboard
     {
         $text = '';
         // Order actions (view, cancel)
-        $data = $this->sql->retrieve('vstore_orders', '*', 'order_invoice_nr='.$this->id.' AND order_e107_user='.USERID);
+        $data = $this->sql->retrieve('vstore_orders', '*', vstore::orderViewWhere($this->id));
         if (!$data)
         {
             // Order not found or not assigned to user
@@ -430,13 +498,13 @@ class vstore_dashboard
 
 
 				$this->sc->setVars($data);
-				$text .= $this->tp->parseTemplate($this->template['address']['edit']['billing']['body'], true, $this->sc);
+				$text .= '<section class="vstore-panel">' . $this->tp->parseTemplate($this->template['address']['edit']['billing']['body'], true, $this->sc) . '</section>';
 			}
 			elseif ($this->id === 2) // Shipping address
 			{
 				$data['ship'] = e107::unserialize($data['cust_shipping']);
 				$this->sc->setVars($data);
-				$text .= $this->tp->parseTemplate($this->template['address']['edit']['shipping']['body'], true, $this->sc);
+				$text .= '<section class="vstore-panel">' . $this->tp->parseTemplate($this->template['address']['edit']['shipping']['body'], true, $this->sc) . '</section>';
 			}
 			else
 			{

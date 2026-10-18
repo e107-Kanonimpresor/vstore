@@ -25,7 +25,7 @@ $vst = new vstore_sitelink;
 e107::lan('vstore', false, true);
 $caption = LAN_VSTORE_MENU_CATEGORIES;
 
-$items = $vst->storeCategories();
+$items = $vst->storeCategoryNav();
 
 $template = e107::getTemplate('vstore', 'vstore_menu', 'categories');
 $text = $tp->parseTemplate($template['start'], true, $sc);

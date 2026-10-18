@@ -8,7 +8,7 @@
 
 ---
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/e107-Kanonimpresor/vstore/releases/tag/v2.0.0)
+[![Version](https://img.shields.io/badge/version-2.1.0-blue)](https://github.com/e107-Kanonimpresor/vstore/releases/tag/v2.1.0)
 ![e107](https://img.shields.io/badge/e107-2.3.2%2B-green)
 [![PHP](https://img.shields.io/badge/PHP-7.4%20to%208.4-purple.svg)](https://php.net)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-3%20%7C%205-purple)
@@ -66,6 +66,8 @@
 - **Stock control** per product and per variation (`-1` for unlimited)
 - **Image galleries** with zoom, product videos and downloadable files
 - **Related products**
+- **Bootstrap 5 storefront**: category tiles, product cards, category bar under the breadcrumb, redesigned menus and cart, responsive and themable with CSS variables (2.1.0)
+- **Quote mode** (2.1.0): a product with an empty price shows a "Quote" button; purchases and quote products share the cart (each kind is checked out on its own, the quote lists only products and quantities) and the request is saved as a quote (Quote request → Migrated to app → Approved → Invoiced) and e-mailed to the customer and the shop
 - **SEO-friendly URLs**
 - **Search integration** with the e107 search
 
@@ -93,7 +95,14 @@
 
 ---
 
-## 🆕 What's new in v2.0.0
+## 🆕 What's new in v2.1.0
+
+- **Quote mode**: products without a price are requested as a quote, in the same cart as the products you sell.
+- **Redesigned storefront** for Bootstrap 5: category tiles, product cards, category bar, menus, cart, checkout with an order summary, and a customer dashboard with figures and a chart.
+- **Add-to-cart feedback**: the product flies to the cart icon, the counter pulses and a message offers the cart.
+- **Admin**: new *quotes* box in the statistics and a *Quotes* filter in the orders.
+
+## What was new in v2.0.0
 
 - **Fully translatable** admin area and storefront (English, Spanish, Portuguese).
 - **Mollie MB WAY and Multibanco**, phone number sent to Mollie, Mollie **webhook** and a *Check payment in Mollie* button.
@@ -124,7 +133,7 @@
 ### Installation steps
 
 1. **Get the plugin**
-   - **Release package (recommended)**: download `vstore-2.0.0.zip` from the [Releases page](https://github.com/e107-Kanonimpresor/vstore/releases) and extract it into `e107_plugins/` (it already contains `vendor/`).
+   - **Release package (recommended)**: download `vstore-2.1.0.zip` from the [Releases page](https://github.com/e107-Kanonimpresor/vstore/releases) and extract it into `e107_plugins/` (it already contains `vendor/`).
    - **From source**:
      ```bash
      cd e107_plugins
@@ -236,6 +245,8 @@ E-mails use `vstore_email_layout_template.php` (document) and `vstore_email_temp
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete list of changes.
 
+**v2.1.0 (2026-10-18)**: quote mode, Bootstrap 5 storefront redesign, redesigned checkout and customer dashboard, add-to-cart effect. See the [CHANGELOG](CHANGELOG.md).
+
 **v2.0.0 (2026-10-17)**: translations, Mollie MB WAY/Multibanco and webhook, EU VAT rewrite, new e-mails, built-in PDF invoices, business layer with tests, security review. See the [release notes](docs/RELEASE_NOTES_v2.0.0.md).
 
 ---
@@ -298,7 +309,7 @@ This project is licensed under the **GNU General Public License v3.0** - see the
 - [x] Mollie MB WAY and Multibanco, built-in PDF invoices, EU VAT rewrite, new e-mail design
 
 ### 🚧 In Progress
-- [ ] Product **quote** mode: leave the price empty and the product shows a "Quote / Presupuesto / Orçamento" button instead of "Add to cart"
+- [x] Product **quote** mode (2.1.0): leave the price empty and the product shows a "Quote / Presupuesto / Orçamento" button instead of "Add to cart"; quotes are saved in the admin area for a later hand-over to a certified billing app
 - [ ] More e-mail improvements
 - [ ] More languages (community translations)
 - [ ] Mobile app integration

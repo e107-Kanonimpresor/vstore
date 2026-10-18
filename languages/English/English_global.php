@@ -17,12 +17,17 @@ define("LAN_VSTORE_STATUS_H", "On Hold");
 define("LAN_VSTORE_STATUS_C", "Completed");
 define("LAN_VSTORE_STATUS_X", "Cancelled");
 define("LAN_VSTORE_STATUS_R", "Refunded");
+define("LAN_VSTORE_STATUS_Q", "Quote request");
+define("LAN_VSTORE_STATUS_M", "Migrated to app");
+define("LAN_VSTORE_STATUS_A", "Quote approved");
+define("LAN_VSTORE_STATUS_F", "Invoiced");
 
 // Email types
 define("LAN_VSTORE_EMAILTYPE_DEFAULT", "Order confirmation");
 define("LAN_VSTORE_EMAILTYPE_COMPLETED", "Order completed");
 define("LAN_VSTORE_EMAILTYPE_CANCELLED", "Order cancelled");
 define("LAN_VSTORE_EMAILTYPE_REFUNDED", "Order refunded");
+define("LAN_VSTORE_EMAILTYPE_QUOTE", "Quote request");
 
 // Weight units
 define("LAN_VSTORE_WEIGHT_G", "Grams");

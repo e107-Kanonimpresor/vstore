@@ -13,22 +13,30 @@ $VSTORE_DASHBOARD_TEMPLATE = array();
 
 
 $VSTORE_DASHBOARD_TEMPLATE['header'] = '
-    <h3>{DASHBOARD: title}</h3>
+<div class="vstore vstore-dash">
+    <div class="vstore-dash-hero">
+        <span class="vstore-dash-avatar">{DASHBOARD: avatar}</span>
+        <div>
+            <h3 class="vstore-dash-hello">{DASHBOARD: hello}</h3>
+            <p class="vstore-dash-sub">{DASHBOARD: subtitle}</p>
+        </div>
+    </div>
 
     {DASHBOARD: nav}
-    <br />
-    <div>
+
+    <div class="vstore-dash-body">
 ';
 
 $VSTORE_DASHBOARD_TEMPLATE['footer'] = '
     </div>
+</div>
 ';
 
 /**
  * Dashboard navigation
  */
 $VSTORE_DASHBOARD_TEMPLATE['nav']['start'] = '
-	<ul class="nav nav-tabs">';
+	<ul class="nav vstore-pillnav">';
 $VSTORE_DASHBOARD_TEMPLATE['nav']['end'] = '
 	</ul>
 ';
@@ -37,10 +45,82 @@ $VSTORE_DASHBOARD_TEMPLATE['nav']['item'] = '
 
 
 /**
- * Dashboard
+ * Dashboard landing page: summary boxes, spending chart, latest orders and shortcuts
+ * Tokens in [brackets] are replaced by the DASHBOARD shortcode.
  */
 $VSTORE_DASHBOARD_TEMPLATE['dashboard'] = '
-    <p>{LAN=LAN_VSTORE_DB_INTRO}</p>
+    <div class="vstore-kpis">{DASHBOARD: kpis}</div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-7">
+            <section class="vstore-panel h-100 mb-0">
+                <h4 class="vstore-panel-title"><span class="vstore-panel-icon"><i class="fa fa-bar-chart" aria-hidden="true"></i></span> {LAN=LAN_VSTORE_DB_CHART_TITLE}</h4>
+                {DASHBOARD: chart}
+            </section>
+        </div>
+        <div class="col-lg-5">
+            <section class="vstore-panel h-100 mb-0">
+                <h4 class="vstore-panel-title"><span class="vstore-panel-icon"><i class="fa fa-clock-o" aria-hidden="true"></i></span> {LAN=LAN_VSTORE_DB_RECENT_TITLE} <a class="vstore-panel-link" href="{DASHBOARD: orders_url}">{LAN=LAN_VSTORE_DB_VIEW_ALL} &raquo;</a></h4>
+                {DASHBOARD: recent}
+            </section>
+        </div>
+    </div>
+
+    <div class="vstore-dash-quick">{DASHBOARD: quick}</div>
+';
+
+$VSTORE_DASHBOARD_TEMPLATE['kpi'] = '
+        <a class="vstore-kpi" href="[url]">
+            <span class="vstore-kpi-icon vstore-kpi-[tone]"><i class="fa [icon]" aria-hidden="true"></i></span>
+            <span class="vstore-kpi-text">
+                <span class="vstore-kpi-label">[label]</span>
+                <span class="vstore-kpi-value">[value]</span>
+            </span>
+        </a>
+';
+
+$VSTORE_DASHBOARD_TEMPLATE['chart']['start'] = '
+    <div class="vstore-chart" role="img" aria-label="{LAN=LAN_VSTORE_DB_CHART_TITLE}">';
+
+$VSTORE_DASHBOARD_TEMPLATE['chart']['bar'] = '
+        <div class="vstore-chart-col[empty]">
+            <span class="vstore-chart-track"><span class="vstore-chart-bar" style="height:[pct]%" title="[label]"></span></span>
+            <span class="vstore-chart-val">[value]</span>
+            <span class="vstore-chart-label">[label]</span>
+        </div>';
+
+$VSTORE_DASHBOARD_TEMPLATE['chart']['end'] = '
+    </div>
+';
+
+$VSTORE_DASHBOARD_TEMPLATE['chart']['empty'] = '
+    <p class="vstore-empty"><i class="fa fa-bar-chart" aria-hidden="true"></i> {LAN=LAN_VSTORE_DB_CHART_EMPTY}</p>
+';
+
+$VSTORE_DASHBOARD_TEMPLATE['recent']['start'] = '
+    <ul class="vstore-recent">';
+
+$VSTORE_DASHBOARD_TEMPLATE['recent']['item'] = '
+        <li>
+            <a class="vstore-recent-item" href="[url]">
+                <span class="vstore-recent-icon"><i class="fa [icon]" aria-hidden="true"></i></span>
+                <span class="vstore-recent-body"><strong>[ref]</strong><small>[date]</small></span>
+                <span class="vstore-recent-meta"><b>[total]</b>[status]</span>
+            </a>
+        </li>';
+
+$VSTORE_DASHBOARD_TEMPLATE['recent']['end'] = '
+    </ul>
+';
+
+$VSTORE_DASHBOARD_TEMPLATE['recent']['empty'] = '
+    <p class="vstore-empty"><i class="fa fa-shopping-bag" aria-hidden="true"></i> {LAN=LAN_VSTORE_DB_MSG_NO_ORDERS}</p>
+';
+
+$VSTORE_DASHBOARD_TEMPLATE['quick'] = '
+        <a class="btn btn-primary" href="[shop_url]"><i class="fa fa-shopping-cart" aria-hidden="true"></i> {LAN=LAN_VSTORE_DB_QUICK_SHOP}</a>
+        <a class="btn btn-default btn-secondary" href="[address_url]"><i class="fa fa-map-marker" aria-hidden="true"></i> {LAN=LAN_VSTORE_DB_QUICK_ADDR}</a>
+        <a class="btn btn-default btn-secondary" href="[account_url]"><i class="fa fa-user" aria-hidden="true"></i> {LAN=LAN_VSTORE_DB_QUICK_ACCOUNT}</a>
 ';
 
 
@@ -48,13 +128,15 @@ $VSTORE_DASHBOARD_TEMPLATE['dashboard'] = '
  * List orders
  */
 $VSTORE_DASHBOARD_TEMPLATE['order']['list']['header'] = '
-    <table class="table table-bordered table-striped">
+    <section class="vstore-panel">
+    <div class="vstore-table-wrap">
+    <table class="table vstore-table vstore-orders">
     <thead>
     <tr>
         <th>{LAN=LAN_VSTORE_DB_ORDER_INFO}</th>
         <th>{LAN=LAN_VSTORE_FR_SHIPPING}</th>
         <th>{LAN=LAN_VSTORE_FR_ITEMS}</th>
-        <th>{LAN=LAN_VSTORE_FR_TOTAL}</th>
+        <th class="text-right text-end">{LAN=LAN_VSTORE_FR_TOTAL}</th>
         <th>{LAN=LAN_VSTORE_DB_STATUS}</th>
         <th>{LAN=LAN_VSTORE_DB_ACTIONS}</th>
     </tr>
@@ -66,19 +148,21 @@ $VSTORE_DASHBOARD_TEMPLATE['order']['list']['header'] = '
 $VSTORE_DASHBOARD_TEMPLATE['order']['list']['footer'] = '
     </tbody>
     </table>
+    </div>
+    </section>
 ';
 
 
 $VSTORE_DASHBOARD_TEMPLATE['order']['list']['item'] = '
     <tr>
         <td>
-            {LAN=LAN_VSTORE_DB_DATE}: {ORDER_DATA: order_date}<br />
-            {LAN=LAN_VSTORE_DB_ORDER}: {ORDER_DATA: order_ref}<br/>
-            {LAN=LAN_VSTORE_DB_INVOICE}: {ORDER_DATA: order_invoice_link}
+            <strong>{ORDER_DATA: order_ref}</strong><br />
+            <small class="text-muted">{ORDER_DATA: order_date}</small><br />
+            <small>{LAN=LAN_VSTORE_DB_INVOICE}: {ORDER_DATA: order_invoice_link}</small>
         </td>
         <td>{ORDER_DATA: order_shipping_full}</td>
         <td>{ORDER_DATA: order_items_short}</td>
-        <td>{ORDER_DATA: order_pay_amount}</td>
+        <td class="text-right text-end"><strong>{ORDER_DATA: order_pay_amount}</strong></td>
         <td>{ORDER_DATA: order_status_label}</td>
         <td>{ORDER_ACTIONS}</td>
     </tr>
@@ -89,43 +173,50 @@ $VSTORE_DASHBOARD_TEMPLATE['order']['list']['item'] = '
  * Order detail
  */
 $VSTORE_DASHBOARD_TEMPLATE['order']['detail'] = '
-    <h4>{LAN=LAN_VSTORE_DB_ORDER_DETAILS} {ORDER_DATA: order_ref} <span class="pull-right float-right">{ORDER_DATA: order_status_label}</span></h4>
-    <div class="clearfix">
-        <div class="col-sm-4">
-            <b>{LAN=LAN_VSTORE_DB_DATE}</b> {ORDER_DATA: order_date}<br />
-            <b>{LAN=LAN_VSTORE_DB_ORDER}</b> {ORDER_DATA: order_ref}<br/>
-            <b>{LAN=LAN_VSTORE_DB_INVOICE}</b> {ORDER_DATA: order_invoice_link}<br/>
-            <b>{LAN=LAN_VSTORE_DB_PAYMENT_METHOD}</b> {ORDER_DATA: order_gateway}<br/>
-            <b>{LAN=LAN_VSTORE_DB_PAYMENT_COMPLETE}</b> {ORDER_DATA: order_pay_status}<br/>
+    <div class="vstore-order-head">
+        <h4>{LAN=LAN_VSTORE_DB_ORDER_DETAILS} {ORDER_DATA: order_ref}</h4>
+        {ORDER_DATA: order_status_label}
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <section class="vstore-panel h-100 mb-0">
+                <h5 class="vstore-panel-title"><span class="vstore-panel-icon"><i class="fa fa-info" aria-hidden="true"></i></span> {LAN=LAN_VSTORE_DB_ORDER}</h5>
+                <p class="mb-1"><b>{LAN=LAN_VSTORE_DB_DATE}</b> {ORDER_DATA: order_date}</p>
+                <p class="mb-1"><b>{LAN=LAN_VSTORE_DB_ORDER}</b> {ORDER_DATA: order_ref}</p>
+                <p class="mb-1"><b>{LAN=LAN_VSTORE_DB_INVOICE}</b> {ORDER_DATA: order_invoice_link}</p>
+                <p class="mb-1"><b>{LAN=LAN_VSTORE_DB_PAYMENT_METHOD}</b> {ORDER_DATA: order_gateway}</p>
+                <p class="mb-0"><b>{LAN=LAN_VSTORE_DB_PAYMENT_COMPLETE}</b> {ORDER_DATA: order_pay_status}</p>
+            </section>
         </div>
 
-        <div class="col-sm-4">
-            <b>{LAN=LAN_VSTORE_FR_SHIPPING_ADDRESS}</b> <br />
-            {ORDER_DATA: order_shipping_full}<br/>
+        <div class="col-md-4">
+            <section class="vstore-panel h-100 mb-0">
+                <h5 class="vstore-panel-title"><span class="vstore-panel-icon"><i class="fa fa-truck" aria-hidden="true"></i></span> {LAN=LAN_VSTORE_FR_SHIPPING_ADDRESS}</h5>
+                {ORDER_DATA: order_shipping_full}
+            </section>
         </div>
 
-        <div class="col-sm-4">
-            <b>{LAN=LAN_VSTORE_FR_BILLING_ADDRESS}</b> <br />
-            {ORDER_DATA: order_billing_full}<br/>
-            {ORDER_DATA: order_billing_contact}<br/>
+        <div class="col-md-4">
+            <section class="vstore-panel h-100 mb-0">
+                <h5 class="vstore-panel-title"><span class="vstore-panel-icon"><i class="fa fa-id-card-o" aria-hidden="true"></i></span> {LAN=LAN_VSTORE_FR_BILLING_ADDRESS}</h5>
+                {ORDER_DATA: order_billing_full}
+                <p class="mb-0 mt-2">{ORDER_DATA: order_billing_contact}</p>
+            </section>
         </div>
     </div>
 
-    <br />
-
-    <div>
-        <b>{LAN=LAN_VSTORE_FR_ITEMS}</b>
+    <section class="vstore-panel">
+        <h5 class="vstore-panel-title"><span class="vstore-panel-icon"><i class="fa fa-shopping-bag" aria-hidden="true"></i></span> {LAN=LAN_VSTORE_FR_ITEMS}</h5>
         {ORDER_ITEMS}
-    </div>
+    </section>
 
-    <div>
-        <b>{LAN=LAN_VSTORE_DB_LOG}</b>
+    <section class="vstore-panel">
+        <h5 class="vstore-panel-title"><span class="vstore-panel-icon"><i class="fa fa-history" aria-hidden="true"></i></span> {LAN=LAN_VSTORE_DB_LOG}</h5>
         {ORDER_DATA: order_log}
-    </div>
+    </section>
 
-    <hr />
-
-    <div class="text-center">
+    <div class="vstore-co-actions justify-content-center">
         {ORDER_ACTIONS: invoice}
         {ORDER_ACTIONS: cancel}
     </div>
@@ -136,7 +227,9 @@ $VSTORE_DASHBOARD_TEMPLATE['order']['detail'] = '
  * List downloads
  */
 $VSTORE_DASHBOARD_TEMPLATE['download']['list']['header'] = '
-    <table class="table table-bordered table-striped">
+    <section class="vstore-panel">
+    <div class="vstore-table-wrap">
+    <table class="table vstore-table">
     <thead>
     <tr>
         <th>{LAN=LAN_VSTORE_DB_ORDER_INFO}</th>
@@ -151,15 +244,17 @@ $VSTORE_DASHBOARD_TEMPLATE['download']['list']['header'] = '
 $VSTORE_DASHBOARD_TEMPLATE['download']['list']['footer'] = '
     </tbody>
     </table>
+    </div>
+    </section>
 ';
 
 
 $VSTORE_DASHBOARD_TEMPLATE['download']['list']['item'] = '
     <tr>
         <td>
-            {LAN=LAN_VSTORE_DB_DATE}: {ORDER_DATA: order_date}<br />
-            {LAN=LAN_VSTORE_DB_ORDER}: {ORDER_DATA: order_ref}<br/>
-            {LAN=LAN_VSTORE_DB_INVOICE}: {ORDER_DATA: order_invoice_link}
+            <strong>{ORDER_DATA: order_ref}</strong><br />
+            <small class="text-muted">{ORDER_DATA: order_date}</small><br />
+            <small>{LAN=LAN_VSTORE_DB_INVOICE}: {ORDER_DATA: order_invoice_link}</small>
         </td>
         <td>{ORDER_DATA: order_downloads}</td>
         <td>{ORDER_DATA: order_status_label}</td>
@@ -168,7 +263,7 @@ $VSTORE_DASHBOARD_TEMPLATE['download']['list']['item'] = '
 
 
 /**
- * List downloads
+ * Saved addresses
  */
 $VSTORE_DASHBOARD_TEMPLATE['address']['view'] = '
 	<div class="row">

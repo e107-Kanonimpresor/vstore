@@ -119,7 +119,7 @@
 				if ($key) $key = strtolower($key[0]);
 			}
 
-			$cancellable = in_array($this->var['order_status'], array('N', 'P', 'H'));
+			$cancellable = in_array($this->var['order_status'], array('N', 'P', 'H', 'Q'));
 			$invoiceUrl = $this->getInvoiceUrl();
 
 			if (!empty($key))
@@ -129,7 +129,7 @@
 				if ($key == 'cancel' && $cancellable)
 				{
 					$text = sprintf('<a href="%s" class="btn btn-warning">%s</a>',
-						e107::url('vstore', 'dashboard_action', array('dash' => 'orders', 'action' => 'cancel', 'id' => $this->var['order_invoice_nr'])),
+						e107::url('vstore', 'dashboard_action', array('dash' => 'orders', 'action' => 'cancel', 'id' => vstore::orderViewId($this->var))),
 						LAN_VSTORE_DB_CANCEL);
 				}
 				elseif ($key == 'invoice' && $invoiceUrl)
@@ -145,7 +145,7 @@
 
 			$actions = array(
 				sprintf('<a href="%s">%s</a>',
-					e107::url('vstore', 'dashboard_action', array('dash' => 'orders', 'action' => 'view', 'id' => $this->var['order_invoice_nr'])),
+					e107::url('vstore', 'dashboard_action', array('dash' => 'orders', 'action' => 'view', 'id' => vstore::orderViewId($this->var))),
 					LAN_VSTORE_DB_VIEW)
 			);
 
@@ -157,7 +157,7 @@
 			if ($cancellable)
 			{
 				$actions[] = sprintf('<a href="%s">%s</a>',
-					e107::url('vstore', 'dashboard_action', array('dash' => 'orders', 'action' => 'cancel', 'id' => $this->var['order_invoice_nr'])),
+					e107::url('vstore', 'dashboard_action', array('dash' => 'orders', 'action' => 'cancel', 'id' => vstore::orderViewId($this->var))),
 					LAN_VSTORE_DB_CANCEL);
 			}
 
@@ -242,11 +242,11 @@
 			switch($key)
 			{
 				case 'order_invoice_nr':
-					$text = vstore::formatInvoiceNr($this->var[$key]);
+					$text = empty($this->var[$key]) ? '-' : vstore::formatInvoiceNr($this->var[$key]);
 					break;
 
 				case 'order_invoice_link':
-					$text = vstore::formatInvoiceNr($this->var['order_invoice_nr']);
+					$text = empty($this->var['order_invoice_nr']) ? '-' : vstore::formatInvoiceNr($this->var['order_invoice_nr']);
 					if ($url = $this->getInvoiceUrl())
 					{
 						$text = '<a href="' . $url . '" target="_blank" rel="noopener">' . $text . ' ' . $this->tp->toGlyph('fa-file-pdf-o') . '</a>';
@@ -271,11 +271,11 @@
 					break;
 
 				case 'order_pay_status':
-					$text = ($this->var['order_status'] == 'C' || $this->var['order_pay_status'] == 'complete') ? '<span class="label label-success badge bg-success">' . LAN_VSTORE_SC_PAID . '</span>' : '<span class="label label-warning">' . LAN_VSTORE_SC_OPEN . '</span>';
+					$text = $this->isQuoteOrder() ? '' : (($this->var['order_status'] == 'C' || $this->var['order_pay_status'] == 'complete') ? '<span class="vstore-badge vstore-badge-success">' . LAN_VSTORE_SC_PAID . '</span>' : '<span class="vstore-badge vstore-badge-warning">' . LAN_VSTORE_SC_OPEN . '</span>');
 					break;
 
 				case 'order_pay_amount':
-					$text = $this->format_amount($this->var['order_pay_amount']);
+					$text = $this->isQuoteOrder() ? '-' : $this->format_amount($this->var['order_pay_amount']);
 					break;
 
 				case 'order_status':
@@ -289,9 +289,13 @@
 						'H' => 'warning',
 						'C' => 'success',
 						'X' => 'danger',
-						'R' => 'default'
+						'R' => 'muted',
+						'Q' => 'primary',
+						'M' => 'info',
+						'A' => 'success',
+						'F' => 'muted',
 					);
-					$text = '<span class="label label-'.$label_classes[$this->var['order_status']].'">' . vstore::getStatus($this->var['order_status']) .'</span>';
+					$text = '<span class="vstore-badge vstore-badge-'.varset($label_classes[$this->var['order_status']], 'muted').'">' . vstore::getStatus($this->var['order_status']) .'</span>';
 					break;
 
 				case 'order_shipping_full':
@@ -389,6 +393,13 @@
 		/** Template of the order lines: the inline-styled e-mail variant when set by {ORDER_ITEMS: email}. */
 		protected $orderItemsTemplate = null;
 
+		/** Is the current order a quote request (quote statuses or the quote gateway)? */
+		protected function isQuoteOrder()
+		{
+			return \Vstore\Support\Catalog::isQuoteStatus(varset($this->var['order_status']))
+				|| varset($this->var['order_pay_gateway']) === \Vstore\Support\Catalog::QUOTE_GATEWAY;
+		}
+
 		protected function getOrderItemsTemplate()
 		{
 			return $this->orderItemsTemplate ?: e107::getTemplate('vstore', 'vstore', 'order_items');
@@ -402,9 +413,16 @@
 				$items = e107::unserialize($items);
 			}
 
-			if (is_array($parm) && isset($parm['email']))
+			$email = is_array($parm) && isset($parm['email']);
+			$quote = $this->isQuoteOrder();
+
+			if ($email)
 			{
-				$this->orderItemsTemplate = e107::getTemplate('vstore', 'vstore_email', 'items');
+				$this->orderItemsTemplate = e107::getTemplate('vstore', 'vstore_email', $quote ? 'quote_items' : 'items');
+			}
+			elseif ($quote)
+			{
+				$this->orderItemsTemplate = e107::getTemplate('vstore', 'vstore', 'order_items_quote');
 			}
 
 			$template = $this->getOrderItemsTemplate();
@@ -700,6 +718,7 @@
 
 			$baseprice = $this->tp->toNumber($this->var['item_price']);
 			$this->var['item_var_price'] = $baseprice;
+			$isQuote = $this->isQuoteItem();
 
 			if (isset($this->var['item_vars']))
 			{
@@ -724,7 +743,7 @@
 						foreach($attributes as $var)
 						{
 							$varname = $var['name'];
-							if($this->tp->toNumber($var['value']) > 0.0)
+							if(!$isQuote && $this->tp->toNumber($var['value']) > 0.0)
 							{
 								switch($var['operator'])
 								{
@@ -867,15 +886,22 @@
 			$ival = e107::unserialize($this->var['item_pic']);
 
 			$images = array();
-			foreach($ival as $i)
+			foreach((array) $ival as $i)
 			{
-				if($this->tp->isImage($i['path']))
+				if(!empty($i['path']) && $this->tp->isImage($i['path']))
 				{
 					$images[] = $i['path'];
 				}
 			}
 
-			$path = vartrue($images[$index]);
+			if(!isset($images[$index]))
+			{
+				// Only the main picture gets a placeholder, a missing thumbnail is simply left out
+				return ($index === 0 && !isset($parm['placeholder'])) ? $this->noImage('fa-cube') : '';
+			}
+
+			$path = $images[$index];
+			unset($parm['placeholder'], $parm['item']);
 			$pre = "";
 			$post = "";
 
@@ -891,6 +917,71 @@
 			}
 
 			return $pre. $this->tp->toImage($path,$parm) . $post;
+		}
+
+		/** Placeholder shown where a product or a category has no picture. */
+		protected function noImage($icon)
+		{
+			return '<span class="vstore-noimg" aria-hidden="true">' . $this->tp->toGlyph($icon) . '</span>';
+		}
+
+		/**
+		 * Thumbnail strip of the product page: only when the product has more than one picture.
+		 * The links keep the data-standard attribute that js/vstore.js uses to swap the main picture.
+		 */
+		function sc_item_thumbs($parm=null)
+		{
+			$count = 0;
+
+			foreach((array) e107::unserialize($this->var['item_pic']) as $i)
+			{
+				if(!empty($i['path']) && $this->tp->isImage($i['path']))
+				{
+					$count++;
+				}
+			}
+
+			if($count < 2)
+			{
+				return '';
+			}
+
+			$text = '<div class="vstore-pv-thumbs thumbnails">';
+
+			for($n = 0; $n < min($count, 8); $n++)
+			{
+				$text .= '<div class="vstore-pv-thumb">' . $this->sc_item_pic(array('item' => $n, 'link' => 1, 'w' => 200, 'h' => 200, 'crop' => 1, 'class' => 'thumbnail img-fluid', 'placeholder' => 0)) . '</div>';
+			}
+
+			return $text . '</div>';
+		}
+
+		/** Badges for the product cards: quote, out of stock, low stock. */
+		function sc_item_badges($parm=null)
+		{
+			$text = '';
+
+			if($this->isQuoteItem())
+			{
+				$text .= '<span class="vstore-badge vstore-badge-quote">' . $this->tp->toGlyph('fa-file-text-o') . ' ' . LAN_VSTORE_QUOTE_BUTTON . '</span>';
+			}
+
+			if(!$this->inStock())
+			{
+				$text .= '<span class="vstore-badge vstore-badge-soldout">' . $this->captionOutOfStock . '</span>';
+			}
+			elseif((int) varset($this->var['item_inventory'], -1) > 0 && (int) $this->var['item_inventory'] <= 5 && !vstore::filterItemVarsByType(varset($this->var['item_vars']), 1, true))
+			{
+				$text .= '<span class="vstore-badge vstore-badge-low">' . sprintf(LAN_VSTORE_FR_LOW_STOCK, (int) $this->var['item_inventory']) . '</span>';
+			}
+
+			return $text;
+		}
+
+		/** CSS state classes of a product card. */
+		function sc_item_state($parm=null)
+		{
+			return ($this->isQuoteItem() ? ' is-quote' : '') . ($this->inStock() ? '' : ' is-soldout');
 		}
 
 		function sc_item_video($parm=0)
@@ -951,7 +1042,39 @@
 
 		function sc_cat_pic($parm=null)
 		{
+			if(empty($this->var['cat_image']))
+			{
+				return $this->noImage('fa-folder-open');
+			}
+
 			return $this->tp->toImage($this->var['cat_image'],$parm);
+		}
+
+		/** Number of products of the category: "6 products", or the bare number with {CAT_COUNT: raw=1}. */
+		function sc_cat_count($parm=null)
+		{
+			static $counts = null;
+
+			if($counts === null)
+			{
+				$counts = array();
+				$sql = e107::getDb();
+				$sql->gen('SELECT item_cat, COUNT(*) AS items_count FROM #vstore_items WHERE item_active = 1 GROUP BY item_cat');
+
+				while($row = $sql->fetch())
+				{
+					$counts[(int) $row['item_cat']] = (int) $row['items_count'];
+				}
+			}
+
+			$n = varset($counts[(int) $this->var['cat_id']], 0);
+
+			if(!empty($parm['raw']))
+			{
+				return $n;
+			}
+
+			return $n == 1 ? LAN_VSTORE_FR_N_PRODUCT_ONE : sprintf(LAN_VSTORE_FR_N_PRODUCTS, $n);
 		}
 
 		function sc_cat_url($parm=null)
@@ -1039,22 +1162,28 @@
 		function sc_item_price($parm=null)
 		{
 			$itemid = (int) $this->var['item_id'];
+
+			if($this->isQuoteItem())
+			{
+				return ' <span class="vstore-item-quote-price vstore-item-quote-' . $itemid . '">' . LAN_VSTORE_QUOTE_PRICE . '</span>';
+			}
+
 			if(empty($this->var['item_price']))
 			{
 				$this->var['item_price'] = 0;
 			}
 
-			if(empty($this->var['item_var_price']))
-			{
-				$this->var['item_var_price'] = 0;
-			}
-
 			$baseprice = $price = $this->tp->toNumber($this->var['item_price']);
-			$varprice = $this->tp->toNumber($this->var['item_var_price']);
 
-			if (!is_null($this->var['item_var_price']) && $varprice >= 0 && $varprice != $baseprice)
+			// item_var_price only exists once {ITEM_VARS} has priced the selected variation; a menu or a card has none
+			if (isset($this->var['item_var_price']))
 			{
-				$price = $varprice;
+				$varprice = $this->tp->toNumber($this->var['item_var_price']);
+
+				if ($varprice >= 0 && $varprice != $baseprice)
+				{
+					$price = $varprice;
+				}
 			}
 
 			$tip = ' title="' . LAN_VSTORE_SC_EXCL_TAX . '"';
@@ -1080,11 +1209,23 @@
 		}
 
 
+		/** Is the current product a quote product (empty price, not 0)? */
+		protected function isQuoteItem()
+		{
+			return array_key_exists('item_price', $this->var) && \Vstore\Support\Catalog::isQuotePrice($this->var['item_price']);
+		}
+
 		function sc_item_addtocart($parm=null)
 		{
 
-			$class = empty($parm['class']) ? 'btn btn-success vstore-add' : $parm['class'];
+			$isQuote = $this->isQuoteItem();
+			$class = empty($parm['class']) ? ($isQuote ? 'btn btn-primary vstore-add' : 'btn btn-success vstore-add') : $parm['class'];
 			$classo = empty($parm['class0']) ? 'btn btn-default btn-secondary disabled vstore-add' : $parm['class0'];
+
+			if($isQuote)
+			{
+				$class = str_replace('btn-success', 'btn-primary', $class);
+			}
 			$itemid = ' data-vstore-item="'.varset($this->var['item_id'], 0).'"';
 
 			if (!in_array('vstore-add', explode(' ', $class)))
@@ -1113,6 +1254,12 @@
 			}
 
 			$label = LAN_VSTORE_001; // 'Add to cart';
+
+			if($isQuote)
+			{
+				// data-vstore-label keeps the caption when js/vstore.js refreshes the button after a variation change
+				return '<a class="'.$class.'" '.$itemid.' data-vstore-label="'.LAN_VSTORE_QUOTE_BUTTON.'" href="#">'.$this->tp->toGlyph('fa-file-text-o').' '.LAN_VSTORE_QUOTE_BUTTON.'</a>';
+			}
 
 			return '<a class="'.$class.'" '.$itemid.' href="#">'.$this->tp->toGlyph('fa-shopping-cart').' '.$label.'</a>';
 		}
@@ -1387,7 +1534,7 @@
 			}
 
 
-			$template = e107::getTemplate('vstore', 'vstore', 'confirm_items');
+			$template = e107::getTemplate('vstore', 'vstore', !empty($this->var['is_quote']) ? 'confirm_items_quote' : 'confirm_items');
 
 			$text = $this->tp->parseTemplate($template['header'], true, $this);
 
@@ -1617,15 +1764,21 @@
 
 		function sc_cart_checkout_button()
 		{
-			$text = '<a href="'.e107::url('vstore','checkout').'" id="cart-checkout"  class="btn btn-success">
-		                            '.LAN_VSTORE_FR_CHECKOUT.' '.$this->tp->toGlyph('fa-play').'
-		                        </a>
-		                        <button id="cart-qty-submit" style="display:none" type="submit" class="btn btn-warning">'.LAN_VSTORE_SC_RECALCULATE.'</button>
+			$isQuote = !empty($this->var['is_quote']);
+			$label   = ($isQuote ? LAN_VSTORE_QUOTE_REQUEST : LAN_VSTORE_FR_CHECKOUT) . ' ' . $this->tp->toGlyph('fa-play');
+			$recalc  = '<button style="display:none" type="submit" class="btn btn-warning cart-qty-submit">' . LAN_VSTORE_SC_RECALCULATE . '</button>';
+
+			if(!empty($this->var['cart_scoped']))
+			{
+				// Purchase lines and quote lines share the cart: the button tells the checkout which ones to process.
+				// The recalculate button comes first so that Enter in a quantity field recalculates.
+				return $recalc . '<button type="submit" name="cartScope" value="' . ($isQuote ? 'quote' : 'sale') . '" class="btn btn-success cart-checkout">' . $label . '</button>';
+			}
+
+			return '<a href="' . e107::url('vstore', 'checkout') . '" id="cart-checkout" class="btn btn-success cart-checkout">' . $label . '</a>
+		                        ' . str_replace('<button ', '<button id="cart-qty-submit" ', $recalc) . '
 
 		';
-
-			return $text;
-
 		}
 
 		static function sc_cart_continueshop()
@@ -1967,6 +2120,88 @@
 		}
 
 
+		/** Summary boxes of the customer dashboard (orders, spent, in progress, open quotes). */
+		protected function dashboardKpis()
+		{
+			$stats = varset($this->var['stats'], array());
+			$template = e107::getTemplate('vstore', 'vstore_dashboard');
+			$url = e107::url('vstore', 'dashboard', array('dash' => 'orders'));
+
+			$boxes = array(
+				array('fa-shopping-bag', 'primary', LAN_VSTORE_DB_KPI_ORDERS, (int) varset($stats['orders'])),
+				array('fa-money', 'success', LAN_VSTORE_DB_KPI_SPENT, $this->format_amount(varset($stats['spent'], 0))),
+				array('fa-truck', 'info', LAN_VSTORE_DB_KPI_OPEN, (int) varset($stats['open'])),
+				array('fa-file-text-o', 'warning', LAN_VSTORE_DB_KPI_QUOTES, (int) varset($stats['quotes'])),
+			);
+
+			$text = '';
+			foreach($boxes as $box)
+			{
+				$text .= strtr($template['kpi'], array('[url]' => $url, '[icon]' => $box[0], '[tone]' => $box[1], '[label]' => $box[2], '[value]' => $box[3]));
+			}
+
+			return $text;
+		}
+
+		/** Bars with the spending of the last months of the customer. */
+		protected function dashboardChart()
+		{
+			$stats = varset($this->var['stats'], array());
+			$template = e107::getTemplate('vstore', 'vstore_dashboard');
+
+			if(empty($stats['peak']))
+			{
+				return $this->tp->parseTemplate($template['chart']['empty'], true, $this);
+			}
+
+			$text = $this->tp->parseTemplate($template['chart']['start'], true, $this);
+			foreach($stats['months'] as $month)
+			{
+				$text .= strtr($template['chart']['bar'], array(
+					'[label]' => $month['label'],
+					'[value]' => $month['value'] > 0 ? $this->format_amount($month['value']) : '&nbsp;',
+					'[pct]'   => $month['pct'],
+					'[empty]' => $month['value'] > 0 ? '' : ' is-empty',
+				));
+			}
+
+			return $text . $template['chart']['end'];
+		}
+
+		/** The latest orders of the customer. */
+		protected function dashboardRecent()
+		{
+			$stats = varset($this->var['stats'], array());
+			$template = e107::getTemplate('vstore', 'vstore_dashboard');
+
+			if(empty($stats['recent']))
+			{
+				return $this->tp->parseTemplate($template['recent']['empty'], true, $this);
+			}
+
+			$text = $template['recent']['start'];
+			$saved = $this->var;
+
+			foreach($stats['recent'] as $row)
+			{
+				$this->var = $row;
+
+				$text .= strtr($template['recent']['item'], array(
+					'[url]'    => e107::url('vstore', 'dashboard_action', array('dash' => 'orders', 'action' => 'view', 'id' => vstore::orderViewId($row))),
+					'[icon]'   => $this->isQuoteOrder() ? 'fa-file-text-o' : 'fa-shopping-bag',
+					'[ref]'    => $this->sc_order_data(array('order_ref' => 1)),
+					'[date]'   => $this->sc_order_data(array('order_date' => 1)),
+					'[total]'  => $this->sc_order_data(array('order_pay_amount' => 1)),
+					'[status]' => $this->sc_order_data(array('order_status_label' => 1)),
+				));
+			}
+
+			$this->var = $saved;
+
+			return $text . $template['recent']['end'];
+		}
+
+
 		function sc_dashboard($parm = null)
 		{
 			if (empty($parm)) return '';
@@ -1978,6 +2213,43 @@
 			{
 				case 'title':
 					$text = $this->var['nav'][$this->var['area']];
+					break;
+
+				case 'avatar':
+					$text = $this->tp->toAvatar(null, array('w' => 64, 'h' => 64, 'crop' => 1, 'shape' => 'circle', 'alt' => ''));
+					break;
+
+				case 'hello':
+					$text = sprintf(LAN_VSTORE_DB_HELLO, $this->tp->toHTML(deftrue('USERNAME'), false, 'TITLE'));
+					break;
+
+				case 'subtitle':
+					$text = $this->var['area'] === 'dashboard' ? LAN_VSTORE_DB_INTRO : $this->var['nav'][$this->var['area']];
+					break;
+
+				case 'orders_url':
+					$text = e107::url('vstore', 'dashboard', array('dash' => 'orders'));
+					break;
+
+				case 'kpis':
+					$text = $this->dashboardKpis();
+					break;
+
+				case 'chart':
+					$text = $this->dashboardChart();
+					break;
+
+				case 'recent':
+					$text = $this->dashboardRecent();
+					break;
+
+				case 'quick':
+					$template = e107::getTemplate('vstore', 'vstore_dashboard');
+					$text = $this->tp->parseTemplate(strtr($template['quick'], array(
+						'[shop_url]'    => e107::url('vstore', 'index'),
+						'[address_url]' => e107::url('vstore', 'dashboard', array('dash' => 'addresses')),
+						'[account_url]' => SITEURL . 'usersettings.php',
+					)), true, $this);
 					break;
 
 				case 'nav':
@@ -2044,11 +2316,20 @@
 			switch($key)
 			{
 				case 'active':
-					if (varset($this->var['link_url'])) {
+					if (isset($this->var['link_active'])) {
+						$text = $this->var['link_active'] ? ' active ' : '';
+					}
+					elseif (varset($this->var['link_url'])) {
 						if (substr(e_REQUEST_URI, 0, strlen($this->var['link_url'])) == $this->var['link_url']) {
 							$text = ' active ';
 						}
 					}
+					break;
+
+				case 'image':
+					$text = empty($this->var['link_image'])
+						? $this->noImage('fa-folder-open')
+						: $this->tp->toImage($this->var['link_image'], array('w' => 96, 'h' => 96, 'crop' => 1, 'alt' => ''));
 					break;
 
 				case 'url':

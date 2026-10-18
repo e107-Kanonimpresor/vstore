@@ -11,7 +11,7 @@ return array(
 	'LAN_VSTORE_ADMIN_PROD_CODE_PH'        => 'PROD001',
 	'LAN_VSTORE_ADMIN_PROD_INVENTORY'      => 'Inventory',
 	'LAN_VSTORE_ADMIN_PROD_INVENTORY_H'    => 'Enter -1 if this item is always available or the number of units you have in stock.',
-	'LAN_VSTORE_ADMIN_PROD_PRICE_H'        => 'Enter the price of the item in %s (without tax).',
+	'LAN_VSTORE_ADMIN_PROD_PRICE_H'        => 'Enter the price of the item in %s (without tax). Leave it empty to offer the product as a quote request (no price, "Quote" button); 0 is a free product.',
 	'LAN_VSTORE_ADMIN_PROD_IMAGES_H'       => "Drag and drop images and videos here to display them on the product's page.",
 	'LAN_VSTORE_ADMIN_PROD_TAX_CLASS'      => 'Tax class',
 	'LAN_VSTORE_ADMIN_PROD_SHIPPING_H'     => 'The cost of shipping this item in %s. eg. 2.00',

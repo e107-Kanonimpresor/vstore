@@ -617,3 +617,82 @@ Pruebas del mantenedor tras §8.19: el botón de factura y la descarga del clien
 | Error de moneda con MB WAY | La moneda de la tienda estaba en USD y MB WAY, Multibanco, iDEAL, Bancontact, transferencia, domiciliación y tarjeta regalo de Mollie solo admiten euros | `Catalog::supportsCurrency()` (lista `MOLLIE_EUR_ONLY`); `initPrefs()` deja de ofrecer esos métodos si la moneda no es EUR. La pestaña Pasarelas avisa de qué métodos se ocultan y por qué. Para cobrar con MB WAY, moneda EUR en Preferencias |
 
 Pruebas: `php tests/run.php` 242/242 en PHP 7.4, 8.2 y 8.4. Con USD, los métodos activos son transferencia, PayPal, tarjeta, PayPal de Mollie y paysafecard.
+
+### 8.21 Modo presupuesto: venta o presupuesto (2026-10-17)
+
+Requisito del mantenedor: el plugin tiene dos posibilidades, venta o presupuesto. Un producto con precio se vende; con el precio vacío muestra el botón "Presupuesto / Quote / Orçamento". El presupuesto sigue el mismo proceso que una compra (carrito) pero sin valores, solo la lista de material pedido; el mismo envío de correo sirve al cliente y a la tienda; y debe quedar un registro en el administrador porque la Autoridad Tributaria portuguesa no acepta facturas creadas en plataformas no certificadas. Flujo de trabajo: pedido online → migrar el presupuesto a la app → el cliente aprueba → se emite una factura certificada (fuera de Vstore).
+
+Decisiones:
+
+| Tema | Decisión |
+|---|---|
+| Qué es un presupuesto | Producto con `item_price` vacío (`NULL`), no 0 (0 es un producto gratuito). El campo del administrador guarda `NULL` en `afterCreate`/`afterUpdate` (el campo numérico guardaría 0) |
+| Mezclar venta y presupuesto | Sí (cambio posterior, ver §8.23): el carrito tiene dos bloques y cada botón tramita solo sus líneas. No se guarda precio de presupuesto en ningún sitio |
+| Proceso del cliente | El de siempre: carrito, datos y direcciones, resumen. Sin precios, totales, cupón, envío, impuestos ni método de pago. Pasarela interna `quote` |
+| Registro | Tabla `vstore_orders` sin cambios de esquema: estados `Q` (solicitado), `M` (migrado a la app), `A` (aprobado), `F` (facturado) y `X`. `order_pay_gateway = quote`, `order_pay_status = none`, importes 0 |
+| Facturas | Los presupuestos no reciben número de factura (no se consume la secuencia que debe ser continua y certificada), no generan PDF, no mueven el stock ni cuentan en las estadísticas de ventas |
+| Correo | Nuevo tipo `quote` (plantilla editable): una sola plantilla, al cliente con copia obligatoria a la tienda. Los cambios de estado posteriores no envían correo; la app externa se ocupa del contacto con el cliente |
+| Administrador | Botones para avanzar el estado, filtro "Presupuestos" y estados traducidos (EN/ES/PT) |
+
+Pendiente (siguiente desarrollo): la función que entrega el presupuesto a la app externa (el estado `M` ya existe como punto de enganche) y la vuelta de aprobación/facturación (`A`, `F`). Hasta entonces el administrador cambia esos estados a mano.
+
+Pruebas: `php tests/run.php` 248/248 en PHP 7.4, 8.2 y 8.4 (precio vacío frente a 0, estados y la regla venta/presupuesto del carrito). Flujo real por línea de comandos con un producto de prueba y la base de datos: carrito de presupuesto, rechazo de mezcla, resumen sin precios, pedido `Q` sin número de factura, correo con copia a la tienda y shortcodes del producto, el pedido y el detalle. Pendiente de comprobar en el navegador: edición del precio vacío en el administrador (incluida la edición en línea), la lista de productos, el desplegable del carrito y el panel del cliente.
+
+### 8.22 Integración con Cegid Primavera (diseño inicial, 2026-10-17)
+
+El presupuesto guardado en Vstore (estados `Q`, `M`, `A`, `F`) se entregará a Cegid Primavera ERP v10 mediante su Web API (REST, OAuth2, instalada en el servidor del cliente), que emitirá la factura certificada. El informe de viabilidad de KreativeKey confirma que es posible pero no trae rutas ni campos, por lo que se parte con información incompleta. Diseño, tareas por fases (descubrimiento, conector con vista previa, migración, aprobación/facturación, producción), riesgos y preguntas abiertas en [INTEGRACION_PRIMAVERA.md](INTEGRACION_PRIMAVERA.md). Siguiente paso: completar la Fase 0 (licencia Web API, entorno de pruebas, documentación de los servicios de ventas y peticiones de ejemplo). Punto abierto a decidir: si las facturas de ventas online también deben salir de Primavera, ya que la factura PDF de Vstore no es certificada.
+
+### 8.23 Carrito mixto y KPI de presupuestos (2026-10-17)
+
+Motivo: la tienda vende productos y a la vez pide presupuestos detallados (por ejemplo, de un servicio); un cliente que ya había enviado un presupuesto no podía añadir productos para comprar. Se retira la regla "un carrito es de uno u otro".
+
+| Tema | Decisión |
+|---|---|
+| Carrito | Un solo carrito con dos bloques (`Productos para comprar` y `Productos para presupuesto`). La plantilla del carrito no cambia: se pinta con las partes `start/item/end` de cada tipo |
+| Tramitación | Con los dos tipos, el botón de cada bloque envía `cartScope=sale|quote`; `startCheckout()` calcula solo esas líneas, las deja en la sesión y redirige al pago. Con un solo tipo sigue el enlace de siempre |
+| Qué sale del carrito | Al guardar el pedido o el presupuesto solo se borran las líneas de ese tipo (`resetCart($kind)`); si no queda ninguna se vacía el carrito entero. `?reset=1` sigue vaciándolo todo |
+| Cálculo | `prepareCheckoutData(..., $only)`: `sale` o `quote` filtra las líneas; sin argumento (menú del carrito) cuenta todas. El cupón solo se aplica a la compra |
+| Administrador | Quinta tarjeta en las estadísticas con el número de presupuestos nuevos (estado `Q`), en rojo si hay alguno y con enlace a la lista filtrada por ese estado. Los cinco recuadros pasan a una fila flexible |
+
+Aplicaciones para ver un presupuesto: mientras la entrega a la app externa no exista, la vista de trabajo es la lista de Ventas con el filtro `Presupuestos` (o el estado `Q` desde la tarjeta) y el detalle del pedido con la lista de material y los datos de contacto; el correo de aviso llega a la tienda con cada solicitud. Cuando esté la integración con Primavera, el presupuesto se consultará y valorará allí, donde nace la factura certificada.
+
+Pruebas: `php tests/run.php` 248/248. Flujo real por línea de comandos y en el navegador: carrito con un producto de cada tipo (dos bloques y dos botones), checkout de presupuesto sin método de pago, checkout de compra con método de pago, y solo salen del carrito las líneas del presupuesto enviado.
+
+### 8.24 Rediseño de la tienda: catálogo, producto, carrito y menús (2026-10-18)
+
+Motivo: el catálogo, el carrito, las categorías y los menús seguían con el aspecto de Bootstrap 3 sobre un tema Bootstrap 5, sin estilo en el menú de categorías. Se mantiene la convención e107: el plugin se pinta con el tema activo y toda plantilla se puede sobrescribir en `<tema>/templates/vstore/`.
+
+| Zona | Decisión |
+|---|---|
+| CSS | `vstore.css` nuevo, acotado bajo `.vstore`. Usa las variables `--bs-*` del tema y expone `--vs-*` (radio, superficie, sombra, acento) para ajustar el aspecto sin tocar el archivo |
+| Catálogo | Raíz: mosaicos de categoría con imagen, recuento y descripción. Categoría: tarjetas de producto con imagen, insignias (presupuesto, sin stock), precio y botón |
+| Barra de categorías | Bajo el breadcrumb en catálogo, categoría y producto: píldoras con recuento y la categoría actual resaltada; en móvil se desliza lateralmente |
+| Producto | Galería con miniaturas, caja de precio con cantidad y botón, ficha con código, disponibilidad y peso, pestañas de detalle |
+| Menús | Categorías: categorías raíz con imagen y recuento (`storeCategoryNav()`). Productos: una categoría o «Todas las categorías (últimos productos)» |
+| Carrito | Filas como tarjetas, desplegable `navcart` y su variante de presupuesto con el mismo estilo; en móvil cada fila pasa a tarjeta y la tabla no desborda |
+| Errores corregidos | `storeCategoryNav()` leía el resultado con `fetch()` mientras `url()` y `toHTML()` lanzaban consultas en la misma conexión y solo salía una categoría: ahora lee todas las filas antes del bucle |
+
+Pruebas: `php tests/run.php` 248/248. Navegador (integrado, tema Bootstrap 5): catálogo, categoría, presupuestos, producto, carrito mixto y desplegable; a 1078, 768 y 390 px sin desbordamiento horizontal; menús de categorías y productos en una columna lateral de prueba (archivo temporal ya eliminado).
+
+### 8.25 Rediseño del checkout y del panel del cliente (2026-10-18)
+
+Motivo: pedido del mantenedor de llevar el estilo de la tienda al checkout y a la pantalla principal del panel del cliente, que solo mostraba un texto de bienvenida; se pidió también datos o un gráfico de compras.
+
+| Zona | Decisión |
+|---|---|
+| Pasos | Indicador de tres pasos (carrito, tus datos, resumen) sobre todas las páginas del checkout (`checkoutPage()`), con el paso actual resaltado y los anteriores marcados |
+| Datos | Formularios de facturación y envío en paneles; las pasarelas de pago son fichas seleccionables; la dirección de envío distinta sigue siendo opcional |
+| Resumen lateral | `checkoutAside()`: productos con imagen y cantidad, subtotal, envío, cupón, impuestos y total (solo productos y cantidades en un presupuesto); fijo al desplazarse en escritorio y bajo el formulario en móvil. No se muestra en la elección entre invitado, registro y acceso, que necesita todo el ancho |
+| Revisión | Paneles de facturación, envío, método de pago, artículos y notas; botón principal grande |
+| Panel del cliente | Cabecera con avatar y saludo, navegación en píldoras y portada con cuatro cifras (pedidos, total gastado, en curso, presupuestos abiertos), gráfico de barras CSS de los últimos seis meses, últimos cinco pedidos y accesos rápidos. Sin librerías de gráficos ni consultas pesadas (cuatro consultas) |
+| Cifras | Los presupuestos no cuentan como compras ni como gasto; el gasto solo suma pedidos con pago completo y estado distinto de cancelado o reembolsado |
+| Enlaces a pedidos | Los presupuestos y los pedidos sin número de factura no se podían abrir desde el panel porque el enlace usaba el número de factura. Ahora el identificador es el número de factura o, sin él, el id del pedido más 1.000.000.000 |
+| Estados | Insignias `vstore-badge` en lugar de las etiquetas `label` de Bootstrap 3 |
+
+Pruebas: `php tests/run.php` 248/248 (las funciones nuevas dependen de e107 y no entran en esa batería). Navegador (tema Bootstrap 5): elección de cliente, formulario con pasarelas, revisión del pedido, a 1078 y 390 px sin desbordamiento. Panel renderizado por línea de comandos con el usuario 1 y comprobado en el navegador: portada, lista de pedidos y detalle de un presupuesto. Pendiente: comprobar con una sesión real el avatar y la cancelación de un presupuesto, y la ficha de descargas.
+
+### 8.26 Efecto al añadir al carrito y versión 2.1.0 (2026-10-18)
+
+Motivo: al añadir un producto solo cambiaba el número del contador y mucha gente no lo notaba. Ahora la imagen del producto vuela al icono del carrito, el contador cambia al llegar y el icono late, el botón muestra una marca un momento y aparece un aviso con enlace al carrito (`role="status"`). Con `prefers-reduced-motion` no hay movimiento. Si la pestaña está oculta y el navegador pausa la animación, un temporizador de respaldo actualiza el contador. Se publica como versión 2.1.0 (Presupuestos, rediseño de la tienda, checkout y panel, efecto del carrito).
+
+Nota de instalación: `plugin.xml` crea el enlace de la tienda y el del carrito con `perm="member"`, de modo que los visitantes sin sesión no los ven aunque el checkout admita compra como invitado. Se deja como está por compatibilidad; cada web puede cambiarlo en Administración, Enlaces del sitio.

@@ -52,7 +52,7 @@ class vstore_sitelink // include plugin-folder in the name.
 		$sql->gen('SELECT c.*, COUNT(i.item_id) AS items_count
 			FROM #vstore_cat c
 			LEFT JOIN #vstore_items i ON (c.cat_id = i.item_cat)
-			WHERE i.item_inventory != 0 AND i.item_active = 1
+			WHERE i.item_inventory != 0 AND i.item_active = 1 AND c.cat_class IN (' . USERCLASS_LIST . ')
 			GROUP BY c.cat_id
 			ORDER BY cat_order');
 		
@@ -77,6 +77,52 @@ class vstore_sitelink // include plugin-folder in the name.
 	}
 
 
+	/**
+	 * Top level categories with the number of products they hold (their subcategories included),
+	 * for the category menu and the category bar of the catalog pages.
+	 *
+	 * @return array rows for {MENU_CAT}: link_id, link_name, link_url, link_image, link_badge
+	 */
+	function storeCategoryNav()
+	{
+		$sql = e107::getDb();
+		$tp  = e107::getParser();
+		$nav = array();
+
+		// The same stock rule as the product list
+		$stock = varset(e107::pref('vstore', 'show_outofstock'), true) ? '' : ' AND i.item_inventory != 0';
+
+		$rows = (array) $sql->retrieve('SELECT c.*, (
+				SELECT COUNT(*) FROM #vstore_items i
+				WHERE i.item_active = 1' . $stock . '
+				AND (i.item_cat = c.cat_id OR i.item_cat IN (SELECT s.cat_id FROM #vstore_cat s WHERE s.cat_parent = c.cat_id))
+			) AS items_count
+			FROM #vstore_cat c
+			WHERE c.cat_parent = 0 AND c.cat_class IN (' . USERCLASS_LIST . ')
+			ORDER BY c.cat_order, c.cat_name', true);
+
+		// All rows are read first: url() and toHTML() run queries on the same connection
+		foreach($rows as $row)
+		{
+			if(empty($row['items_count']))
+			{
+				continue;
+			}
+
+			$nav[] = array(
+				'link_id'          => (int) $row['cat_id'],
+				'link_name'        => $tp->toHTML($row['cat_name'], '', 'TITLE'),
+				'link_url'         => e107::url('vstore', 'category', $row),
+				'link_description' => $tp->toHTML($row['cat_description'], '', 'DESCRIPTION'),
+				'link_image'       => $row['cat_image'],
+				'link_badge'       => (int) $row['items_count'],
+			);
+		}
+
+		return $nav;
+	}
+
+
 
 	function storeCart() // http://bootsnipp.com/snippets/33gmp
 	{
@@ -91,8 +137,7 @@ class vstore_sitelink // include plugin-folder in the name.
 
 		$isBusiness = !empty($data['totals']['is_business']);
 		$isLocal = !empty($data['totals']['is_local']);
-		
-		$frm = e107::getForm();
+                $isQuote = !empty($data['totals']['is_quote']);
 		$tp = e107::getParser();
 		$template = e107::getTemplate('vstore', 'vstore', 'navcart');
 
@@ -122,7 +167,9 @@ class vstore_sitelink // include plugin-folder in the name.
 		foreach($data['items'] as $item)
 		{
 			$images = e107::unserialize($item['item_pic']);
-			$img = $tp->toImage($images[0]['path'],array('w'=>60));
+			$img = !empty($images[0]['path'])
+				? $tp->toImage($images[0]['path'], array('w' => 60, 'h' => 60, 'crop' => 1))
+				: '<span class="vstore-noimg" aria-hidden="true">' . $tp->toGlyph('fa-cube') . '</span>';
 
 			$itemcount += $item['cart_qty'];
 
@@ -136,7 +183,7 @@ class vstore_sitelink // include plugin-folder in the name.
 				)
 			));
 
-			$text .= $tp->parseTemplate($template['item'], true, $sc); 
+$text .= $tp->parseTemplate((($isQuote || !empty($item['is_quote'])) && isset($template['item_quote'])) ? $template['item_quote'] : $template['item'], true, $sc);
 
 			//$total += $subtotal;
 
@@ -147,7 +194,7 @@ class vstore_sitelink // include plugin-folder in the name.
 			'order_pay_amount' => ($isBusiness && !$isLocal ? $data['totals']['cart_subNet'] : $data['totals']['cart_subTotal']),
 			'item_count' => $itemcount,
 		));
-		$text .= $tp->parseTemplate($template['footer'], true, $sc); 
+$text .= $tp->parseTemplate(($isQuote && isset($template['footer_quote'])) ? $template['footer_quote'] : $template['footer'], true, $sc);
 	
 		if (!e_AJAX_REQUEST) {
 			$text .= $tp->parseTemplate($template['end'], true, $sc);

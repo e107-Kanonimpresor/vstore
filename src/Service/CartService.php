@@ -31,7 +31,8 @@ class CartService
 
 	/**
 	 * Add an item to the cart. A quantity already in the cart is increased, never above the stock.
-	 * Codes: ITEM_UNAVAILABLE (the item is inactive, its lines are removed) and QTY_EXCEEDS (no stock left).
+	 * Codes: ITEM_UNAVAILABLE (the item is inactive, its lines are removed), QTY_EXCEEDS (no stock left).
+	 * Products for purchase and quote products share the cart; the checkout handles each kind on its own.
 	 *
 	 * @param string     $session  Cart id
 	 * @param int        $userId

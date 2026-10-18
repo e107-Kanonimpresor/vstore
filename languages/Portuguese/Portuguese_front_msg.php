@@ -93,6 +93,8 @@ return array(
 	'LAN_VSTORE_MSG_PDF_PLUGIN'       => 'A biblioteca PDF (TCPDF) não está instalada!<br/>O Vstore precisa dela para criar faturas em PDF. Execute "composer install" na pasta e107_plugins/vstore.',
 	'LAN_VSTORE_MSG_PDF_FOLDER'       => 'Não foi possível criar a pasta de faturas do utilizador.',
 	'LAN_VSTORE_MSG_PDF_NOT_FOUND'    => 'O PDF da fatura não foi encontrado.',
+	'LAN_VSTORE_MSG_QUOTE_SENT'          => 'O seu pedido de orçamento %s foi enviado. Enviámos-lhe uma cópia por e-mail.',
+	'LAN_VSTORE_MSG_LOG_QUOTE_CREATED'   => 'Pedido de orçamento criado.',
 
 	// Shortcodes
 	'LAN_VSTORE_SC_PAID'              => 'Pago',

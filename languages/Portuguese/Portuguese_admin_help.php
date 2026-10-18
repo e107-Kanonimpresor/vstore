@@ -19,7 +19,7 @@ define('LAN_VSTORE_GUIDE_CATALOG_INTRO',  'O catálogo é construído com três 
 define('LAN_VSTORE_GUIDE_CATALOG_CAT_H',  'Categorias');
 define('LAN_VSTORE_GUIDE_CATALOG_CAT_T',  'As categorias organizam a loja e podem ser aninhadas. Restrinja uma categoria a uma classe de utilizador para a ocultar dos restantes visitantes.');
 define('LAN_VSTORE_GUIDE_CATALOG_PROD_H', 'Produtos');
-define('LAN_VSTORE_GUIDE_CATALOG_PROD_T', 'Cada produto tem um código único (maiúsculas, dígitos e hífenes), um preço, um inventário e uma classe de imposto. Use <code>-1</code> como inventário para stock ilimitado. As imagens e os vídeos são adicionados no seu próprio separador.');
+define('LAN_VSTORE_GUIDE_CATALOG_PROD_T', 'Cada produto tem um código único (maiúsculas, dígitos e hífenes), um preço, um inventário e uma classe de imposto. Use <code>-1</code> como inventário para stock ilimitado. As imagens e os vídeos são adicionados no seu próprio separador. Se deixar o preço vazio (não 0), o produto é oferecido como <strong>orçamento</strong>: não mostra preço e o botão passa a ser "Orçamento".');
 define('LAN_VSTORE_GUIDE_CATALOG_VAR_H',  'Variações');
 define('LAN_VSTORE_GUIDE_CATALOG_VAR_T',  'Crie um grupo de variações (por exemplo tamanhos) uma vez e atribua até dois grupos a cada produto. Uma variação pode alterar o preço com um valor fixo ou uma percentagem e pode ter o seu próprio inventário.');
 
@@ -70,7 +70,7 @@ define('LAN_VSTORE_GUIDE_ORDERS_TAB',     'Encomendas');
 define('LAN_VSTORE_GUIDE_ORDERS_TITLE',   'Encomendas, emails e faturas');
 define('LAN_VSTORE_GUIDE_ORDERS_INTRO',   'Tudo o que está relacionado com uma venda é gerido no separador Vendas.');
 define('LAN_VSTORE_GUIDE_ORDERS_ST_H',    'Estado da encomenda');
-define('LAN_VSTORE_GUIDE_ORDERS_ST_T',    'Uma encomenda passa por Nova, Em processamento, Em espera, Concluída, Cancelada e Reembolsada. As alterações de estado atualizam o inventário e enviam o email correspondente.');
+define('LAN_VSTORE_GUIDE_ORDERS_ST_T',    'Uma encomenda passa por Nova, Em processamento, Em espera, Concluída, Cancelada e Reembolsada. As alterações de estado atualizam o inventário e enviam o email correspondente. Os pedidos de orçamento seguem o seu próprio fluxo: Orçamento solicitado, Migrado para a app, Orçamento aprovado e Faturado.');
 define('LAN_VSTORE_GUIDE_ORDERS_EM_H',    'Modelos de email');
 define('LAN_VSTORE_GUIDE_ORDERS_EM_T',    'Existe um modelo para cada alteração de estado. Use o botão de repor para recuperar o texto original.');
 define('LAN_VSTORE_GUIDE_ORDERS_INV_H',   'Faturas');

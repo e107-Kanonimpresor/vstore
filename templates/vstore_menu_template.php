@@ -10,20 +10,44 @@
 
 	$VSTORE_MENU_TEMPLATE = array();
 
-	// Categories menu
+	// Categories menu (menu area): picture, name and number of products
 	$VSTORE_MENU_TEMPLATE['categories']['start'] = '
-    <div class="list-group vstore-categories">
+    <nav class="vstore vstore-catnav" aria-label="{LAN=LAN_VSTORE_FR_BROWSE_CATEGORIES}">
+        <ul class="vstore-catnav-list">
     ';
 
 	$VSTORE_MENU_TEMPLATE['categories']['end'] = '
-    </div>
+        </ul>
+    </nav>
     ';
 
 	$VSTORE_MENU_TEMPLATE['categories']['item'] = '
-		<a href="{MENU_CAT:url}" class="list-group-item vstore-categories-item {MENU_CAT:active}">
-			{MENU_CAT:name}
-			<span class="badge badge-primary badge-pill">{MENU_CAT:badge}</span>
-			<p class="list-group-item-text vstore-categories-item-text">{MENU_CAT:description}</p>
-		</a>
+		<li>
+			<a href="{MENU_CAT:url}" class="vstore-catnav-link{MENU_CAT:active}">
+				<span class="vstore-catnav-thumb">{MENU_CAT:image}</span>
+				<span class="vstore-catnav-name">{MENU_CAT:name}</span>
+				<span class="vstore-catnav-count">{MENU_CAT:badge}</span>
+			</a>
+		</li>
+    ';
+
+	// Category bar shown under the breadcrumb of the catalog pages: quick filter
+	$VSTORE_MENU_TEMPLATE['bar']['start'] = '
+    <nav class="vstore vstore-catbar" aria-label="{LAN=LAN_VSTORE_FR_BROWSE_CATEGORIES}">
+        <ul class="vstore-catbar-list">
+    ';
+
+	$VSTORE_MENU_TEMPLATE['bar']['end'] = '
+        </ul>
+    </nav>
+    ';
+
+	$VSTORE_MENU_TEMPLATE['bar']['item'] = '
+		<li>
+			<a href="{MENU_CAT:url}" class="vstore-pill{MENU_CAT:active}">
+				<span class="vstore-pill-name">{MENU_CAT:name}</span>
+				<span class="vstore-pill-count">{MENU_CAT:badge}</span>
+			</a>
+		</li>
     ';
 

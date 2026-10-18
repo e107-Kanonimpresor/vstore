@@ -94,7 +94,15 @@ class vstore_order_ui extends e_admin_ui
 			// Completed, Cancelled, Refunded will NOT be displayed!
 			$this->filterQry = 'SELECT * FROM `#vstore_orders` WHERE FIND_IN_SET(order_status, "N,P,H")';
 			//$this->setQuery('filter_options');
-		}			// check for responses on inline editing
+		}
+
+		if (!empty($_GET['filter_options']) && $_GET['filter_options'] == 'order_status__quotes')
+		{
+			// Quote requests in every step of their workflow
+			$this->filterQry = 'SELECT * FROM `#vstore_orders` WHERE FIND_IN_SET(order_status, "Q,M,A,F")';
+		}
+
+		// check for responses on inline editing
 			// and display them
 			$js = '
 			$(function(){
@@ -302,13 +310,18 @@ class vstore_order_form_ui extends e_admin_form_ui
 				'H' => 'warning',
 				'C' => 'success',
 				'X' => 'danger',
-				'R' => 'default'
+				'R' => 'default',
+				'Q' => 'primary',
+				'M' => 'info',
+				'A' => 'success',
+				'F' => 'default'
 			);
 
 	static $pay_status_classes = array(
 				'incomplete' => 'warning',
 				'complete' => 'success',
-				'refunded' => 'default'
+				'refunded' => 'default',
+				'none' => 'default'
 			);
 
 	function order_invoice_nr($curVal, $mode)
@@ -371,6 +384,7 @@ class vstore_order_form_ui extends e_admin_form_ui
 				// $order_pay_transid = $this->getController()->getFieldVar('order_pay_transid');
 
 				$text = '<div class="label-wide label label-'.self::$status_classes[$curVal].'">'.vstore::getStatus($curVal).'</div>';
+				$isQuote = $this->getController()->getFieldVar('order_pay_gateway') === \Vstore\Support\Catalog::QUOTE_GATEWAY;
 
 				switch($curVal) {
 					case 'N': // new
@@ -395,7 +409,23 @@ class vstore_order_form_ui extends e_admin_form_ui
 						$text .= $this->button('btnRefund', '1', 'danger', LAN_VSTORE_ADMIN_ORD_BTN_REFUND, array('confirm' => LAN_VSTORE_ADMIN_ORD_CONFIRM_REFUND));
 						break;
 					case 'X': // cancelled
-						$text .= $this->button('btnProcessing', 1, 'button', LAN_VSTORE_ADMIN_ORD_BTN_PROCESS, array());
+						$text .= $isQuote
+							? $this->button('btnReopen', 1, 'button', LAN_VSTORE_ADMIN_ORD_BTN_REOPEN, array())
+							: $this->button('btnProcessing', 1, 'button', LAN_VSTORE_ADMIN_ORD_BTN_PROCESS, array());
+						break;
+					case 'Q': // quote requested
+						$text .= $this->button('btnCancel', 1, 'danger', LAN_VSTORE_ADMIN_ORD_BTN_CANCEL, array('confirm' => LAN_VSTORE_ADMIN_ORD_CONFIRM_CANCEL));
+						$text .= $this->button('btnMigrated', 1, 'button', LAN_VSTORE_ADMIN_ORD_BTN_MIGRATED, array());
+						break;
+					case 'M': // sent to the external billing app
+						$text .= $this->button('btnCancel', 1, 'danger', LAN_VSTORE_ADMIN_ORD_BTN_CANCEL, array('confirm' => LAN_VSTORE_ADMIN_ORD_CONFIRM_CANCEL));
+						$text .= $this->button('btnApproved', 1, 'button', LAN_VSTORE_ADMIN_ORD_BTN_APPROVED, array());
+						break;
+					case 'A': // approved by the customer
+						$text .= $this->button('btnCancel', 1, 'danger', LAN_VSTORE_ADMIN_ORD_BTN_CANCEL, array('confirm' => LAN_VSTORE_ADMIN_ORD_CONFIRM_CANCEL));
+						$text .= $this->button('btnInvoiced', 1, 'button', LAN_VSTORE_ADMIN_ORD_BTN_INVOICED, array());
+						break;
+					case 'F': // invoiced in the external app
 						break;
 					case 'R': // refunded
 						//$text .= 'Order is already refunded!';
@@ -454,6 +484,26 @@ class vstore_order_form_ui extends e_admin_form_ui
 							e.preventDefault();
 							updateOrder('complete', {$order_id});
 						});
+
+						$('#btnmigrated').click(function(e){
+							e.preventDefault();
+							updateOrder('qmigrated', {$order_id});
+						});
+
+						$('#btnapproved').click(function(e){
+							e.preventDefault();
+							updateOrder('qapproved', {$order_id});
+						});
+
+						$('#btninvoiced').click(function(e){
+							e.preventDefault();
+							updateOrder('qinvoiced', {$order_id});
+						});
+
+						$('#btnreopen').click(function(e){
+							e.preventDefault();
+							updateOrder('qreopen', {$order_id});
+						});
 						
 					});
 					");
@@ -471,6 +521,7 @@ class vstore_order_form_ui extends e_admin_form_ui
 			case 'filter':
 				$filter = vstore::getStatus();
 				$filter['open'] = LAN_VSTORE_ADMIN_ORD_FILTER_OPEN;
+				$filter['quotes'] = LAN_VSTORE_ADMIN_ORD_FILTER_QUOTES;
 				return $filter;
 				break;
 

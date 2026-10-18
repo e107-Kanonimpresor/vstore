@@ -19,6 +19,12 @@ return array(
 	'LAN_VSTORE_ADMIN_ORD_PAYSTATUS_REFUNDED'   => 'Refunded',
 
 	'LAN_VSTORE_ADMIN_ORD_FILTER_OPEN'     => 'Open',
+	'LAN_VSTORE_ADMIN_ORD_PAYSTATUS_NONE'       => 'None',
+	'LAN_VSTORE_ADMIN_ORD_FILTER_QUOTES'   => 'Quotes',
+	'LAN_VSTORE_ADMIN_ORD_BTN_MIGRATED'    => 'Mark as migrated to the app',
+	'LAN_VSTORE_ADMIN_ORD_BTN_APPROVED'    => 'Mark as approved',
+	'LAN_VSTORE_ADMIN_ORD_BTN_INVOICED'    => 'Mark as invoiced',
+	'LAN_VSTORE_ADMIN_ORD_BTN_REOPEN'      => 'Reopen as quote request',
 	'LAN_VSTORE_ADMIN_ORD_INVOICE_TIP'     => 'Click to open/generate the invoice pdf',
 	'LAN_VSTORE_ADMIN_ORD_INVOICE_FORCE'   => 'Check to force the creation of a new invoice pdf during save',
 

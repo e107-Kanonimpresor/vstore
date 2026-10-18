@@ -19,7 +19,7 @@ define('LAN_VSTORE_GUIDE_CATALOG_INTRO',  'The catalog is built from three relat
 define('LAN_VSTORE_GUIDE_CATALOG_CAT_H',  'Categories');
 define('LAN_VSTORE_GUIDE_CATALOG_CAT_T',  'Categories organise the shop and can be nested. Restrict a category to a user class to hide it from other visitors.');
 define('LAN_VSTORE_GUIDE_CATALOG_PROD_H', 'Products');
-define('LAN_VSTORE_GUIDE_CATALOG_PROD_T', 'Each product has a unique code (uppercase letters, digits and hyphens), a price, an inventory and a tax class. Use <code>-1</code> as inventory for unlimited stock. Images and videos are added in their own tab.');
+define('LAN_VSTORE_GUIDE_CATALOG_PROD_T', 'Each product has a unique code (uppercase letters, digits and hyphens), a price, an inventory and a tax class. Use <code>-1</code> as inventory for unlimited stock. Images and videos are added in their own tab. If you leave the price empty (not 0), the product is offered as a <strong>quote</strong>: no price is shown and the button reads "Quote".');
 define('LAN_VSTORE_GUIDE_CATALOG_VAR_H',  'Variations');
 define('LAN_VSTORE_GUIDE_CATALOG_VAR_T',  'Create a variation group (for example sizes) once, then assign up to two groups to each product. A variation can change the price by a fixed amount or a percentage and can track its own inventory.');
 
@@ -70,7 +70,7 @@ define('LAN_VSTORE_GUIDE_ORDERS_TAB',     'Orders');
 define('LAN_VSTORE_GUIDE_ORDERS_TITLE',   'Orders, emails and invoices');
 define('LAN_VSTORE_GUIDE_ORDERS_INTRO',   'Everything related to a sale is managed from the Sales tab.');
 define('LAN_VSTORE_GUIDE_ORDERS_ST_H',    'Order status');
-define('LAN_VSTORE_GUIDE_ORDERS_ST_T',    'An order moves through New, Processing, On Hold, Completed, Cancelled and Refunded. The status changes update inventory and send the matching email.');
+define('LAN_VSTORE_GUIDE_ORDERS_ST_T',    'An order moves through New, Processing, On Hold, Completed, Cancelled and Refunded. The status changes update inventory and send the matching email. Quote requests follow their own flow: Quote request, Migrated to app, Quote approved and Invoiced.');
 define('LAN_VSTORE_GUIDE_ORDERS_EM_H',    'Email templates');
 define('LAN_VSTORE_GUIDE_ORDERS_EM_T',    'There is one template for each status change. Use the reset button to restore the original text.');
 define('LAN_VSTORE_GUIDE_ORDERS_INV_H',   'Invoices');

@@ -29,6 +29,8 @@
 		'cancelled' => LAN_VSTORE_MAIL_CANCELLED,
 		'refund'    => LAN_VSTORE_MAIL_CANCELLED_REFUND,
 		'refunded'  => LAN_VSTORE_MAIL_REFUNDED,
+		'quote'     => LAN_VSTORE_MAIL_QUOTE_INTRO,
+		'quote_ref' => LAN_VSTORE_MAIL_QUOTE_REF,
 	);
 
 	// Inline style presets.
@@ -87,6 +89,20 @@
 <p style='{$_p}'>{$_l['refunded']}</p>
 {$_closing}";
 
+	$VSTORE_EMAIL_TEMPLATE['quote'] = "{$_greeting}
+<p style='{$_p}'>{$_l['quote']}</p>
+<table role='presentation' width='100%' cellpadding='0' cellspacing='0' border='0' style='margin:0 0 8px;'>
+<tr>
+<td style='padding:12px 16px;background-color:#eff6ff;border-left:4px solid #2563eb;border-radius:4px;'>
+<p style='margin:0;font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#1e40af;'>{$_l['quote_ref']}</p>
+<p style='margin:4px 0 0;font-size:20px;line-height:28px;font-weight:700;color:#111827;'>#{REF}</p>
+</td>
+</tr>
+</table>
+{$_addr}
+{ORDER_ITEMS: email}
+{$_closing}";
+
 	// Order lines (used by {ORDER_ITEMS: email}); the coupon and tax rows come from {ORDER_COUPON} and {ORDER_TAX}.
 	$_th = "padding:10px 8px;border-bottom:2px solid #e5e7eb;font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#6b7280;";
 	$_td = "padding:12px 8px;border-bottom:1px solid #e5e7eb;font-size:14px;line-height:21px;color:#374151;";
@@ -141,6 +157,26 @@
 <td align='right' style='{$_tf}'>[x]</td>
 <td align='right' style='{$_tf}white-space:nowrap;'>[y]</td>
 </tr>
+";
+
+	$VSTORE_EMAIL_TEMPLATE['quote_items']['header'] = "<table width='100%' cellpadding='0' cellspacing='0' border='0' style='margin:24px 0;border-collapse:collapse;'>
+<thead>
+<tr>
+<th scope='col' align='left' style='{$_th}'>{LAN=LAN_VSTORE_FR_DESCRIPTION}</th>
+<th scope='col' align='right' style='{$_th}'>{LAN=LAN_VSTORE_FR_QTY}</th>
+</tr>
+</thead>
+<tbody>
+";
+
+	$VSTORE_EMAIL_TEMPLATE['quote_items']['row'] = "<tr>
+<td align='left' valign='top' style='{$_td}'>{CART_DATA: name}</td>
+<td align='right' valign='top' style='{$_td}'>{CART_DATA: quantity}</td>
+</tr>
+";
+
+	$VSTORE_EMAIL_TEMPLATE['quote_items']['footer'] = "</tbody>
+</table>
 ";
 
 	// Optional lines are only printed when they have a value.

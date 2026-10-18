@@ -572,6 +572,13 @@ class vstore
 					$status = 'H';
 					$result = $this->order->setOrderStatus($status);
 				}
+				elseif(in_array($this->post['order'], array('qmigrated', 'qapproved', 'qinvoiced', 'qreopen'), true))
+				{
+					// Quote workflow, access only for Admins!
+					$quoteSteps = array('qmigrated' => 'M', 'qapproved' => 'A', 'qinvoiced' => 'F', 'qreopen' => 'Q');
+					$status = $quoteSteps[$this->post['order']];
+					$result = $this->order->setOrderStatus($status);
+				}
 				else
 				{
 					// In case that none of the above has handled the ajax request
@@ -689,6 +696,12 @@ class vstore
 		if(varset($this->post['cartRemove']))
 		{
 			$this->updateCart('remove', $this->post['cartRemove']);
+		}
+
+		// A cart with products and quote products starts the checkout of one kind, the other stays in the cart
+		if(in_array(varset($this->post['cartScope']), array('sale', 'quote'), true))
+		{
+			$this->startCheckout($this->post['cartScope']);
 		}
 
 		if(!empty($this->get['add']))
@@ -998,6 +1011,12 @@ class vstore
 		$data['ship'] = $ship;
 		$data['order_pay_gateway'] = $this->getGatewayType(true);
 
+		$isQuote = !empty($data['is_quote']);
+		if($isQuote)
+		{
+			$data['order_pay_gateway'] = Catalog::QUOTE_GATEWAY;
+		}
+
 		if(!empty($ship['address']))
 		{
 			$data['order_use_shipping']  = 1;
@@ -1015,7 +1034,8 @@ class vstore
 
 		$this->sc->setVars($data);
 
-		return e107::getParser()->parseTemplate($template['main'], true, $this->sc);
+		// A theme without the quote_main part keeps the standard confirmation
+		return e107::getParser()->parseTemplate(($isQuote && isset($template['quote_main'])) ? $template['quote_main'] : $template['main'], true, $this->sc);
 	}
 
 
@@ -1141,7 +1161,7 @@ class vstore
 				}
 
 				// $ns->tablerender($this->captionBase, $bread . $text, 'vstore-cart-list');
-				$ns->tablerender($this->captionBase, $text, 'vstore-cart-list');
+				$ns->tablerender($this->captionBase, $this->checkoutPage(2, $text), 'vstore-cart-list');
 
 				return null;
 			}
@@ -1191,7 +1211,7 @@ class vstore
 				// $bread = $this->setBreadcrumb();
 				$this->setBreadcrumb();
 				// $ns->tablerender($this->captionBase, $bread . $text, 'vstore-cart-list');
-				$ns->tablerender($this->captionBase, $text, 'vstore-cart-list');
+				$ns->tablerender($this->captionBase, $this->checkoutPage(3, $text, false), 'vstore-cart-list');
 
 				return null;
 			}
@@ -1210,7 +1230,8 @@ class vstore
 					$text .= $this->checkoutView();
 				}
 				// $ns->tablerender($this->captionBase, $bread . $text, 'vstore-cart-list');
-				$ns->tablerender($this->captionBase, $text, 'vstore-cart-list');
+				// The choice between guest, sign up and login is wide: no order summary beside it
+				$ns->tablerender($this->captionBase, $this->checkoutPage(2, $text, USER || isset($_POST['as_guest'])), 'vstore-cart-list');
 
 				return null;
 			}
@@ -1305,7 +1326,7 @@ class vstore
 			$this->setBreadcrumb();
 			$msg = e107::getMessage()->render('vstore');
 			// $ns->tablerender($this->captionBase, $bread . $msg . $text, 'vstore-product-view');
-			$ns->tablerender($this->captionBase, $msg . $text, 'vstore-product-view');
+			$ns->tablerender($this->captionBase, $this->categoryBar() . $msg . $text, 'vstore-product-view');
 
 			return null;
 		}
@@ -1323,7 +1344,7 @@ class vstore
 			$this->setBreadcrumb();
 			$msg = e107::getMessage()->render('vstore');
 			// $ns->tablerender($this->captionBase, $bread . $msg . $subCategoryText . $text, 'vstore-product-list');
-			$ns->tablerender($this->captionBase, $msg . $subCategoryText . $text, 'vstore-product-list');
+			$ns->tablerender($this->captionBase, $this->categoryBar() . $msg . $subCategoryText . $text, 'vstore-product-list');
 		}
 		else
 		{
@@ -1333,7 +1354,7 @@ class vstore
 			$this->setBreadcrumb();
 			$msg = e107::getMessage()->render('vstore');
 			// $ns->tablerender($this->captionBase, $bread . $msg . $text, 'vstore-category-list');
-			$ns->tablerender($this->captionBase, $msg . $text, 'vstore-category-list');
+			$ns->tablerender($this->captionBase, $this->categoryBar() . $msg . $text, 'vstore-category-list');
 		}
 	}
 
@@ -1557,6 +1578,118 @@ class vstore
 	}
 
 	/**
+	 * Wrap a checkout page with the progress steps and, next to it, the summary of what is being ordered.
+	 *
+	 * @param int    $step      2 = details and address, 3 = review
+	 * @param string $main      html of the page
+	 * @param bool   $withAside show the order summary beside the form
+	 * @return string
+	 */
+	private function checkoutPage($step, $main, $withAside = true)
+	{
+		$tp = e107::getParser();
+		$template = e107::getTemplate('vstore', 'vstore', 'checkout');
+
+		$steps = $tp->parseTemplate(strtr($template['steps'], array(
+			'[cart_url]' => e107::url('vstore', 'cart', 'sef'),
+			'[step2]'    => $step >= 3 ? 'is-done' : 'is-active',
+			'[step3]'    => $step >= 3 ? 'is-active' : '',
+		)), true, $this->sc);
+
+		$aside = $withAside ? $this->checkoutAside() : '';
+
+		return strtr($template['layout'], array(
+			'[steps]'      => $steps,
+			'[grid_class]' => $aside === '' ? '' : ' has-aside',
+			'[main]'       => $main,
+			'[aside]'      => $aside,
+		));
+	}
+
+	/**
+	 * Summary of the products and totals of the checkout, shown beside the forms.
+	 *
+	 * @return string
+	 */
+	private function checkoutAside()
+	{
+		$data = $this->getCheckoutData();
+
+		if(empty($data['items']))
+		{
+			return '';
+		}
+
+		$tp = e107::getParser();
+		$template = e107::getTemplate('vstore', 'vstore', 'checkout');
+		$isQuote = !empty($data['is_quote']);
+		$totals = (array) varset($data['totals']);
+		$net = !empty($totals['is_business']) && empty($totals['is_local']);
+
+		$count = 0;
+		$list = '';
+		foreach($data['items'] as $row)
+		{
+			$count += (int) $row['cart_qty'];
+
+			$images = e107::unserialize(varset($row['item_pic']));
+			$pic = !empty($images[0]['path'])
+				? $tp->toImage($images[0]['path'], array('w' => 96, 'h' => 96, 'crop' => 1, 'alt' => ''))
+				: '<span class="vstore-noimg" aria-hidden="true"><i class="fa fa-cube"></i></span>';
+
+			$list .= strtr($template[$isQuote ? 'aside_item_quote' : 'aside_item'], array(
+				'[pic]'   => $pic,
+				'[name]'  => $tp->toHTML($row['item_name'], false, 'TITLE'),
+				'[vars]'  => !empty($row['itemvarstring']) ? ' ' . strip_tags($row['itemvarstring']) : '',
+				'[qty]'   => (int) $row['cart_qty'],
+				'[total]' => $isQuote ? '' : $this->sc->format_amount(varset($row['item_total'])),
+			));
+		}
+
+		$html = $tp->parseTemplate(strtr($template['aside_start'], array('[count]' => sprintf(LAN_VSTORE_FR_ITEM_COUNT, $count))), true, $this->sc) . $list;
+
+		if($isQuote)
+		{
+			return $html . $tp->parseTemplate($template['aside_end_quote'], true, $this->sc);
+		}
+
+		$row = function($label, $value, $class = '') use ($template)
+		{
+			return strtr($template['aside_row'], array('[label]' => $label, '[value]' => $value, '[class]' => $class));
+		};
+
+		$rows = $row(LAN_VSTORE_FR_SUBTOTAL, $this->sc->format_amount($net ? $totals['cart_subNet'] : $totals['cart_subTotal']));
+		$rows .= $row(LAN_VSTORE_FR_SHIPPING, $this->sc->format_amount($net ? $totals['cart_shippingNet'] : $totals['cart_shippingTotal']));
+
+		$coupon = (array) varset($totals['cart_coupon']);
+		if(!empty($coupon['code']) && !empty($coupon['amount']))
+		{
+			$rows .= $row(LAN_VSTORE_FR_COUPON . ' ' . $tp->toHTML($coupon['code'], false, 'TITLE'), $this->sc->format_amount($net ? $coupon['amount_net'] : $coupon['amount']), ' is-discount');
+		}
+
+		if(!$net)
+		{
+			$tax = 0;
+			foreach((array) varset($totals['cart_taxTotal']) as $rate => $amount)
+			{
+				if($tp->toNumber($rate) > 0)
+				{
+					$tax += $amount;
+				}
+			}
+
+			if($tax > 0)
+			{
+				$rows .= $row(LAN_VSTORE_FR_TAX, $this->sc->format_amount($tax));
+			}
+		}
+
+		$rows .= $row(LAN_VSTORE_FR_TOTAL, $this->sc->format_amount($net ? $totals['cart_grandNet'] : $totals['cart_grandTotal']), ' is-total');
+
+		return $html . strtr($template['aside_end'], array('[rows]' => $rows));
+	}
+
+	/**
 	 * Render checkout complete message
 	 *
 	 * @return string
@@ -1586,9 +1719,12 @@ class vstore
 	private function checkoutView()
 	{
 
-		$active = $this->getActiveGateways();
+		$checkout = $this->getCheckoutData();
+		$isQuote = !empty($checkout['is_quote']);
 
-		$curGateway = $this->getGatewayType();
+		$active = $isQuote ? array() : $this->getActiveGateways();
+
+		$curGateway = $isQuote ? '' : $this->getGatewayType();
 
 		if(!USER && !isset($_POST['as_guest']))
 		{
@@ -1607,11 +1743,14 @@ class vstore
 		}
 
 
-		$active = $this->hideDisabledMollieMethods($active);
-
-		if(empty($active))
+		if(!$isQuote)
 		{
-			return LAN_VSTORE_MSG_NO_PAY_OPTIONS;
+			$active = $this->hideDisabledMollieMethods($active);
+
+			if(empty($active))
+			{
+				return LAN_VSTORE_MSG_NO_PAY_OPTIONS;
+			}
 		}
 
 		$text = e107::getForm()->open(
@@ -1622,13 +1761,20 @@ class vstore
 		);
 
 		$text .= $this->renderCustomerForm();
-		$text .= "<hr /><p>";
-		$text .= "<i class='fa fa-truck' aria-hidden='true'></i> <a id='shipping-view-toggle' class='e-expandit' href='#shipping-view'>".LAN_VSTORE_MSG_ADD_SHIPPING."</a>";
-		$text .= "</p><div id='shipping-view' style='display:none'>";
+		$text .= "<div class='vstore-toggle'><i class='fa fa-truck' aria-hidden='true'></i> <a id='shipping-view-toggle' class='e-expandit' href='#shipping-view'>".LAN_VSTORE_MSG_ADD_SHIPPING."</a></div>";
+		$text .= "<div id='shipping-view' style='display:none'>";
 		$text .= $this->renderShippingForm();
 		$text .= "</div>";
 
-		$text .= "<hr /><h3>".LAN_VSTORE_MSG_SELECT_PAYMENT."</h3><div class='vstore-gateway-list row'>";
+		if($isQuote)
+		{
+			// No payment: the request is saved as a quote
+			$text .= "<input type='hidden' name='gateway' value='" . Catalog::QUOTE_GATEWAY . "'><p class='vstore-summary-note'><i class='fa fa-info-circle' aria-hidden='true'></i> " . LAN_VSTORE_QUOTE_CART_NOTE . "</p>";
+		}
+		else
+		{
+			$text .= "<section class='vstore-panel'><h3 class='vstore-panel-title'><span class='vstore-panel-icon'><i class='fa fa-credit-card' aria-hidden='true'></i></span> ".LAN_VSTORE_MSG_SELECT_PAYMENT."</h3><div class='vstore-gateway-list row g-3'>";
+		}
 
 		if(count($active) == 1 && empty($curGateway))
 		{
@@ -1637,7 +1783,7 @@ class vstore
 		foreach($active as $gateway => $icon)
 		{
 			$text .= "
-                        <div class='col-6 col-xs-6 col-sm-4 col-4 d-grid' style='margin-bottom:15px'>
+                        <div class='col-6 col-md-4 d-grid'>
                             <label class='btn btn-default btn-light btn-secondary btn-block btn-" . $gateway . " " . ($curGateway == $gateway ? 'active' : '') . " vstore-gateway text-center'>
                                 <input type='radio' name='gateway' value='" . $gateway . "' style='display:none;' class='vstore-gateway-radio' required " . ($curGateway == $gateway ? 'checked' : '') . ">
                                 " . $icon . "
@@ -1646,7 +1792,7 @@ class vstore
                         </div>";
 		}
 
-		$text .= "</div>";
+		$text .= $isQuote ? '' : "</div></section>";
 
 		/*
 
@@ -1661,12 +1807,9 @@ class vstore
 					</div>';
 					*/
 		$text .= '
-       
-            <div class="row mt-5 mb-5">
-                <div class="col-12 col-xs-12">
-                    <a class="btn btn-default btn-secondary vstore-btn-back-confirm" href="' . e107::url('vstore', 'cart', 'sef') . '">&laquo; ' . LAN_VSTORE_FR_BACK . '</a>
-                    <button class="btn btn-primary vstore-btn-buy-now pull-right float-right float-end" type="submit" name="mode" value="confirm">' . LAN_VSTORE_MSG_CONTINUE . ' &raquo;</button>
-                </div>
+            <div class="vstore-co-actions">
+                <a class="btn btn-default btn-secondary vstore-btn-back-confirm" href="' . e107::url('vstore', 'cart', 'sef') . '">&laquo; ' . LAN_VSTORE_FR_BACK . '</a>
+                <button class="btn btn-primary btn-lg vstore-btn-buy-now" type="submit" name="mode" value="confirm">' . LAN_VSTORE_MSG_CONTINUE . ' &raquo;</button>
             </div>';
 
 		$text .= e107::getForm()->close();
@@ -1728,7 +1871,8 @@ class vstore
 
 		$active = $this->getActiveGateways();
 		$curGateway = $this->getGatewayType(true);
-		if(!empty($active))
+		$checkout = $this->getCheckoutData();
+		if(!empty($active) || !empty($checkout['is_quote']))
 		{
 			$text = e107::getForm()->open(
 				'gateway-select',
@@ -1739,13 +1883,11 @@ class vstore
 
 			$text .= $this->renderShippingForm();
 
-			$text .= '<br/>
-            <div class="row">
-                <div class="col-12 col-xs-12">
-                    <input type="hidden" name="order_use_shipping" value="1">
-                    <a class="btn btn-default btn-secondary vstore-btn-back-confirm" href="' . e107::url('vstore', 'checkout', 'sef') . '">&laquo; ' . LAN_VSTORE_FR_BACK . '</a>
-                    <button class="btn btn-primary vstore-btn-buy-now pull-right float-right float-end" type="submit" name="mode" value="confirm">' . LAN_VSTORE_MSG_CONTINUE . ' &raquo;</button>
-                </div>
+			$text .= '
+            <div class="vstore-co-actions">
+                <input type="hidden" name="order_use_shipping" value="1">
+                <a class="btn btn-default btn-secondary vstore-btn-back-confirm" href="' . e107::url('vstore', 'checkout', 'sef') . '">&laquo; ' . LAN_VSTORE_FR_BACK . '</a>
+                <button class="btn btn-primary btn-lg vstore-btn-buy-now" type="submit" name="mode" value="confirm">' . LAN_VSTORE_MSG_CONTINUE . ' &raquo;</button>
             </div>';
 
 			$text .= e107::getForm()->close();
@@ -1798,6 +1940,11 @@ class vstore
 		}
 
 		$paymentMethod = '';
+		if($type === Catalog::QUOTE_GATEWAY)
+		{
+			return $this->processQuote();
+		}
+
 		if(self::isMollie($type))
 		{
 			$paymentMethod = substr($type, 7);
@@ -1828,35 +1975,7 @@ class vstore
 		}
 		else
 		{
-			$items = array();
-
-			foreach($data['items'] as $var)
-			{
-				$price = $var['item_price'];
-				$itemvarstring = '';
-				if(!empty($var['cart_item_vars']))
-				{
-					$itemprop = self::getItemVarProperties($var['cart_item_vars'], $var['item_price']);
-
-					if($itemprop)
-					{
-						$itemvarstring = $itemprop['variation'];
-					}
-				}
-
-
-				$items[] = array(
-					'id'          => $var['item_id'],
-					'name'        => $var['item_code'],
-					'price'       => (float) $price,
-					'description' => $var['item_name'],
-					'quantity'    => (int) $var['cart_qty'],
-					'tax_rate'    => $var['tax_rate'],
-					'file'        => $var['item_download'],
-					'vars'        => $itemvarstring,
-					'item_vars'   => $var['cart_item_vars']
-				);
-			}
+			$items = $this->orderItemsFromCheckout($data);
 		}
 
 		if($mode === 'halt')
@@ -1865,7 +1984,7 @@ class vstore
 			$transID = null;
 			$transData = null;
 			$this->saveTransaction($transID, $transData, $items);
-			$this->resetCart();
+			$this->resetCart('sale');
 
 			if(!empty($message))
 			{
@@ -2030,7 +2149,7 @@ class vstore
 			}
 
 			$this->saveTransaction($transID, $transData, $items, $order_status, $pending ? 'incomplete' : ''); // Order payed > save as Processing
-			$this->resetCart();
+			$this->resetCart('sale');
 
 			e107::getSession('vstore')->clear('_data');
 		//	unset($_SESSION['vstore']['_data']);
@@ -2044,6 +2163,77 @@ class vstore
 			}
 			e107::getMessage()->addError($message, 'vstore');
 		}
+	}
+
+	/**
+	 * Order lines (as stored in the order) from the checkout data.
+	 *
+	 * @param array $data checkout data with the items
+	 * @return array
+	 */
+	private function orderItemsFromCheckout(array $data)
+	{
+		$items = array();
+
+		foreach($data['items'] as $var)
+		{
+			$price = $var['item_price'];
+			$itemvarstring = '';
+			if(!empty($var['cart_item_vars']))
+			{
+				$itemprop = self::getItemVarProperties($var['cart_item_vars'], $var['item_price']);
+
+				if($itemprop)
+				{
+					$itemvarstring = $itemprop['variation'];
+				}
+			}
+
+
+			$items[] = array(
+				'id'          => $var['item_id'],
+				'name'        => $var['item_code'],
+				'price'       => (float) $price,
+				'description' => $var['item_name'],
+				'quantity'    => (int) $var['cart_qty'],
+				'tax_rate'    => $var['tax_rate'],
+				'file'        => $var['item_download'],
+				'vars'        => $itemvarstring,
+				'item_vars'   => $var['cart_item_vars']
+			);
+		}
+
+		return $items;
+	}
+
+	/**
+	 * Save a quote request: no payment, no invoice number and no stock change. The customer and the shop get the same e-mail.
+	 *
+	 * @return bool|null false when the request could not be saved
+	 */
+	private function processQuote()
+	{
+		$data = $this->getCheckoutData();
+
+		if(empty($data['items']) || empty($data['is_quote']))
+		{
+			e107::getMessage()->addError(LAN_VSTORE_MSG_CART_EMPTY_ERR, 'vstore');
+
+			return false;
+		}
+
+		if(!$this->saveTransaction(null, null, $this->orderItemsFromCheckout($data), 'Q'))
+		{
+			return false;
+		}
+
+		$this->resetCart('quote');
+		e107::getSession('vstore')->clear('_data');
+
+		// Force the browser window to refresh the cart menu
+		e107::js('footer-inline', '$(function(){ vstoreCartRefresh(); });');
+
+		return null;
 	}
 
 	/**
@@ -2196,7 +2386,7 @@ class vstore
 			$mes->addInfo(LAN_VSTORE_MSG_MOLLIE_PENDING, 'vstore');
 		}
 
-		$this->resetCart();
+		$this->resetCart('sale');
 		e107::getSession('vstore')->clear('_data');
 	}
 
@@ -2229,6 +2419,9 @@ class vstore
 	{
 
 		$this->html_invoice = null;
+
+		// A quote request has no payment, invoice number, stock change or invoice
+		$isQuote = Catalog::isQuoteStatus($order_status);
 
 		if(isset($transData['L_ERRORCODE0']) && intval($transData['L_ERRORCODE0']) == 11607)
 		{
@@ -2264,8 +2457,8 @@ class vstore
 		$this->order->order_billing = $customerData;
 		$this->order->order_shipping = $shippingData;
 
-		$this->order->order_pay_gateway = $this->getGatewayType(true);
-		$this->order->order_pay_status = $payStatus !== '' ? $payStatus : (empty($transData) ? 'incomplete' : 'complete');
+		$this->order->order_pay_gateway = $isQuote ? Catalog::QUOTE_GATEWAY : $this->getGatewayType(true);
+		$this->order->order_pay_status = $isQuote ? 'none' : ($payStatus !== '' ? $payStatus : (empty($transData) ? 'incomplete' : 'complete'));
 		$this->order->order_pay_transid = $id;
 		$this->order->order_pay_amount = $cartData['totals']['cart_grandTotal'];
 		$this->order->order_pay_currency = $cartData['currency'];
@@ -2274,21 +2467,27 @@ class vstore
 		$this->order->order_pay_coupon_code = $cartData['totals']['cart_coupon']['code'];
 		$this->order->order_pay_coupon_amount = $cartData['totals']['cart_coupon']['amount'];
 		$this->order->order_pay_rawdata = array('purchase' => $transData);
-		$this->order->setInvoiceNr();
-		$this->order->setOrderLog($this->order->order_pay_status === 'complete' ? LAN_VSTORE_MSG_LOG_CREATED_PAID : ($payStatus === 'incomplete' && !empty($transData) ? LAN_VSTORE_MSG_LOG_CREATED_PENDING : LAN_VSTORE_MSG_LOG_CREATED));
+		if(!$isQuote)
+		{
+			$this->order->setInvoiceNr();
+		}
+		$this->order->setOrderLog($isQuote ? LAN_VSTORE_MSG_LOG_QUOTE_CREATED : ($this->order->order_pay_status === 'complete' ? LAN_VSTORE_MSG_LOG_CREATED_PAID : ($payStatus === 'incomplete' && !empty($transData) ? LAN_VSTORE_MSG_LOG_CREATED_PENDING : LAN_VSTORE_MSG_LOG_CREATED)));
 
 		$mes = e107::getMessage();
 		$saved = true;
 		if($this->order->save())
 		{
 			// Order saved, update inventory before doing any "secondary" work...
-			$this->updateInventory($this->order->order_items);
+			if(!$isQuote)
+			{
+				$this->updateInventory($this->order->order_items);
+			}
 
 			if(USER && !$this->saveCustomer(
 					$customerData,
 					$shippingData,
 					$this->getShippingType(),
-					$this->getGatewayType(true)
+					$isQuote ? '' : $this->getGatewayType(true)
 				))
 			{
 				$mes->addError(LAN_VSTORE_MSG_CUSTOMER_FAIL, 'vstore');
@@ -2301,7 +2500,7 @@ class vstore
 			}
 
 			// Render the in
-			$pdf_data = $this->renderInvoice();
+			$pdf_data = $isQuote ? false : $this->renderInvoice();
 			$pdf_file = '';
 			if($this->pref['invoice_create_pdf'] && is_array($pdf_data))
 			{
@@ -2309,7 +2508,13 @@ class vstore
 				$pdf_file = $this->pathToInvoicePdf($this->order->order_invoice_nr, $pdf_data['userid']);
 			}
 
-			if(!$quiet)
+			if($isQuote)
+			{
+				$mes->addSuccess(sprintf(LAN_VSTORE_MSG_QUOTE_SENT, $this->order->order_refcode), 'vstore');
+
+				$this->order->emailCustomer('quote');
+			}
+			elseif(!$quiet)
 			{
 				$mes->addSuccess(sprintf(LAN_VSTORE_MSG_ORDER_COMPLETE, $this->order->order_refcode), 'vstore');
 
@@ -2414,6 +2619,12 @@ class vstore
 		{
 			return self::getMolliePaymentMethodIcon($type, $size);
 		}
+
+		if($type === Catalog::QUOTE_GATEWAY)
+		{
+			return e107::getParser()->toGlyph('fa-file-text-o', array('size' => $size));
+		}
+
 		$text = !empty(self::$gateways[$type]) ? self::$gateways[$type]['icon'] : '';
 
 		return e107::getParser()->toIcon($text, array('size' => $size, 'fw'=>true));
@@ -2431,6 +2642,11 @@ class vstore
 		if(self::isMollie($type))
 		{
 			return self::getMolliePaymentMethodTitle($type);
+		}
+
+		if($type === Catalog::QUOTE_GATEWAY)
+		{
+			return LAN_VSTORE_QUOTE_TITLE;
 		}
 
 		return self::$gateways[$type]['title'];
@@ -2523,15 +2739,33 @@ class vstore
 
 	/**
 	 * Reset the cart
-	 * Remove all items from the cart
+	 * Remove all items from the cart, or only the lines of one kind once their order is saved
 	 *
+	 * @param string|null $kind 'sale' or 'quote' keeps the lines of the other kind, null empties the cart
 	 * @return void
 	 */
-	protected function resetCart()
+	protected function resetCart($kind = null)
 	{
 
 		// Delete the cart of this visitor from the database
 		$sql = e107::getDb();
+
+		if($kind !== null && !empty($this->cartId))
+		{
+			foreach((array) $this->getCartData() as $row)
+			{
+				if((Catalog::isQuotePrice($row['item_price']) ? 'quote' : 'sale') === $kind)
+				{
+					$sql->delete('vstore_cart', 'cart_id=' . (int) $row['cart_id']);
+				}
+			}
+
+			if($this->getCartData())
+			{
+				return null;
+			}
+		}
+
 		if(!empty($this->cartId))
 		{
 			$sql->delete('vstore_cart', 'cart_session = "' . $sql->escape($this->cartId) . '"');
@@ -2576,6 +2810,64 @@ class vstore
 	public function setCartId($id)
 	{
 		$this->cartId = $id;
+	}
+
+	/**
+	 * Category bar for the catalog pages (shown under the breadcrumb): "All" plus the top level categories,
+	 * with the one being browsed highlighted.
+	 *
+	 * @return string empty when there are fewer than two categories to choose from
+	 */
+	public function categoryBar()
+	{
+		if(!class_exists('vstore_sitelink'))
+		{
+			include_once e_PLUGIN . 'vstore/e_sitelink.php';
+		}
+
+		$nav = (new vstore_sitelink())->storeCategoryNav();
+
+		if(count($nav) < 2)
+		{
+			return '';
+		}
+
+		$current = 0;
+
+		if(!empty($this->get['item']) && !empty($this->item['item_cat']))
+		{
+			$current = (int) $this->item['item_cat'];
+		}
+		elseif(!empty($this->get['cat']))
+		{
+			$current = (int) $this->get['cat'];
+		}
+
+		if($current && !empty($this->categories[$current]['cat_parent']))
+		{
+			$current = (int) $this->categories[$current]['cat_parent'];
+		}
+
+		array_unshift($nav, array(
+			'link_id'    => 0,
+			'link_name'  => LAN_VSTORE_FR_ALL_CATEGORIES,
+			'link_url'   => e107::url('vstore', 'index'),
+			'link_badge' => array_sum(array_column($nav, 'link_badge')),
+		));
+
+		$tp = e107::getParser();
+		$template = e107::getTemplate('vstore', 'vstore_menu', 'bar');
+
+		$text = $tp->parseTemplate($template['start'], true, $this->sc);
+
+		foreach($nav as $item)
+		{
+			$item['link_active'] = ($item['link_id'] === $current);
+			$this->sc->setVars($item);
+			$text .= $tp->parseTemplate($template['item'], true, $this->sc);
+		}
+
+		return $text . $tp->parseTemplate($template['end'], true, $this->sc);
 	}
 
 	/**
@@ -2647,7 +2939,7 @@ class vstore
 	/**
 	 * Render the list of products
 	 *
-	 * @param integer $category selected category id
+	 * @param integer $category selected category id, 0 for all categories (latest products first)
 	 * @param boolean $np render nextpref yes/no
 	 * @param string $templateID name of the template to use
 	 * @param int $item_count number of items to show (used for menu)
@@ -2669,13 +2961,17 @@ class vstore
 			$hide_outofstock = ' AND item_inventory != 0';
 		}
 
+		$category = (int) $category;
+		$catFilter = $category > 0 ? ' AND item_cat = ' . $category : '';
+		$order = $category > 0 ? 'item_order' : 'item_id DESC';
+
 		if(!$data = e107::getDb()->retrieve(
 			'SELECT SQL_CALC_FOUND_ROWS *, cat_class
             FROM #vstore_items
             LEFT JOIN #vstore_cat ON (item_cat = cat_id)
-            WHERE cat_class IN (' . USERCLASS_LIST . ') AND item_active=1 AND item_cat = ' . (int) $category .
+            WHERE cat_class IN (' . USERCLASS_LIST . ') AND item_active=1' . $catFilter .
 			$hide_outofstock . '
-            ORDER BY item_order LIMIT ' . $this->from . ',' . $this->perPage,
+            ORDER BY ' . $order . ' LIMIT ' . $this->from . ',' . $this->perPage,
 			true
 		))
 		{
@@ -2684,7 +2980,7 @@ class vstore
 
 		$count = e107::getDb()->foundRows();
 
-		$categoryRow = $this->categories[$category];
+		$categoryRow = $category > 0 ? $this->categories[$category] : array();
 
 		$tp = e107::getParser();
 		$this->sc->setVars($categoryRow);
@@ -2905,6 +3201,72 @@ class vstore
 
 
 	/**
+	 * Split the cart lines into the kinds that exist: products for purchase and quote products.
+	 *
+	 * @param array $data cart lines (getCartData())
+	 * @return string[] 'sale' and/or 'quote'
+	 */
+	private function cartKinds(array $data)
+	{
+		$kinds = array();
+
+		foreach($data as $row)
+		{
+			$kinds[Catalog::isQuotePrice($row['item_price']) ? 'quote' : 'sale'] = true;
+		}
+
+		return array_values(array_intersect(array('sale', 'quote'), array_keys($kinds)));
+	}
+
+	/**
+	 * Price one kind of cart lines. In a cart with both kinds the totals carry cart_scoped
+	 * so the checkout button posts the kind that has to be processed.
+	 *
+	 * @param array  $data  cart lines
+	 * @param string $kind  'sale' or 'quote'
+	 * @param bool   $mixed true when the cart has both kinds
+	 * @return array|null checkout data, null when there is nothing of that kind
+	 */
+	private function checkoutDataFor(array $data, $kind, $mixed)
+	{
+		$checkout = $this->prepareCheckoutData($data, false, true, $kind);
+
+		if(!is_array($checkout))
+		{
+			return null;
+		}
+
+		$checkout['totals']['cart_scoped'] = $mixed;
+
+		return $checkout;
+	}
+
+	/**
+	 * Start the checkout of the purchase lines or of the quote lines of the cart and go to the checkout page.
+	 *
+	 * @param string $kind 'sale' or 'quote'
+	 * @return void
+	 */
+	private function startCheckout($kind)
+	{
+		$data = $this->getCartData();
+
+		if(!$data)
+		{
+			return;
+		}
+
+		$checkout = $this->checkoutDataFor($data, $kind, false);
+
+		if($checkout)
+		{
+			$this->setCheckoutData($checkout);
+			e107::redirect(e107::url('vstore', 'checkout'));
+			exit;
+		}
+	}
+
+	/**
 	 * Render the cart
 	 *
 	 * @return string
@@ -2917,40 +3279,72 @@ class vstore
 			return e107::getMessage()->addInfo(LAN_VSTORE_FR_CART_EMPTY, 'vstore')->render('vstore');
 		}
 
-		$checkoutData = $this->prepareCheckoutData($data);
+		$kinds = $this->cartKinds($data);
+		$mixed = count($kinds) > 1;
+		$sections = array();
 
-		if(!is_array($checkoutData))
+		foreach($kinds as $kind)
 		{
-			return $checkoutData;
+			if($checkout = $this->checkoutDataFor($data, $kind, $mixed))
+			{
+				$sections[$kind] = $checkout;
+			}
+		}
+
+		if(!$sections)
+		{
+			return e107::getMessage()->addInfo(LAN_VSTORE_FR_CART_EMPTY, 'vstore')->render('vstore');
 		}
 
 		$tp = e107::getParser();
 		$frm = e107::getForm();
 		$template = e107::getTemplate('vstore', 'vstore_cart');
 
-		$text = $frm->open('cart', 'post', e107::url('vstore', 'cart'));
+		$text = '<div class="vstore vstore-cart-page">' . $frm->open('cart', 'post', e107::url('vstore', 'cart'));
 
 		$text .= e107::getMessage()->render('vstore');
 
 		$text .= '<div class="row">
                 <div class="col-sm-12 col-md-12">';
 
-		$text .= $tp->parseTemplate($template['start'], true, $this->sc);
-
-		foreach($checkoutData['items'] as $row)
+		foreach($sections as $kind => $checkoutData)
 		{
-			$this->sc->setVars($row);
-			$text .= $tp->parseTemplate($template['item'], true, $this->sc);
+			// A quote request uses the quote_* parts of the template (no prices); a theme without them keeps the standard ones
+			$isQuote = ($kind === 'quote');
+			$part = function($key) use ($template, $isQuote)
+			{
+				return ($isQuote && isset($template['quote_' . $key])) ? $template['quote_' . $key] : $template[$key];
+			};
+
+			if($mixed)
+			{
+				$text .= '<h4 class="vstore-cart-section vstore-cart-section-' . $kind . '">' . ($isQuote ? LAN_VSTORE_FR_CART_QUOTE_LINES : LAN_VSTORE_FR_CART_SALE_LINES) . '</h4>';
+			}
+
+			$text .= $tp->parseTemplate($part('start'), true, $this->sc);
+
+			foreach($checkoutData['items'] as $row)
+			{
+				$this->sc->setVars($row);
+				$text .= $tp->parseTemplate($part('item'), true, $this->sc);
+			}
+
+			$this->sc->setVars($checkoutData['totals']);
+
+			$text .= $tp->parseTemplate($part('end'), true, $this->sc);
+
+			if($mixed && $kind === 'sale')
+			{
+				$text .= '<hr />';
+			}
 		}
 
-		$this->sc->setVars($checkoutData['totals']);
-
-		$text .= $tp->parseTemplate($template['end'], true, $this->sc);
 		$text .= '</div></div>';
 
-		$text .= $frm->close();
+		$text .= $frm->close() . '</div>';
 
-		$this->setCheckoutData($checkoutData);
+		// A direct visit to the checkout page uses the purchase lines, or the quote lines when there is nothing to buy
+		$this->setCheckoutData(isset($sections['sale']) ? $sections['sale'] : $sections['quote']);
 
 		return $text;
 	}
@@ -2962,9 +3356,11 @@ class vstore
 	 *
 	 * @param array $data item list or the checkoutdata array
 	 * @param boolean $isCheckoutData true if $data is of type checkout data
+	 * @param boolean $fromSitelink true when called for the cart menu (an empty cart returns null)
+	 * @param string|null $only 'sale' or 'quote' keeps only that kind of lines, null keeps all of them
 	 * @return array
 	 */
-	public function prepareCheckoutData($data, $isCheckoutData = false, $fromSitelink = false)
+	public function prepareCheckoutData($data, $isCheckoutData = false, $fromSitelink = false, $only = null)
 	{
 		$sql = e107::getDb();
 		$cust = (array) vstore::getCustomerData();
@@ -2981,7 +3377,12 @@ class vstore
 		$hasCoupon = false;
 		$posted = isset($this->post['cart_coupon_code']) ? trim($this->post['cart_coupon_code']) : null;
 
-		if(!$isCheckoutData && !empty($posted))
+		if($only === 'quote')
+		{
+			// Quote lines take no coupon
+			$couponCode = '';
+		}
+		elseif(!$isCheckoutData && !empty($posted))
 		{
 			$this->post['cart_coupon_code'] = $posted;
 			$couponCode = $posted;
@@ -3027,18 +3428,36 @@ class vstore
 		{
 			if(!$this->isItemActive($row['cart_item']))
 			{
-				e107::getMessage()->addWarning(sprintf(LAN_VSTORE_MSG_ITEM_REMOVED, $row['item_name']), 'vstore');
+				static $warned = array();
+				if(!isset($warned[$row['cart_id']]))
+				{
+					$warned[$row['cart_id']] = true;
+					e107::getMessage()->addWarning(sprintf(LAN_VSTORE_MSG_ITEM_REMOVED, $row['item_name']), 'vstore');
+				}
 				$sql->delete('vstore_cart', 'cart_id=' . (int) $row['cart_id'] . ' AND cart_item=' . (int) $row['cart_item']);
 				continue;
 			}
 
 			$row['itemvarstring'] = '';
+
+			// A product without a price is a quote request line: no price, shipping or tax (checkout rows keep the flag)
+			if(!isset($row['is_quote']))
+			{
+				$row['is_quote'] = Catalog::isQuotePrice($row['item_price']);
+			}
+
+			if($row['is_quote'])
+			{
+				$row['item_price'] = 0;
+				$row['item_shipping'] = 0;
+			}
+
 			if(!empty($row['cart_item_vars']))
 			{
 				$varinfo = self::getItemVarProperties($row['cart_item_vars'], $row['item_price']);
 				if($varinfo)
 				{
-					if(!$isCheckoutData)
+					if(!$isCheckoutData && !$row['is_quote'])
 					{
 						$row['item_price'] += $varinfo['price'];
 					}
@@ -3047,6 +3466,28 @@ class vstore
 			}
 
 			$rows[] = $row;
+		}
+
+		// Purchase and quote lines share the cart: the checkout works with one kind at a time
+		if($only !== null)
+		{
+			$wantQuote = ($only === 'quote');
+
+			$rows = array_values(array_filter($rows, function($row) use ($wantQuote)
+			{
+				return !empty($row['is_quote']) === $wantQuote;
+			}));
+		}
+
+		// Only a cart made of quote lines only is a quote request
+		$isQuote = !empty($rows);
+		foreach($rows as $row)
+		{
+			if(empty($row['is_quote']))
+			{
+				$isQuote = false;
+				break;
+			}
 		}
 
 		if(count($rows) == 0)
@@ -3065,11 +3506,19 @@ class vstore
 
 		$custCountry = !empty($cust['country']) ? $cust['country'] : varset($session['customer_country'], '');
 
+		if($isQuote)
+		{
+			// No coupon, shipping, tax or VAT lookup for a quote request
+			$coupon = null;
+			$vatId = '';
+			$pref['shipping'] = 0;
+		}
+
 		$calc = self::checkoutService()->calculate($rows, $coupon ?: null, array(
 			'country'     => $custCountry,
 			'vat_id'      => $vatId,
 			// The net view is only for sales without tax: a VAT ID of another EU country that VIES accepts
-			'is_business' => self::taxService()->isReverseCharge($custCountry, $pref, $vatId),
+			'is_business' => !$isQuote && self::taxService()->isReverseCharge($custCountry, $pref, $vatId),
 			'is_local'    => $isLocal,
 			'user_id'     => USERID,
 		), $pref);
@@ -3079,11 +3528,14 @@ class vstore
 			self::addResultMessage($message);
 		}
 
+		$calc['totals']['is_quote'] = $isQuote;
+
 		return array(
-			'id'     => $id,
-			'coupon' => $calc['totals']['cart_coupon'],
-			'items'  => $calc['items'],
-			'totals' => $calc['totals'],
+			'id'       => $id,
+			'is_quote' => $isQuote,
+			'coupon'   => $calc['totals']['cart_coupon'],
+			'items'    => $calc['items'],
+			'totals'   => $calc['totals'],
 		);
 	}
 
@@ -4103,6 +4555,35 @@ class vstore
 	public static function validInvoiceOrderState($order_status)
 	{
 		return (new InvoiceNumberService())->isValidState($order_status);
+	}
+
+	/** Dashboard ids from this value up are order ids: quotes and unpaid orders have no invoice number to be found by. */
+	const ORDER_VIEW_OFFSET = 1000000000;
+
+	/**
+	 * Id used in the dashboard links of an order: its invoice number, or the order id plus ORDER_VIEW_OFFSET without one.
+	 *
+	 * @param array $order row of vstore_orders
+	 * @return int
+	 */
+	public static function orderViewId(array $order)
+	{
+		$nr = (int) varset($order['order_invoice_nr']);
+
+		return $nr > 0 ? $nr : self::ORDER_VIEW_OFFSET + (int) varset($order['order_id']);
+	}
+
+	/**
+	 * SQL condition that finds an order of the dashboard by the id of orderViewId().
+	 *
+	 * @param int $id
+	 * @return string
+	 */
+	public static function orderViewWhere($id)
+	{
+		$id = (int) $id;
+
+		return ($id >= self::ORDER_VIEW_OFFSET ? 'order_id=' . ($id - self::ORDER_VIEW_OFFSET) : 'order_invoice_nr=' . $id) . ' AND order_e107_user=' . (int) USERID;
 	}
 
 	/**

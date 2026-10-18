@@ -105,8 +105,8 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 
 				$this.keyup(function ()
 				{
-					$("#cart-qty-submit").show(0);
-					$("#cart-checkout").hide(0);
+					$(".cart-qty-submit").show(0);
+					$(".cart-checkout").hide(0);
 				});
 			});
 		}
@@ -116,6 +116,128 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 	 * add item to cart via ajax
 	 * @type {{attach: e107.behaviors.vstoreCartAdd.attach}}
 	 */
+	var vstoreReduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+	/**
+	 * A copy of the product picture flies to the cart icon; done() runs when it lands.
+	 */
+	function vstoreFlyToCart($btn, done)
+	{
+		var $target = $('#vstore-cart-icon:visible').first();
+		if (!$target.length)
+		{
+			$target = $('.navbar-toggler:visible').first();
+		}
+
+		var $src = $btn.closest('article, .vstore-pv').find('img:visible').first();
+		if (!$src.length)
+		{
+			$src = $btn;
+		}
+
+		if (vstoreReduceMotion || !$target.length || !$src[0].animate)
+		{
+			done();
+			return;
+		}
+
+		var from = $src[0].getBoundingClientRect();
+		var to = $target[0].getBoundingClientRect();
+		var size = Math.max(40, Math.min(72, from.width / 2));
+		var left = from.left + from.width / 2 - size / 2;
+		var top = from.top + from.height / 2 - size / 2;
+		var dx = to.left + to.width / 2 - size / 2 - left;
+		var dy = to.top + to.height / 2 - size / 2 - top;
+
+		var $fly = ($src.is('img') ? $('<img alt="">').attr('src', $src.attr('src')) : $('<span></span>'))
+			.addClass('vstore-fly')
+			.css({left: left, top: top, width: size, height: size});
+
+		$('body').append($fly);
+
+		var finished = false;
+		var finish = function ()
+		{
+			if (finished)
+			{
+				return;
+			}
+
+			finished = true;
+			$fly.remove();
+			done();
+		};
+
+		var flight = $fly[0].animate([
+			{transform: 'translate(0, 0) scale(1)', opacity: 1},
+			{transform: 'translate(' + (dx * 0.55) + 'px, ' + (dy * 0.55 - 60) + 'px) scale(.85)', opacity: 1, offset: 0.55},
+			{transform: 'translate(' + dx + 'px, ' + dy + 'px) scale(.25)', opacity: 0.25}
+		], {duration: 750, easing: 'cubic-bezier(.45, 0, .55, 1)'});
+
+		flight.onfinish = finish;
+
+		// a hidden tab pauses animations: the counter must still change
+		setTimeout(finish, 1100);
+	}
+
+	/**
+	 * The cart icon and its counter pulse once.
+	 */
+	function vstoreBumpCart()
+	{
+		if (vstoreReduceMotion)
+		{
+			return;
+		}
+
+		var $icon = $('#vstore-cart-icon');
+		$icon.removeClass('vstore-cart-bump');
+		void $icon[0].offsetWidth; // restart the animation
+		$icon.addClass('vstore-cart-bump');
+		setTimeout(function () { $icon.removeClass('vstore-cart-bump'); }, 900);
+	}
+
+	/**
+	 * The button shows a check for a moment.
+	 */
+	function vstoreButtonAdded($btn, label)
+	{
+		if ($btn.data('vstoreHtml') === undefined)
+		{
+			$btn.data('vstoreHtml', $btn.html());
+		}
+
+		$btn.addClass('is-added').html('<i class="fa fa-check" aria-hidden="true"></i> ').append($('<span></span>').text(label));
+
+		clearTimeout($btn.data('vstoreTimer'));
+		$btn.data('vstoreTimer', setTimeout(function ()
+		{
+			$btn.removeClass('is-added').html($btn.data('vstoreHtml'));
+			$btn.removeData('vstoreHtml');
+		}, 1800));
+	}
+
+	/**
+	 * Small message with a link to the cart, announced to screen readers.
+	 */
+	function vstoreToast(text, linkText, url)
+	{
+		$('.vstore-toast').remove();
+
+		var $toast = $('<div class="vstore vstore-toast" role="status" aria-live="polite"></div>')
+			.append('<i class="fa fa-check-circle" aria-hidden="true"></i> ')
+			.append($('<span></span>').text(text))
+			.append($('<a></a>').attr('href', url).text(linkText));
+
+		$('body').append($toast);
+		setTimeout(function () { $toast.addClass('is-visible'); }, 20);
+		setTimeout(function ()
+		{
+			$toast.removeClass('is-visible');
+			setTimeout(function () { $toast.remove(); }, 400);
+		}, 3800);
+	}
+
 	e107.behaviors.vstoreCartAdd = {
 		attach: function (context, settings)
 		{
@@ -168,19 +290,31 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 							$('#vstore-cart-dropdown').html(msg);
 							var itemcount = $('#vstore-item-count').val();
 							if (itemcount <= 0) itemcount = 0;
-							if ($('#vstore-cart-icon .badge').length>0)
+
+							var cartText = e107.settings.vstore.cart;
+							vstoreButtonAdded($btn, cartText.added);
+							vstoreToast(cartText.addedtext, cartText.viewcart, cartText.url);
+
+							// the counter changes when the picture lands on the cart icon
+							vstoreFlyToCart($btn, function ()
 							{
-								$('#vstore-cart-icon .badge').html(itemcount);
-							}
-							else if ($('#vstore-cart-icon .badge-pill').length>0)
-							{
-								$('#vstore-cart-icon .badge-pill').html(itemcount);
-							}
+								if ($('#vstore-cart-icon .badge').length>0)
+								{
+									$('#vstore-cart-icon .badge').html(itemcount);
+								}
+								else if ($('#vstore-cart-icon .badge-pill').length>0)
+								{
+									$('#vstore-cart-icon .badge-pill').html(itemcount);
+								}
+								$('#vstore-cart-icon').addClass('active');
+								vstoreBumpCart();
+							});
+
 							$('li.dropdown.vstore-storecart').addClass('open');
 							return;
 						}
-						else {
-							$btn.removeClass('btn-success').addClass('disabled btn-default').html(e107.settings.vstore.cart.outofstock);
+                                                else {
+							$btn.removeClass("btn-success btn-primary").addClass("disabled btn-default btn-secondary").html(e107.settings.vstore.cart.outofstock);
 						}
 						// Print our any (error) message
 						// $('#uiAlert').html(msg);
@@ -241,12 +375,15 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 					var inStock = vstoreCheckInventory(itemid, varid, itemvars);
 					if (inStock)
 					{
-						$('.vstore-add-item-' + itemid).removeClass('btn-default disabled').addClass('btn-success').html('<span class="glyphicon glyphicon-shopping-cart"></span> ' + settings.vstore.cart.addtocart);
+						$('.vstore-add-item-' + itemid).removeClass('btn-default disabled').each(function(){
+							var $b = $(this), label = $b.data('vstore-label'); // quote buttons keep their caption
+							$b.addClass(label ? 'btn-primary' : 'btn-success').html('<span class="glyphicon glyphicon-shopping-cart"></span> ' + (label ? label : settings.vstore.cart.addtocart));
+						});
 						$('.vstore-item-avail-' + itemid).removeClass('label-danger').addClass('label-success').html(settings.vstore.cart.available);
 					}
 					else
 					{
-						$('.vstore-add-item-' + itemid).removeClass('btn-success').addClass('btn-default disabled').html(settings.vstore.cart.outofstock);
+						$('.vstore-add-item-' + itemid).removeClass('btn-success btn-primary').addClass('btn-default btn-secondary disabled').html(settings.vstore.cart.outofstock);
 						$('.vstore-item-avail-' + itemid).removeClass('label-success').addClass('label-danger').html(settings.vstore.cart.outofstock);
 					}
 

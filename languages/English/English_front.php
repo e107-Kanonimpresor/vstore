@@ -17,4 +17,7 @@ return array(
 	'LAN_VSTORE_003'           => 'Out of Stock',
 	'LAN_VSTORE_MENU_PRODUCTS'   => 'Products',
 	'LAN_VSTORE_MENU_CATEGORIES' => 'Vstore Categories',
+	'LAN_VSTORE_FR_ADDED_SHORT' => 'Added',
+	'LAN_VSTORE_FR_ADDED_TO_CART' => 'Added to your cart',
+	'LAN_VSTORE_FR_VIEW_CART' => 'View cart',
 );

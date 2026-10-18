@@ -8,7 +8,7 @@
 
 ---
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/e107-Kanonimpresor/vstore/releases/tag/v2.0.0)
+[![Version](https://img.shields.io/badge/version-2.1.0-blue)](https://github.com/e107-Kanonimpresor/vstore/releases/tag/v2.1.0)
 ![e107](https://img.shields.io/badge/e107-2.3.2%2B-green)
 [![PHP](https://img.shields.io/badge/PHP-7.4%20a%208.4-purple.svg)](https://php.net)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-3%20%7C%205-purple)
@@ -66,6 +66,8 @@
 - **Control de stock** por producto y por variación (`-1` para ilimitado)
 - **Galerías de imágenes** con zoom, vídeos y archivos descargables
 - **Productos relacionados**
+- **Tienda en Bootstrap 5**: mosaicos de categoría, tarjetas de producto, barra de categorías bajo el breadcrumb, menús y carrito rediseñados, adaptable a móvil y personalizable con variables CSS (2.1.0)
+- **Modo presupuesto** (2.1.0): un producto con el precio vacío muestra un botón "Presupuesto"; los productos de compra y de presupuesto comparten carrito (cada tipo se tramita por separado y el presupuesto solo lista productos y cantidades) y la solicitud se guarda como presupuesto (Presupuesto solicitado → Migrado a la app → Aprobado → Facturado) y se envía por correo al cliente y a la tienda
 - **URLs amigables** para SEO
 - **Integración con la búsqueda** de e107
 
@@ -93,7 +95,14 @@
 
 ---
 
-## 🆕 Novedades de la v2.0.0
+## 🆕 Novedades de la v2.1.0
+
+- **Modo presupuesto**: los productos sin precio se piden como presupuesto, en el mismo carrito que los productos a la venta.
+- **Tienda rediseñada** para Bootstrap 5: mosaicos de categoría, tarjetas de producto, barra de categorías, menús, carrito, checkout con resumen del pedido y panel del cliente con cifras y gráfico.
+- **Efecto al añadir al carrito**: el producto vuela al icono del carrito, el contador pulsa y un aviso ofrece ir al carrito.
+- **Administración**: nueva tarjeta de *presupuestos* en las estadísticas y filtro *Presupuestos* en los pedidos.
+
+## Novedades anteriores: v2.0.0
 
 - Administración y tienda **totalmente traducibles** (español, inglés y portugués).
 - **Mollie MB WAY y Multibanco**, teléfono enviado a Mollie, **webhook** de Mollie y botón *Comprobar el pago en Mollie*.
@@ -124,7 +133,7 @@
 ### Pasos de instalación
 
 1. **Obtenga el plugin**
-   - **Paquete de la versión (recomendado)**: descargue `vstore-2.0.0.zip` desde la [página de Releases](https://github.com/e107-Kanonimpresor/vstore/releases) y extráigalo en `e107_plugins/` (ya incluye `vendor/`).
+   - **Paquete de la versión (recomendado)**: descargue `vstore-2.1.0.zip` desde la [página de Releases](https://github.com/e107-Kanonimpresor/vstore/releases) y extráigalo en `e107_plugins/` (ya incluye `vendor/`).
    - **Desde el código fuente**:
      ```bash
      cd e107_plugins
@@ -298,7 +307,7 @@ Este proyecto se distribuye bajo la **Licencia Pública General de GNU v3.0** - 
 - [x] Mollie MB WAY y Multibanco, facturas PDF integradas, IVA de la UE reescrito, nuevo diseño de correos
 
 ### 🚧 En Desarrollo
-- [ ] Modo **presupuesto** de producto: si deja el precio vacío, el producto muestra un botón "Presupuesto / Quote / Orçamento" en lugar de "Añadir al carrito"
+- [x] Modo **presupuesto** de producto (2.1.0): si deja el precio vacío, el producto muestra un botón "Presupuesto / Quote / Orçamento" en lugar de "Añadir al carrito"; los presupuestos se guardan en el administrador para pasarlos después a una app de facturación certificada
 - [ ] Más mejoras de los correos
 - [ ] Más idiomas (traducciones de la comunidad)
 - [ ] Integración con aplicación móvil

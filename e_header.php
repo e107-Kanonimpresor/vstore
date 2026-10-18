@@ -31,6 +31,9 @@ if(deftrue('USER_AREA'))
 				? LAN_VSTORE_003
 				: $vstore_prefs['caption_outofstock'][e_LANGUAGE],
 			'available'  => LAN_VSTORE_002,
+			'added'      => LAN_VSTORE_FR_ADDED_SHORT,
+			'addedtext'  => LAN_VSTORE_FR_ADDED_TO_CART,
+			'viewcart'   => LAN_VSTORE_FR_VIEW_CART,
 		),
 		'ImageZoom' => array('url' => '')
 	)

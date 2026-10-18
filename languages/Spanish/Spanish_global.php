@@ -17,12 +17,17 @@ define("LAN_VSTORE_STATUS_H", "En espera");
 define("LAN_VSTORE_STATUS_C", "Completado");
 define("LAN_VSTORE_STATUS_X", "Cancelado");
 define("LAN_VSTORE_STATUS_R", "Reembolsado");
+define("LAN_VSTORE_STATUS_Q", "Presupuesto solicitado");
+define("LAN_VSTORE_STATUS_M", "Migrado a la app");
+define("LAN_VSTORE_STATUS_A", "Presupuesto aprobado");
+define("LAN_VSTORE_STATUS_F", "Facturado");
 
 // Tipos de email
 define("LAN_VSTORE_EMAILTYPE_DEFAULT", "Confirmación del pedido");
 define("LAN_VSTORE_EMAILTYPE_COMPLETED", "Pedido completado");
 define("LAN_VSTORE_EMAILTYPE_CANCELLED", "Pedido cancelado");
 define("LAN_VSTORE_EMAILTYPE_REFUNDED", "Pedido reembolsado");
+define("LAN_VSTORE_EMAILTYPE_QUOTE", "Solicitud de presupuesto");
 
 // Unidades de peso
 define("LAN_VSTORE_WEIGHT_G", "Gramos");
