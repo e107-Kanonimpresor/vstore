@@ -25,6 +25,11 @@ $vst = new vstore_sitelink;
 e107::lan('vstore', false, true);
 $caption = LAN_VSTORE_MENU_CATEGORIES;
 
+if (isset($parm) && is_array($parm) && !empty($parm['caption']))
+{
+    $caption = $tp->toHTML($parm['caption'], false, 'TITLE');
+}
+
 $items = $vst->storeCategoryNav();
 
 $template = e107::getTemplate('vstore', 'vstore_menu', 'categories');

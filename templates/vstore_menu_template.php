@@ -51,3 +51,41 @@
 		</li>
     ';
 
+        // Product showcase (menu area): pills plus one panel of product cards per pill.
+        // [bracketed] tokens are replaced by vstore::showcase(); the cards use $VSTORE_TEMPLATE['list']['item'].
+        $VSTORE_MENU_TEMPLATE['showcase']['start'] = '
+    <div id="[id]" class="vstore vstore-showcase vstore-cols-[cols]">
+    ';
+
+        $VSTORE_MENU_TEMPLATE['showcase']['end'] = '
+    </div>
+    ';
+
+        $VSTORE_MENU_TEMPLATE['showcase']['nav_start'] = '
+        <nav class="vstore-catbar" aria-label="{LAN=LAN_VSTORE_FR_BROWSE_CATEGORIES}">
+            <ul class="vstore-catbar-list">
+    ';
+
+        $VSTORE_MENU_TEMPLATE['showcase']['nav_item'] = '
+                <li>
+                    <a href="[url]" class="vstore-pill[active]"[attr]>
+                        <span class="vstore-pill-name">[name]</span>
+                        <span class="vstore-pill-count">[count]</span>
+                    </a>
+                </li>
+    ';
+
+        $VSTORE_MENU_TEMPLATE['showcase']['nav_end'] = '
+            </ul>
+        </nav>
+    ';
+
+        $VSTORE_MENU_TEMPLATE['showcase']['panel_start'] = '
+        <div class="vstore-showcase-panel" data-vs-panel="[id]"[hidden]>
+            <div class="vstore-grid vstore-showcase-grid">
+    ';
+
+        $VSTORE_MENU_TEMPLATE['showcase']['panel_end'] = '
+            </div>
+        </div>
+    ';

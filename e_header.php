@@ -35,7 +35,12 @@ if(deftrue('USER_AREA'))
 			'addedtext'  => LAN_VSTORE_FR_ADDED_TO_CART,
 			'viewcart'   => LAN_VSTORE_FR_VIEW_CART,
 		),
-		'ImageZoom' => array('url' => '')
+		'gallery'   => array(
+			'enlarge' => LAN_VSTORE_FR_ENLARGE,
+			'close'   => LAN_VSTORE_FR_CLOSE,
+			'prev'    => LAN_VSTORE_FR_PREV_IMAGE,
+			'next'    => LAN_VSTORE_FR_NEXT_IMAGE,
+		),
 	)
 	));
 

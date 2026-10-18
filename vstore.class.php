@@ -3032,6 +3032,191 @@ class vstore
 
 
 	/**
+	 * Product showcase for the menu areas (vstore_showcase_menu.php): product cards of the catalog list,
+	 * optionally with category pills that switch between one panel of cards per category.
+	 *
+	 * @param array $o options, see Vstore\Support\ShowcaseOptions::normalize()
+	 * @return string empty when there is nothing to show
+	 */
+	public function showcase(array $o)
+	{
+		static $instance = 0;
+
+		$tp = e107::getParser();
+		$root = (int) $o['category'];
+
+		if($root > 0 && empty($this->categories[$root]))
+		{
+			$root = 0;
+		}
+
+		$cardTemplate = e107::getTemplate('vstore', 'vstore', 'list');
+		$tpl = e107::getTemplate('vstore', 'vstore_menu', 'showcase');
+
+		if(empty($tpl['panel_start']) || empty($cardTemplate['item']))
+		{
+			$VSTORE_MENU_TEMPLATE = array();
+			include e_PLUGIN . 'vstore/templates/vstore_menu_template.php';
+			$tpl = $VSTORE_MENU_TEMPLATE['showcase'];
+		}
+
+		$all = $this->showcaseCards($this->showcaseCategoryIds($root), $o, $root === 0, $cardTemplate['item']);
+
+		if($all['html'] === '')
+		{
+			return '';
+		}
+
+		$groups = array();
+
+		if($o['nav'] !== 'none')
+		{
+			if(!class_exists('vstore_sitelink'))
+			{
+				include_once e_PLUGIN . 'vstore/e_sitelink.php';
+			}
+
+			$groups = (new vstore_sitelink())->storeCategoryNav($root);
+		}
+
+		$parse = function ($html, $vars = array()) use ($tp)
+		{
+			$map = array();
+
+			foreach($vars as $k => $v)
+			{
+				$map['[' . $k . ']'] = $v;
+			}
+
+			return $tp->parseTemplate(strtr($html, $map), true, $this->sc);
+		};
+
+		$filter = ($o['nav'] === 'pills');
+		$text = $parse($tpl['start'], array('id' => 'vstore-showcase-' . (++$instance), 'cols' => $o['columns'] ?: 'auto'));
+
+		if(count($groups) > 1)
+		{
+			$text .= $parse($tpl['nav_start']);
+			$pills = array_merge(array(array(
+				'link_id'    => 0,
+				'link_name'  => LAN_VSTORE_FR_ALL_CATEGORIES,
+				'link_url'   => $root ? e107::url('vstore', 'category', $this->categories[$root]) : e107::url('vstore', 'index'),
+				'link_badge' => $all['total'],
+			)), $groups);
+
+			foreach($pills as $pill)
+			{
+				$text .= $parse($tpl['nav_item'], array(
+					'url'    => $pill['link_url'],
+					'name'   => $pill['link_name'],
+					'count'  => (int) $pill['link_badge'],
+					'active' => $pill['link_id'] === 0 ? ' active' : '',
+					'attr'   => $filter ? ' data-vs-cat="' . (int) $pill['link_id'] . '"' : '',
+				));
+			}
+
+			$text .= $parse($tpl['nav_end']);
+		}
+		else
+		{
+			$groups = array();
+			$filter = false;
+		}
+
+		$text .= $parse($tpl['panel_start'], array('id' => 0, 'hidden' => '')) . $all['html'] . $parse($tpl['panel_end']);
+
+		if($filter)
+		{
+			foreach($groups as $group)
+			{
+				$cards = $this->showcaseCards($this->showcaseCategoryIds((int) $group['link_id']), $o, false, $cardTemplate['item']);
+
+				$text .= $parse($tpl['panel_start'], array('id' => (int) $group['link_id'], 'hidden' => ' hidden'))
+					. $cards['html'] . $parse($tpl['panel_end']);
+			}
+		}
+
+		return $text . $parse($tpl['end']);
+	}
+
+
+	/**
+	 * A category and its subcategories.
+	 *
+	 * @param int $catId 0 = every category (no filter)
+	 * @return int[]
+	 */
+	private function showcaseCategoryIds($catId)
+	{
+		if($catId < 1)
+		{
+			return array();
+		}
+
+		$ids = array($catId);
+
+		foreach($this->categories as $id => $cat)
+		{
+			if((int) $cat['cat_parent'] === $catId)
+			{
+				$ids[] = (int) $id;
+			}
+		}
+
+		return $ids;
+	}
+
+
+	/**
+	 * Product cards of one showcase panel.
+	 *
+	 * @param int[] $catIds empty = every category
+	 * @param array $o showcase options
+	 * @param bool $allCategories true when the panel is not limited to one category (changes the automatic order)
+	 * @param string $itemTemplate card template
+	 * @return array html and total (all matching products, not only the cards shown)
+	 */
+	private function showcaseCards(array $catIds, array $o, $allCategories, $itemTemplate)
+	{
+		$sql = e107::getDb();
+		$tp = e107::getParser();
+
+		$filter = $catIds ? ' AND i.item_cat IN (' . implode(',', array_map('intval', $catIds)) . ')' : '';
+		$stock = varset($this->pref['show_outofstock'], true) ? '' : ' AND i.item_inventory != 0';
+
+		$rows = $sql->retrieve(
+			'SELECT SQL_CALC_FOUND_ROWS i.*, c.cat_class
+			FROM #vstore_items i
+			LEFT JOIN #vstore_cat c ON (i.item_cat = c.cat_id)
+			WHERE c.cat_class IN (' . USERCLASS_LIST . ') AND i.item_active = 1' . $filter . $stock . '
+			ORDER BY ' . Vstore\Support\ShowcaseOptions::orderSql($o['order'], $allCategories) . '
+			LIMIT ' . (int) $o['limit'],
+			true
+		);
+
+		if(empty($rows))
+		{
+			return array('html' => '', 'total' => 0);
+		}
+
+		$total = (int) $sql->foundRows();
+		$html = '';
+
+		foreach($rows as $row)
+		{
+			$row['cat_id'] = $row['item_cat'];
+			$row['cat_sef'] = varset($this->categories[$row['item_cat']]['cat_sef']);
+			$row['item_sef'] = eHelper::title2sef($row['item_name'], 'dashl');
+
+			$this->sc->setVars($row);
+			$html .= $tp->parseTemplate($itemTemplate, true, $this->sc);
+		}
+
+		return array('html' => $html, 'total' => $total);
+	}
+
+
+	/**
 	 * Render a single product/item
 	 *
 	 * @param integer $id item_id

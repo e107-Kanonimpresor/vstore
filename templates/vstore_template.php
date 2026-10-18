@@ -94,7 +94,7 @@ $VSTORE_TEMPLATE['menu']['end'] =  '</div>';
 $VSTORE_TEMPLATE['item']['main']        = '{SETIMAGE: w=900&h=720&crop=1}
 											<div class="vstore vstore-product-view vstore-pv">
 												<div class="vstore-pv-gallery">
-													<div class="vstore-pv-main vstore-zoom">
+													<div class="vstore-pv-main">
 														<span class="vstore-badges">{ITEM_BADGES}</span>
 														{ITEM_PIC: item=0&link=1}
 													</div>

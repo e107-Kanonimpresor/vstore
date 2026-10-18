@@ -56,6 +56,11 @@ $num_items = vartrue($vstore_prefs['menu_item_count'], 2);
 e107::lan('vstore', false, true);
 $caption = LAN_VSTORE_MENU_PRODUCTS;
 
+if (isset($parm) && is_array($parm) && !empty($parm['caption']))
+{
+    $caption = e107::getParser()->toHTML($parm['caption'], false, 'TITLE');
+}
+
 $text = $vst->productList($category, false, 'menu', $num_items);
 
 

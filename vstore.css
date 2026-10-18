@@ -2045,6 +2045,196 @@
 }
 
 
+/* ------------------------------------------------------ product gallery */
+
+.vstore-pv-main img {
+	transition: transform .5s var(--vs-ease);
+}
+
+.vstore-pv-main:hover img {
+	transform: scale(1.03);
+}
+
+.vstore-pv-expand {
+	position: absolute;
+	right: .85rem;
+	bottom: .85rem;
+	z-index: 2;
+	display: inline-grid;
+	place-items: center;
+	width: 2.4rem;
+	height: 2.4rem;
+	border-radius: 50%;
+	background: rgba(15, 17, 23, .62);
+	color: #fff;
+	font-size: .95rem;
+	opacity: .85;
+	pointer-events: none;
+	transition: opacity .25s, transform .25s var(--vs-ease);
+}
+
+.vstore-pv-main:hover .vstore-pv-expand {
+	opacity: 1;
+	transform: scale(1.1);
+}
+
+.vstore-pv-thumb.is-active {
+	border-color: var(--vs-accent);
+}
+
+html.vstore-lb-open {
+	overflow: hidden;
+}
+
+.vstore-lb {
+	position: fixed;
+	inset: 0;
+	z-index: 2200;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1rem;
+	background: rgba(8, 10, 16, .92);
+	opacity: 0;
+	transition: opacity .25s ease;
+}
+
+@supports (backdrop-filter: blur(6px)) {
+	.vstore-lb {
+		background: rgba(8, 10, 16, .82);
+		backdrop-filter: blur(8px);
+	}
+}
+
+.vstore-lb.is-open {
+	opacity: 1;
+}
+
+.vstore-lb-stage {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: .75rem;
+	max-width: min(calc(100vw - 9rem), 1500px);
+	margin: 0;
+}
+
+.vstore-lb-stage img {
+	display: block;
+	width: auto;
+	max-width: 100%;
+	height: auto;
+	max-height: 82vh;
+	border-radius: 1rem;
+	background: rgba(255, 255, 255, .06);
+	box-shadow: 0 2rem 4rem -1rem rgba(0, 0, 0, .7);
+	transform: scale(.96);
+	transition: transform .3s var(--vs-ease), opacity .25s;
+}
+
+.vstore-lb.is-open .vstore-lb-stage img {
+	transform: none;
+}
+
+.vstore-lb.is-loading .vstore-lb-stage img {
+	opacity: .35;
+}
+
+.vstore-lb-stage figcaption {
+	color: rgba(255, 255, 255, .85);
+	font-size: .9rem;
+	text-align: center;
+}
+
+.vstore-lb-close,
+.vstore-lb-prev,
+.vstore-lb-next {
+	position: absolute;
+	z-index: 2;
+	display: inline-grid;
+	place-items: center;
+	width: 3rem;
+	height: 3rem;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, .14);
+	color: #fff;
+	font-size: 1.1rem;
+	line-height: 1;
+	transition: background .25s, transform .25s var(--vs-ease);
+}
+
+.vstore-lb-close:hover,
+.vstore-lb-prev:hover,
+.vstore-lb-next:hover {
+	background: rgba(255, 255, 255, .28);
+}
+
+.vstore-lb-close:focus-visible,
+.vstore-lb-prev:focus-visible,
+.vstore-lb-next:focus-visible {
+	outline: 2px solid #fff;
+	outline-offset: 2px;
+}
+
+.vstore-lb-close {
+	top: 1rem;
+	right: 1rem;
+}
+
+.vstore-lb-prev {
+	left: 1rem;
+	top: 50%;
+	margin-top: -1.5rem;
+}
+
+.vstore-lb-next {
+	right: 1rem;
+	top: 50%;
+	margin-top: -1.5rem;
+}
+
+.vstore-lb-prev:hover,
+.vstore-lb-next:hover {
+	transform: scale(1.08);
+}
+
+.vstore-lb.is-single .vstore-lb-prev,
+.vstore-lb.is-single .vstore-lb-next {
+	display: none;
+}
+
+@media (max-width: 575.98px) {
+	.vstore-lb-prev,
+	.vstore-lb-next {
+		top: auto;
+		bottom: 1rem;
+		margin-top: 0;
+	}
+
+	.vstore-lb-stage {
+		max-width: 100%;
+	}
+
+	.vstore-lb-stage img {
+		max-height: 72vh;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.vstore-lb,
+	.vstore-lb-stage img,
+	.vstore-pv-main img {
+		transition: none;
+	}
+
+	.vstore-pv-main:hover img {
+		transform: none;
+	}
+}
+
+
 /* ------------------------------------------------------------- small screens */
 
 @media (max-width: 767.98px) {
@@ -2178,3 +2368,39 @@
 
 /* Fix for Boostrap 4 */
 .s-message.fade                             { opacity: 1 !important; visibility: inherit; }
+
+
+/* --------------------------------------------------------- showcase menu */
+
+.vstore-showcase {
+	container-type: inline-size;
+}
+
+.vstore-showcase-panel[hidden] {
+	display: none;
+}
+
+.vstore-showcase .vstore-catbar {
+	margin-bottom: 1.25rem;
+}
+
+.vstore-cols-1 .vstore-showcase-grid { grid-template-columns: minmax(0, 1fr); }
+.vstore-cols-2 .vstore-showcase-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.vstore-cols-3 .vstore-showcase-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.vstore-cols-4 .vstore-showcase-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* the columns follow the width of the menu area, not of the screen */
+@container (max-width: 46rem) {
+	.vstore-cols-3 .vstore-showcase-grid,
+	.vstore-cols-4 .vstore-showcase-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@container (max-width: 28rem) {
+	.vstore-cols-2 .vstore-showcase-grid,
+	.vstore-cols-3 .vstore-showcase-grid,
+	.vstore-cols-4 .vstore-showcase-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}

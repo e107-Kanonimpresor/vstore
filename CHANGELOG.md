@@ -5,6 +5,8 @@ All notable changes to the Vstore e-commerce plugin will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
 ## [2.1.0] - 2026-10-18
 
 ### Added
@@ -22,11 +24,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Checkout redesign** with the same style as the rest of the store: progress steps (cart, details, summary), cards for the billing and shipping forms, selectable payment tiles, a sticky **order summary** beside the forms (products with picture, coupon, tax and total; products and quantities only for a quote) and a review page in cards. New template parts `checkout/steps`, `checkout/layout` and `checkout/aside_*` in `vstore_template.php`; `customer/guest`, `customer/header`, `shipping/header`, `orderconfirm/*`, `confirm_items/*` and `order_items/*` were rebuilt.
 - **Customer dashboard redesign**: greeting with avatar, pill navigation and a landing page with four summary boxes (orders, total spent, in progress, open quotes), a bar chart of the purchases of the last six months, the latest orders and shortcuts. Order list, order detail and downloads use the new panels and status badges (`vstore-badge`). New template parts `dashboard`, `kpi`, `chart/*`, `recent/*` and `quick` in `vstore_dashboard_template.php`.
 - **Add-to-cart effect**: a copy of the product picture flies to the cart icon, the counter changes when it lands and the icon pulses, the button shows a check for a moment and a message with a link to the cart is announced to screen readers. `prefers-reduced-motion` skips the movement. New strings `LAN_VSTORE_FR_ADDED_SHORT`, `LAN_VSTORE_FR_ADDED_TO_CART` and `LAN_VSTORE_FR_VIEW_CART`.
+- **Admin stylesheet** `css/vstore_admin.css` (Bootstrap 3 admin, selectors scoped under `.vstore-guide` and `.vstore-about`), loaded only by the Guide and About tabs. Same component set as the sitedown_styles and booking plugins: overview header, flow bar, feature cards, example cards, numbered steps, status table, troubleshooting list.
+- **Product showcase menu** (`vstore_showcase_menu.php`, options in `e_menu.php` like the FAQs menu of KeyHub): product cards with the look of the product pages for any menu area. Menu Manager options: caption, category (**All categories** shows random products, or one category with its subcategories), number of products (1-24), products per row (1 to 4 or automatic, the grid also drops columns when the menu area is narrow, via container queries), order (automatic, random, newest, name, price, manual) and category pills (filter in place with one panel per pill, links to the category page, or none). Option parsing and the ORDER BY whitelist live in `Vstore\Support\ShowcaseOptions` (13 new tests); `vstore::showcase()` renders it and `storeCategoryNav($parent)` can list the subcategories of a category. New template parts `showcase` in `vstore_menu_template.php` (the cards reuse `$VSTORE_TEMPLATE['list']['item']`), language file `admin_menu` (EN/ES/PT) and a Menus section in the Appearance tab of the guide.
+- The product and category menus have a **Caption** option in the Menu Manager (through the same `e_menu.php`).
+- **User Guide rewritten and restyled** (EN/ES/PT): new tabs **Overview**, **Quotes**, **Appearance** and **Credits** (authors, libraries used, thanks, licence); Quick start as numbered steps; the Catalog tab explains the image gallery and the price field (price, 0, empty); Orders lists the ten statuses with the names of the global language file (`{LAN_VSTORE_STATUS_*}` are resolved by the controller); Troubleshooting covers the members-only store links and stale CSS/JS after an update.
+- **About tab redesigned**: identity card with version and release date, description with feature list and changelog link, plugin information, credits, support buttons and licence footer. New shortcodes `VSTORE_ABOUT_RELEASED`, `VSTORE_ABOUT_COMPAT` and `VSTORE_ABOUT_CHANGELOG_URL`.
+
+### Changed
+- **Product pictures open in a lightbox instead of the hover zoom.** The hover zoom (`jquery.zoom`, removed) laid a second, enlarged copy over the picture, which looked like two pictures moving. A click on the picture now opens it centred on the page, uncropped, with arrows, keyboard (Esc, left and right arrows), swipe on touch screens, a counter, focus kept inside the dialog and the page scroll locked (`vstoreLightbox` in `js/vstore.js`, styles `.vstore-lb*`). Respects `prefers-reduced-motion`. New strings `LAN_VSTORE_FR_ENLARGE`, `LAN_VSTORE_FR_CLOSE`, `LAN_VSTORE_FR_PREV_IMAGE` and `LAN_VSTORE_FR_NEXT_IMAGE`.
 
 ### Fixed
 - The customer dashboard could not open or cancel a quote request or an order without invoice number (the link used the invoice number): the links now carry `vstore::orderViewId()` and the lookup `vstore::orderViewWhere()`. The invoice column shows "-" instead of `IN000000` for them.
 - The product menu showed `0.00` as price: the variation price was applied even when no variation had been priced (`sc_item_price()`).
 - The category menu listed a single category because `url()` and `toHTML()` ran queries while the result was still being read (`storeCategoryNav()`).
+- Clicking a thumbnail of the product page replaced the main picture with the 200px thumbnail, which looked blurred. It now uses the picture of the page size, and the link of every picture holds a large version (`{ITEM_PIC: link=1}` and `{ITEM_THUMBS}`).
 
 ## [2.0.0] - 2026-10-17
 

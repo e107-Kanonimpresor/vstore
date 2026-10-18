@@ -67,6 +67,7 @@ O **Vstore** é um plugin de comércio eletrónico para o CMS Bootstrap [e107 v2
 - **Galerias de imagens** com zoom, vídeos e ficheiros para download
 - **Produtos relacionados**
 - **Loja em Bootstrap 5**: mosaicos de categoria, cartões de produto, barra de categorias sob o breadcrumb, menus e carrinho redesenhados, adaptável a telemóvel e personalizável com variáveis CSS (2.1.0)
+- **Menu montra** (2.1.0): `vstore_showcase_menu` mostra cartões de produto em qualquer área de menu, com opções no Gestor de menus: todas as categorias (aleatório) ou uma categoria, quantidade de produtos, de uma a quatro colunas, ordem e pílulas de categorias que filtram no próprio menu
 - **Modo orçamento** (2.1.0): um produto com o preço vazio mostra um botão "Orçamento"; os produtos de compra e de orçamento partilham o carrinho (cada tipo é tratado em separado e o orçamento só lista produtos e quantidades) e o pedido fica guardado como orçamento (Orçamento solicitado → Migrado para a app → Aprovado → Faturado) e é enviado por e-mail ao cliente e à loja
 - **URLs amigáveis** para SEO
 - **Integração com a pesquisa** do e107

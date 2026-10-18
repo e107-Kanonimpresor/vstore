@@ -78,6 +78,7 @@ trait vstore_admin_common
 	public function AboutPage()
 	{
 		e107::lan('vstore', 'admin_about', true);
+		e107::css('vstore', 'css/vstore_admin.css');
 
 		$tmpl = e107::getTemplate('vstore', 'vstore_about', 'body');
 		$body = $this->_resolveLans((string) $tmpl, 'LAN_PLUGIN_VSTORE_ABOUT_');
@@ -96,6 +97,7 @@ trait vstore_admin_common
 	public function GuidePage()
 	{
 		e107::lan('vstore', 'admin_help', true);
+		e107::css('vstore', 'css/vstore_admin.css');
 
 		$tp = e107::getParser();
 		$sc = e107::getScBatch('vstore_guide', 'vstore');
@@ -106,13 +108,14 @@ trait vstore_admin_common
 		{
 			$name = strtoupper($key);
 			$html = $this->_resolveLans($html, 'LAN_VSTORE_GUIDE_' . $name . '_');
+			$html = $this->_resolveLans($html, 'LAN_VSTORE_STATUS_');
 			$tabs['guide-' . $key] = array(
 				'caption' => defset('LAN_VSTORE_GUIDE_' . $name . '_TAB', $name),
 				'text'    => $tp->parseTemplate($html, true, $sc),
 			);
 		}
 
-		return e107::getForm()->tabs($tabs);
+		return '<div class="vstore-guide">' . e107::getForm()->tabs($tabs) . '</div>';
 	}
 
 	/**

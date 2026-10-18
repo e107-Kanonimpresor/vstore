@@ -17,7 +17,12 @@ return array(
 	'LAN_VSTORE_003'           => 'Esgotado',
 	'LAN_VSTORE_MENU_PRODUCTS'   => 'Produtos',
 	'LAN_VSTORE_MENU_CATEGORIES' => 'Categorias do Vstore',
+	'LAN_VSTORE_MENU_SHOWCASE'   => 'Produtos em destaque',
 	'LAN_VSTORE_FR_ADDED_SHORT' => 'Adicionado',
 	'LAN_VSTORE_FR_ADDED_TO_CART' => 'Adicionado ao seu carrinho',
 	'LAN_VSTORE_FR_VIEW_CART' => 'Ver carrinho',
+	'LAN_VSTORE_FR_ENLARGE' => 'Ampliar imagem',
+	'LAN_VSTORE_FR_CLOSE' => 'Fechar',
+	'LAN_VSTORE_FR_PREV_IMAGE' => 'Imagem anterior',
+	'LAN_VSTORE_FR_NEXT_IMAGE' => 'Imagem seguinte',
 );

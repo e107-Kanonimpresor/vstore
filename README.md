@@ -67,6 +67,7 @@
 - **Image galleries** with zoom, product videos and downloadable files
 - **Related products**
 - **Bootstrap 5 storefront**: category tiles, product cards, category bar under the breadcrumb, redesigned menus and cart, responsive and themable with CSS variables (2.1.0)
+- **Showcase menu** (2.1.0): `vstore_showcase_menu` shows product cards in any menu area, with options in the Menu Manager: all categories (random) or one category, number of products, one to four columns, order and category pills that filter in place
 - **Quote mode** (2.1.0): a product with an empty price shows a "Quote" button; purchases and quote products share the cart (each kind is checked out on its own, the quote lists only products and quantities) and the request is saved as a quote (Quote request → Migrated to app → Approved → Invoiced) and e-mailed to the customer and the shop
 - **SEO-friendly URLs**
 - **Search integration** with the e107 search

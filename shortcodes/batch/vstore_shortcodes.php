@@ -880,19 +880,26 @@
 			return e107::url('vstore', 'category', array('cat_sef' => $this->var['cat_sef']));
 		}
 
-		function sc_item_pic($parm=null)
+		/** Paths of the pictures of the current product (videos and other files are left out). */
+		protected function itemImagePaths()
 		{
-			$index = (!empty($parm['item'])) ? (int) $parm['item'] : 0; // intval($parm);
-			$ival = e107::unserialize($this->var['item_pic']);
-
 			$images = array();
-			foreach((array) $ival as $i)
+
+			foreach((array) e107::unserialize($this->var['item_pic']) as $i)
 			{
 				if(!empty($i['path']) && $this->tp->isImage($i['path']))
 				{
 					$images[] = $i['path'];
 				}
 			}
+
+			return $images;
+		}
+
+		function sc_item_pic($parm=null)
+		{
+			$index = (!empty($parm['item'])) ? (int) $parm['item'] : 0; // intval($parm);
+			$images = $this->itemImagePaths();
 
 			if(!isset($images[$index]))
 			{
@@ -908,10 +915,10 @@
 
 			if(!empty($parm['link']))
 			{
-				$parm['scale']= '3x';
-				$link = $this->tp->thumbUrl($path, $parm);
-				unset($parm['scale'],$parm['link']);
-				$pre = "<a href='".$link."' data-standard='".$this->tp->thumbUrl($path, $parm)."'>";
+				// The link holds the large picture for the lightbox, data-standard the one shown on the page
+				$link = $this->tp->thumbUrl($path, array('w' => 1600));
+				unset($parm['link']);
+				$pre = "<a href='".$link."' data-standard='".$this->tp->thumbUrl($path, $parm)."' aria-label='".LAN_VSTORE_FR_ENLARGE."'>";
 				$post = "</a>";
 
 			}
@@ -927,30 +934,24 @@
 
 		/**
 		 * Thumbnail strip of the product page: only when the product has more than one picture.
-		 * The links keep the data-standard attribute that js/vstore.js uses to swap the main picture.
+		 * Each link holds the large picture (href) and the one shown on the page (data-standard); js/vstore.js swaps and enlarges them.
 		 */
 		function sc_item_thumbs($parm=null)
 		{
-			$count = 0;
+			$images = $this->itemImagePaths();
 
-			foreach((array) e107::unserialize($this->var['item_pic']) as $i)
-			{
-				if(!empty($i['path']) && $this->tp->isImage($i['path']))
-				{
-					$count++;
-				}
-			}
-
-			if($count < 2)
+			if(count($images) < 2)
 			{
 				return '';
 			}
 
 			$text = '<div class="vstore-pv-thumbs thumbnails">';
 
-			for($n = 0; $n < min($count, 8); $n++)
+			foreach(array_slice($images, 0, 12) as $path)
 			{
-				$text .= '<div class="vstore-pv-thumb">' . $this->sc_item_pic(array('item' => $n, 'link' => 1, 'w' => 200, 'h' => 200, 'crop' => 1, 'class' => 'thumbnail img-fluid', 'placeholder' => 0)) . '</div>';
+				$thumb = $this->tp->toImage($path, array('w' => 200, 'h' => 200, 'crop' => 1, 'class' => 'thumbnail img-fluid'));
+
+				$text .= '<div class="vstore-pv-thumb"><a href="' . $this->tp->thumbUrl($path, array('w' => 1600)) . '" data-standard="' . $this->tp->thumbUrl($path, array()) . '" aria-label="' . LAN_VSTORE_FR_ENLARGE . '">' . $thumb . '</a></div>';
 			}
 
 			return $text . '</div>';

@@ -67,6 +67,7 @@
 - **Galerías de imágenes** con zoom, vídeos y archivos descargables
 - **Productos relacionados**
 - **Tienda en Bootstrap 5**: mosaicos de categoría, tarjetas de producto, barra de categorías bajo el breadcrumb, menús y carrito rediseñados, adaptable a móvil y personalizable con variables CSS (2.1.0)
+- **Menú escaparate** (2.1.0): `vstore_showcase_menu` muestra tarjetas de producto en cualquier área de menú, con opciones en el Gestor de menús: todas las categorías (aleatorio) o una categoría, cantidad de productos, de una a cuatro columnas, orden y píldoras de categorías que filtran en el mismo menú
 - **Modo presupuesto** (2.1.0): un producto con el precio vacío muestra un botón "Presupuesto"; los productos de compra y de presupuesto comparten carrito (cada tipo se tramita por separado y el presupuesto solo lista productos y cantidades) y la solicitud se guarda como presupuesto (Presupuesto solicitado → Migrado a la app → Aprobado → Facturado) y se envía por correo al cliente y a la tienda
 - **URLs amigables** para SEO
 - **Integración con la búsqueda** de e107

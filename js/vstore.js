@@ -4,10 +4,170 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 {
 	'use strict';
 
+
 	/**
-	 * Zoom object.
+	 * Lightbox: the picture opens centred on the page, with arrows, keyboard and swipe.
 	 */
-	e107.ImageZoom = null;
+	var vstoreLightbox = (function ()
+	{
+		var $box = null;
+		var $img = null;
+		var $caption = null;
+		var items = [];
+		var index = 0;
+		var opener = null;
+		var onChange = null;
+		var touchX = null;
+
+		function text(key)
+		{
+			return (e107.settings.vstore.gallery || {})[key] || '';
+		}
+
+		function button(cls, label, icon)
+		{
+			return $('<button type="button"></button>')
+				.addClass(cls)
+				.attr('aria-label', label)
+				.html('<i class="fa ' + icon + '" aria-hidden="true"></i>');
+		}
+
+		function go(i)
+		{
+			index = (i + items.length) % items.length;
+
+			var item = items[index];
+
+			$box.addClass('is-loading');
+			$img.attr('src', item.large).attr('alt', item.alt);
+			$caption.text(item.alt ? item.alt + ' (' + (index + 1) + '/' + items.length + ')' : (index + 1) + ' / ' + items.length);
+
+			// the next and the previous picture load in the background
+			[index + 1, index - 1].forEach(function (n)
+			{
+				var near = items[(n + items.length) % items.length];
+				if (near && near.large !== item.large)
+				{
+					new Image().src = near.large;
+				}
+			});
+
+			if (onChange)
+			{
+				onChange(index);
+			}
+		}
+
+		function close()
+		{
+			if (!$box)
+			{
+				return;
+			}
+
+			$(document).off('keydown.vstoreLightbox');
+			$('html').removeClass('vstore-lb-open');
+			$box.removeClass('is-open');
+
+			var $closing = $box;
+			setTimeout(function () { $closing.remove(); }, 250);
+			$box = null;
+
+			if (opener)
+			{
+				opener.focus();
+			}
+		}
+
+		function keys(e)
+		{
+			if (e.key === 'Escape')
+			{
+				close();
+			}
+			else if (e.key === 'ArrowRight' && items.length > 1)
+			{
+				go(index + 1);
+			}
+			else if (e.key === 'ArrowLeft' && items.length > 1)
+			{
+				go(index - 1);
+			}
+			else if (e.key === 'Tab')
+			{
+				// the focus stays inside the dialog
+				var $focusable = $box.find('button:visible');
+				var pos = $focusable.index(document.activeElement);
+
+				if (e.shiftKey && pos <= 0)
+				{
+					$focusable.last().focus();
+					e.preventDefault();
+				}
+				else if (!e.shiftKey && pos === $focusable.length - 1)
+				{
+					$focusable.first().focus();
+					e.preventDefault();
+				}
+			}
+		}
+
+		function build()
+		{
+			$img = $('<img alt="">').on('load error', function () { $box.removeClass('is-loading'); });
+			$caption = $('<figcaption></figcaption>');
+
+			$box = $('<div class="vstore vstore-lb" role="dialog" aria-modal="true"></div>')
+				.attr('aria-label', text('enlarge'))
+				.append(button('vstore-lb-close', text('close'), 'fa-times').on('click', close))
+				.append(button('vstore-lb-prev', text('prev'), 'fa-chevron-left').on('click', function () { go(index - 1); }))
+				.append($('<figure class="vstore-lb-stage"></figure>').append($img, $caption))
+				.append(button('vstore-lb-next', text('next'), 'fa-chevron-right').on('click', function () { go(index + 1); }))
+				.on('click', function (e)
+				{
+					// a click on the dark area closes it
+					if ($(e.target).is('.vstore-lb, .vstore-lb-stage'))
+					{
+						close();
+					}
+				})
+				.on('touchstart', function (e) { touchX = e.originalEvent.touches[0].clientX; })
+				.on('touchend', function (e)
+				{
+					var dx = e.originalEvent.changedTouches[0].clientX - touchX;
+
+					if (touchX !== null && Math.abs(dx) > 50 && items.length > 1)
+					{
+						go(index + (dx < 0 ? 1 : -1));
+					}
+					touchX = null;
+				});
+		}
+
+		return {
+			/**
+			 * @param {Array} list items with large (url) and alt
+			 * @param {number} start index of the first picture
+			 * @param {Function} changed called with the index when the picture changes
+			 * @param {Element} from element that gets the focus back on close
+			 */
+			open: function (list, start, changed, from)
+			{
+				items = list;
+				onChange = changed;
+				opener = from;
+
+				build();
+				$box.toggleClass('is-single', items.length < 2);
+				$('body').append($box);
+				$('html').addClass('vstore-lb-open');
+				go(start);
+
+				$(document).on('keydown.vstoreLightbox', keys);
+				setTimeout(function () { $box.addClass('is-open'); $box.find('.vstore-lb-close').focus(); }, 20);
+			}
+		};
+	}());
 
 	/**
 	 * Namespace for vstore related settings.
@@ -15,79 +175,100 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 	e107.settings.vstore = e107.settings.vstore || {};
 
 	/**
-	 * Default settings for Zoom.
+	 * Product gallery: the thumbnails change the main picture and a click on it opens the lightbox.
+	 * @type {{attach: e107.behaviors.vstoreGallery.attach}}
 	 */
-	e107.settings.vstore.ImageZoom = e107.settings.vstore.ImageZoom || {
-		url: false,
-		on: 'mouseover',
-		duration: 120,
-		target: false,
-		touch: true,
-		magnify: 1,
-		callback: function ()
-		{
-			// TODO colorbox support?
-		},
-		onZoomIn: function ()
-		{
-		},
-		onZoomOut: function ()
-		{
-		}
-	};
-
-	/**
-	 * @type {{attach: e107.behaviors.vstoreImageZoom.attach}}
-	 */
-	e107.behaviors.vstoreImageZoom = {
+	e107.behaviors.vstoreGallery = {
 		attach: function (context, settings)
 		{
-			$(context).find('.vstore-zoom').one('vstore-image-zoom').each(function ()
+			$(context).find('.vstore-pv-gallery').one('vstore-gallery').each(function ()
 			{
-				var $this = $(this);
+				var $main = $(this).find('.vstore-pv-main');
+				var $mainLink = $main.find('a').first();
+				var $thumbs = $(this).find('.vstore-pv-thumb a');
 
-				if(typeof $.fn.zoom !== 'undefined')
+				if (!$mainLink.length)
 				{
-					e107.ImageZoom = $this;
-					e107.settings.vstore.ImageZoom.url = $this.find('img:first').attr('src');
-					e107.ImageZoom.zoom(e107.settings.vstore.ImageZoom);
+					return;
 				}
+
+				var items = [];
+				var $sources = $thumbs.length ? $thumbs : $mainLink;
+
+				$sources.each(function ()
+				{
+					var $a = $(this);
+
+					items.push({
+						large: $a.attr('href'),
+						main: $a.data('standard'),
+						alt: $a.find('img').attr('alt') || ''
+					});
+				});
+
+				var current = 0;
+
+				function show(i)
+				{
+					current = i;
+
+					// the picture shown on the page is the medium one, never the small thumbnail
+					$main.find('img').first().attr('src', items[i].main).removeAttr('srcset');
+					$mainLink.attr('href', items[i].large);
+					$thumbs.parent().removeClass('is-active').eq(i).addClass('is-active');
+				}
+
+				$thumbs.each(function (i)
+				{
+					$(this).on('click', function (e)
+					{
+						e.preventDefault();
+						show(i);
+					});
+				});
+
+				$mainLink.on('click', function (e)
+				{
+					e.preventDefault();
+					vstoreLightbox.open(items, current, show, $mainLink[0]);
+				});
+
+				$thumbs.parent().first().addClass('is-active');
+				$main.append('<span class="vstore-pv-expand" aria-hidden="true"><i class="fa fa-expand"></i></span>');
 			});
 		}
 	};
 
 	/**
-	 * @type {{attach: e107.behaviors.vstoreThumbnail.attach}}
+	 * Product showcase menu: the category pills show the matching panel instead of leaving the page.
+	 * Without JavaScript the pills are plain links to the category pages.
 	 */
-	e107.behaviors.vstoreThumbnail = {
+	e107.behaviors.vstoreShowcase = {
 		attach: function (context, settings)
 		{
-			$(context).find('.thumbnails a').one('vstore-thumbnail').each(function ()
+			$(context).find('.vstore-showcase').one('vstore-showcase').each(function ()
 			{
-				$(this).click(function ()
+				var $box = $(this);
+				var $pills = $box.find('.vstore-pill[data-vs-cat]');
+
+				if (!$pills.length)
 				{
-					var $this = $(this);
+					return;
+				}
 
-					var newSrc = $this.data('standard');
-					var newSrcSet = $this.attr('href');
+				$pills.on('click', function (e)
+				{
+					e.preventDefault();
 
-					var $images = $('.vstore-zoom img');
-					var $links = $('.vstore-zoom a');
+					var cat = String($(this).data('vs-cat'));
 
-					$images.attr('src', newSrc);
-					$images.attr('srcset', newSrcSet);
+					$pills.removeClass('active').removeAttr('aria-current');
+					$(this).addClass('active').attr('aria-current', 'true');
 
-					$links.attr('href', newSrcSet);
-					$links.attr('data-standard', newSrc);
-
-					// Change URL in Zoom settings.
-					e107.settings.vstore.ImageZoom.url = newSrcSet;
-					// Destroy Zoom object.
-					e107.ImageZoom.trigger('zoom.destroy');
-					// Re-init Zoom with new settings.
-					e107.ImageZoom.zoom(e107.settings.vstore.ImageZoom);
-
-					return false;
+					$box.find('.vstore-showcase-panel').each(function ()
+					{
+						$(this).prop('hidden', String($(this).data('vs-panel')) !== cat);
+					});
 				});
 			});
 		}

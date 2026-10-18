@@ -11,8 +11,6 @@ if (!defined('e107_INIT'))
 	require_once("../../class2.php");
 }
 
-e107::js('vstore', 'js/jquery.zoom.min.js');
-
 /// Moved to e_header.php issue #146 ///
 // e107::js('vstore', 'js/vstore.js');
 // e107::lan('vstore', false, true); // e107_plugins/vstore/languages/English_front.php

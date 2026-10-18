@@ -27,6 +27,21 @@ class plugin_vstore_vstore_about_shortcodes extends e_shortcode
 		return htmlspecialchars($this->v('version'), ENT_QUOTES);
 	}
 
+	public function sc_vstore_about_released()
+	{
+		return htmlspecialchars($this->v('released'), ENT_QUOTES);
+	}
+
+	public function sc_vstore_about_compat()
+	{
+		return htmlspecialchars($this->v('compatibility'), ENT_QUOTES);
+	}
+
+	public function sc_vstore_about_changelog_url()
+	{
+		return htmlspecialchars($this->v('changelog'), ENT_QUOTES);
+	}
+
 	public function sc_vstore_about_year()
 	{
 		return date('Y');

@@ -888,5 +888,21 @@ $pdfData = (string) @file_get_contents($pdfFile);
 check('pdf file created', array(substr($pdfData, 0, 5), strlen($pdfData) > 1000, strpos($pdfData, '%%EOF') !== false), array('%PDF-', true, true));
 @unlink($pdfFile);
 
+echo "Showcase menu options\n";
+use Vstore\Support\ShowcaseOptions;
+check('defaults', ShowcaseOptions::normalize(array()), array('caption' => '', 'category' => 0, 'limit' => 6, 'columns' => 3, 'order' => 'auto', 'nav' => 'pills'));
+check('values are clamped', ShowcaseOptions::normalize(array('limit' => '99', 'columns' => '9', 'category' => '-4')), array('caption' => '', 'category' => 0, 'limit' => 24, 'columns' => 4, 'order' => 'auto', 'nav' => 'pills'));
+check('limit 0 falls back to the default', ShowcaseOptions::normalize(array('limit' => '0'))['limit'], 6);
+check('columns auto', ShowcaseOptions::normalize(array('columns' => 'auto'))['columns'], 0);
+check('unknown order and nav are rejected', array(ShowcaseOptions::normalize(array('order' => 'id; DROP TABLE x'))['order'], ShowcaseOptions::normalize(array('nav' => 'tabs'))['nav']), array('auto', 'pills'));
+check('known values are kept', ShowcaseOptions::normalize(array('order' => 'price_desc', 'nav' => 'none', 'category' => '7', 'caption' => ' Shop ')), array('caption' => 'Shop', 'category' => 7, 'limit' => 6, 'columns' => 3, 'order' => 'price_desc', 'nav' => 'none'));
+check('parse array', ShowcaseOptions::parse(array('limit' => 4)), array('limit' => 4));
+check('parse json', ShowcaseOptions::parse('{"limit":"4","nav":"links"}'), array('limit' => '4', 'nav' => 'links'));
+check('parse key=value lines', ShowcaseOptions::parse("limit=4\nnav=none"), array('limit' => '4', 'nav' => 'none'));
+check('parse empty', ShowcaseOptions::parse(''), array());
+check('auto order: random for all, manual for a category', array(ShowcaseOptions::orderSql('auto', true), ShowcaseOptions::orderSql('auto', false)), array('RAND()', 'i.item_order ASC, i.item_id ASC'));
+check('order clauses', array(ShowcaseOptions::orderSql('newest', false), ShowcaseOptions::orderSql('name', true), ShowcaseOptions::orderSql('bogus', true)), array('i.item_id DESC', 'i.item_name ASC', 'i.item_order ASC, i.item_id ASC'));
+check('quote products (no price) sort last by price', ShowcaseOptions::orderSql('price_asc', true), '(i.item_price IS NULL) ASC, i.item_price ASC');
+
 echo "\n$total checks, $failures failed\n";
 exit($failures ? 1 : 0);

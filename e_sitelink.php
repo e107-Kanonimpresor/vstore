@@ -81,9 +81,10 @@ class vstore_sitelink // include plugin-folder in the name.
 	 * Top level categories with the number of products they hold (their subcategories included),
 	 * for the category menu and the category bar of the catalog pages.
 	 *
+	 * @param int $parent 0 = top level categories, otherwise the subcategories of this category
 	 * @return array rows for {MENU_CAT}: link_id, link_name, link_url, link_image, link_badge
 	 */
-	function storeCategoryNav()
+	function storeCategoryNav($parent = 0)
 	{
 		$sql = e107::getDb();
 		$tp  = e107::getParser();
@@ -98,7 +99,7 @@ class vstore_sitelink // include plugin-folder in the name.
 				AND (i.item_cat = c.cat_id OR i.item_cat IN (SELECT s.cat_id FROM #vstore_cat s WHERE s.cat_parent = c.cat_id))
 			) AS items_count
 			FROM #vstore_cat c
-			WHERE c.cat_parent = 0 AND c.cat_class IN (' . USERCLASS_LIST . ')
+			WHERE c.cat_parent = ' . (int) $parent . ' AND c.cat_class IN (' . USERCLASS_LIST . ')
 			ORDER BY c.cat_order, c.cat_name', true);
 
 		// All rows are read first: url() and toHTML() run queries on the same connection

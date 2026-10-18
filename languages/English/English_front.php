@@ -17,7 +17,12 @@ return array(
 	'LAN_VSTORE_003'           => 'Out of Stock',
 	'LAN_VSTORE_MENU_PRODUCTS'   => 'Products',
 	'LAN_VSTORE_MENU_CATEGORIES' => 'Vstore Categories',
+	'LAN_VSTORE_MENU_SHOWCASE'   => 'Featured products',
 	'LAN_VSTORE_FR_ADDED_SHORT' => 'Added',
 	'LAN_VSTORE_FR_ADDED_TO_CART' => 'Added to your cart',
 	'LAN_VSTORE_FR_VIEW_CART' => 'View cart',
+	'LAN_VSTORE_FR_ENLARGE' => 'Enlarge image',
+	'LAN_VSTORE_FR_CLOSE' => 'Close',
+	'LAN_VSTORE_FR_PREV_IMAGE' => 'Previous image',
+	'LAN_VSTORE_FR_NEXT_IMAGE' => 'Next image',
 );

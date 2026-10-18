@@ -1,0 +1,427 @@
+/**
+ * Vstore - Admin About and User Guide stylesheet.
+ *
+ * Loaded by vstore_admin_common::GuidePage() / AboutPage().
+ * Same architecture as the sitedown_styles and booking plugins:
+ *   - Every selector is prefixed with .vstore-guide (or .vstore-about) to avoid collisions.
+ *   - Uses the Bootstrap 3 markup produced by $frm->tabs() (.tab-pane, .table, .alert).
+ *   - Palette: #337ab7 (primary), #333 (text), #555 (muted), #fff (cards), same as the e107 admin theme.
+ */
+
+/* ── User Guide — Base Text Color ── */
+.vstore-guide .tab-pane {
+	color: #333;
+}
+
+/* ── User Guide — Tab Content ── */
+.vstore-guide .tab-content {
+	padding: 20px 15px;
+	border: 1px solid #ddd;
+	border-top: 0;
+	border-radius: 0 0 4px 4px;
+	background: #fff;
+}
+
+/* ── User Guide — Headings ── */
+.vstore-guide .tab-pane h4 {
+	margin-top: 0;
+	color: #333;
+	border-bottom: 2px solid #337ab7;
+	padding-bottom: 8px;
+	margin-bottom: 15px;
+}
+
+.vstore-guide .tab-pane h5 {
+	color: #555;
+	margin-top: 18px;
+}
+
+/* ── User Guide — Text & Lists ── */
+.vstore-guide .tab-pane p {
+	line-height: 1.7;
+}
+
+.vstore-guide .tab-pane ul,
+.vstore-guide .tab-pane ol {
+	padding-left: 20px;
+}
+
+.vstore-guide .tab-pane li {
+	margin-bottom: 5px;
+}
+
+/* ── User Guide — Tables ── */
+.vstore-guide .table {
+	margin-top: 10px;
+	background: #fff;
+	color: #333;
+}
+
+.vstore-guide .table th,
+.vstore-guide .table td {
+	color: #333 !important;
+	border-color: #dee2e6 !important;
+}
+
+.vstore-guide .table th {
+	background: #f5f5f5;
+}
+
+.vstore-guide .table code {
+	color: #c7254e;
+	background: #f9f2f4;
+}
+
+/* ── User Guide — Alerts ── */
+.vstore-guide .alert {
+	margin-top: 15px;
+}
+
+/* ── User Guide — Overview Header ── */
+.vstore-guide .bg-overview-header {
+	background: linear-gradient(135deg, #337ab7 0%, #265d8c 100%);
+	color: #fff;
+	padding: 28px 24px 22px;
+	border-radius: 6px;
+	margin-bottom: 24px;
+}
+
+.vstore-guide .bg-overview-header h4 {
+	color: #fff;
+	border-bottom-color: rgba(255,255,255,.35);
+	margin-bottom: 10px;
+}
+
+.vstore-guide .bg-overview-intro {
+	color: rgba(255,255,255,.9);
+	font-size: 14px;
+	margin-bottom: 0;
+}
+
+/* ── User Guide — Flow Bar ── */
+.vstore-guide .bg-flow-bar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 16px 10px;
+	background: #f8f9fa;
+	border: 1px solid #e9ecef;
+	border-radius: 6px;
+	margin-bottom: 28px;
+	flex-wrap: wrap;
+}
+
+.vstore-guide .bg-flow-step {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.vstore-guide .bg-flow-num {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	background: #337ab7;
+	color: #fff;
+	border-radius: 50%;
+	font-weight: 700;
+	font-size: 13px;
+	flex-shrink: 0;
+}
+
+.vstore-guide .bg-flow-label {
+	font-size: 13px;
+	font-weight: 600;
+	color: #333;
+}
+
+.vstore-guide .bg-flow-arrow {
+	color: #adb5bd;
+	font-size: 18px;
+	font-weight: 700;
+}
+
+/* ── User Guide — Section Title ── */
+.vstore-guide .bg-section-title {
+	color: #333;
+	font-size: 16px;
+	font-weight: 700;
+	border-bottom: 2px solid #337ab7;
+	padding-bottom: 6px;
+	margin: 28px 0 16px;
+}
+
+.vstore-guide .bg-section-title i {
+	margin-right: 6px;
+	color: #337ab7;
+}
+
+/* ── User Guide — Feature Cards ── */
+.vstore-guide .bg-features-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	gap: 14px;
+	margin-bottom: 28px;
+}
+
+.vstore-guide .bg-feature-card {
+	background: #fff;
+	border: 1px solid #e2e6ea;
+	border-radius: 6px;
+	padding: 16px 14px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	transition: box-shadow .2s ease, border-color .2s ease;
+}
+
+.vstore-guide .bg-feature-card:hover {
+	border-color: #337ab7;
+	box-shadow: 0 2px 8px rgba(51,122,183,.12);
+}
+
+.vstore-guide .bg-feature-icon {
+	font-size: 22px;
+	color: #337ab7;
+	margin-bottom: 4px;
+}
+
+.vstore-guide .bg-feature-card strong {
+	font-size: 13px;
+	color: #333;
+}
+
+.vstore-guide .bg-feature-card span {
+	font-size: 12px;
+	color: #666;
+	line-height: 1.5;
+}
+
+/* ── User Guide — Example Cards ── */
+.vstore-guide .bg-examples-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	gap: 14px;
+	margin-bottom: 28px;
+}
+
+.vstore-guide .bg-example-card {
+	background: #f8f9fa;
+	border: 1px solid #e9ecef;
+	border-left: 4px solid #337ab7;
+	border-radius: 4px;
+	padding: 14px 16px;
+}
+
+.vstore-guide .bg-example-icon {
+	font-size: 20px;
+	color: #337ab7;
+	margin-bottom: 6px;
+}
+
+.vstore-guide .bg-example-card strong {
+	display: block;
+	font-size: 14px;
+	color: #333;
+	margin-bottom: 4px;
+}
+
+.vstore-guide .bg-example-card p {
+	font-size: 12px;
+	color: #555;
+	margin-bottom: 0;
+	line-height: 1.5;
+}
+
+/* ── User Guide — Definition Lists (Troubleshooting) ── */
+.vstore-guide dl {
+	margin-top: 10px;
+}
+
+.vstore-guide dt {
+	font-size: 14px;
+	margin-top: 12px;
+	color: #c9302c;
+}
+
+.vstore-guide dd {
+	margin-left: 15px;
+	margin-bottom: 8px;
+	color: #555;
+}
+
+
+/* ── User Guide — Numbered step cards (quick start) ── */
+.vstore-guide .bg-steps {
+        list-style: none;
+        counter-reset: bg-step;
+        padding: 0;
+        margin: 0 0 24px;
+}
+
+.vstore-guide .bg-steps > li {
+        counter-increment: bg-step;
+        position: relative;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        padding: 12px 14px 12px 54px;
+        margin-bottom: 10px;
+        min-height: 52px;
+}
+
+.vstore-guide .bg-steps > li::before {
+        content: counter(bg-step);
+        position: absolute;
+        left: 14px;
+        top: 12px;
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+        text-align: center;
+        background: #337ab7;
+        color: #fff;
+        border-radius: 50%;
+        font-weight: 700;
+        font-size: 13px;
+}
+
+.vstore-guide .bg-steps > li strong {
+        display: block;
+        color: #333;
+        margin-bottom: 2px;
+}
+
+.vstore-guide .bg-steps > li span {
+        color: #555;
+        font-size: 13px;
+}
+
+/* ── User Guide — Status table (orders) ── */
+.vstore-guide .bg-status-table {
+        margin-bottom: 24px;
+}
+
+.vstore-guide .bg-status-table td:first-child {
+        width: 28%;
+        white-space: nowrap;
+}
+
+/* ── User Guide — Example cards: accent variants ── */
+.vstore-guide .bg-example-card.bg-accent-success { border-left-color: #5cb85c; }
+.vstore-guide .bg-example-card.bg-accent-success .bg-example-icon { color: #5cb85c; }
+.vstore-guide .bg-example-card.bg-accent-warning { border-left-color: #f0ad4e; }
+.vstore-guide .bg-example-card.bg-accent-warning .bg-example-icon { color: #f0ad4e; }
+
+/* ── User Guide — Code samples ── */
+.vstore-guide code {
+        color: #c7254e;
+        background: #f9f2f4;
+}
+
+.vstore-guide .bg-path {
+        display: block;
+        padding: 8px 12px;
+        margin: 8px 0 16px;
+        background: #f5f5f5;
+        border: 1px solid #e3e3e3;
+        border-radius: 4px;
+        font-family: Menlo, Monaco, Consolas, monospace;
+        font-size: 12px;
+        color: #333;
+        word-break: break-all;
+}
+
+/* ── About page ── */
+.vstore-about .vs-about-hero {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+}
+
+.vstore-about .vs-about-hero-icon {
+        flex: 0 0 auto;
+        width: 64px;
+        height: 64px;
+        line-height: 64px;
+        text-align: center;
+        font-size: 30px;
+        color: #fff;
+        background: linear-gradient(135deg, #337ab7 0%, #265d8c 100%);
+        border-radius: 12px;
+}
+
+.vstore-about .vs-about-hero h3 {
+        margin: 0 0 4px;
+}
+
+.vstore-about .vs-about-meta {
+        font-size: 12px;
+        color: #777;
+        text-align: right;
+}
+
+.vstore-about .vs-about-features {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+        list-style: none;
+        padding: 0;
+        margin: 0 0 14px;
+}
+
+.vstore-about .vs-about-features li {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 4px;
+        padding: 8px 12px;
+        font-size: 13px;
+        color: #444;
+}
+
+.vstore-about .vs-about-features li i {
+        color: #337ab7;
+        margin-right: 6px;
+}
+
+.vstore-about .table > tbody > tr > th {
+        width: 30%;
+        color: #555;
+        font-weight: 600;
+}
+
+.vstore-about .vs-about-footer {
+        margin-top: 20px;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+        text-align: center;
+        color: #777;
+        font-size: 12px;
+}
+
+@media (max-width: 767px) {
+        .vstore-about .vs-about-hero { flex-direction: column; align-items: flex-start; }
+        .vstore-about .vs-about-meta { text-align: left; }
+        .vstore-guide .bg-flow-arrow { display: none; }
+}
+
+/* ── Inline emphasis inside cards (the card title rule must not hit it) ── */
+.vstore-guide .bg-example-card p strong,
+.vstore-guide .bg-feature-card span strong,
+.vstore-guide .bg-steps > li span strong {
+        display: inline;
+        font-size: inherit;
+        margin: 0;
+        color: inherit;
+}
+
+/* ── Card icons: own line with space below (the <i> is an inline element) ── */
+.vstore-guide .bg-feature-icon,
+.vstore-guide .bg-example-icon {
+        display: block;
+        line-height: 1;
+        margin-bottom: 10px;
+}
