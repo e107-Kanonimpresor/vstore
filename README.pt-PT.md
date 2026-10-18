@@ -8,7 +8,7 @@
 
 ---
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/e107-Kanonimpresor/vstore/releases/tag/v2.0.0)
+[![Version](https://img.shields.io/badge/version-2.1.0-blue)](https://github.com/e107-Kanonimpresor/vstore/releases/tag/v2.1.0)
 ![e107](https://img.shields.io/badge/e107-2.3.2%2B-green)
 [![PHP](https://img.shields.io/badge/PHP-7.4%20a%208.4-purple.svg)](https://php.net)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-3%20%7C%205-purple)
@@ -66,6 +66,8 @@ O **Vstore** é um plugin de comércio eletrónico para o CMS Bootstrap [e107 v2
 - **Controlo de stock** por produto e por variação (`-1` para ilimitado)
 - **Galerias de imagens** com zoom, vídeos e ficheiros para download
 - **Produtos relacionados**
+- **Loja em Bootstrap 5**: mosaicos de categoria, cartões de produto, barra de categorias sob o breadcrumb, menus e carrinho redesenhados, adaptável a telemóvel e personalizável com variáveis CSS (2.1.0)
+- **Modo orçamento** (2.1.0): um produto com o preço vazio mostra um botão "Orçamento"; os produtos de compra e de orçamento partilham o carrinho (cada tipo é tratado em separado e o orçamento só lista produtos e quantidades) e o pedido fica guardado como orçamento (Orçamento solicitado → Migrado para a app → Aprovado → Faturado) e é enviado por e-mail ao cliente e à loja
 - **URLs amigáveis** para SEO
 - **Integração com a pesquisa** do e107
 
@@ -93,7 +95,14 @@ O **Vstore** é um plugin de comércio eletrónico para o CMS Bootstrap [e107 v2
 
 ---
 
-## 🆕 Novidades da v2.0.0
+## 🆕 Novidades da v2.1.0
+
+- **Modo orçamento**: os produtos sem preço são pedidos como orçamento, no mesmo carrinho que os produtos à venda.
+- **Loja redesenhada** para Bootstrap 5: mosaicos de categoria, cartões de produto, barra de categorias, menus, carrinho, checkout com resumo da encomenda e painel do cliente com valores e gráfico.
+- **Efeito ao adicionar ao carrinho**: o produto voa para o ícone do carrinho, o contador pulsa e uma mensagem oferece o carrinho.
+- **Administração**: nova caixa de *orçamentos* nas estatísticas e filtro *Orçamentos* nas encomendas.
+
+## Novidades anteriores: v2.0.0
 
 - Administração e loja **totalmente traduzíveis** (português, inglês e espanhol).
 - **Mollie MB WAY e Multibanco**, telefone enviado à Mollie, **webhook** da Mollie e botão *Verificar pagamento na Mollie*.
@@ -124,7 +133,7 @@ O **Vstore** é um plugin de comércio eletrónico para o CMS Bootstrap [e107 v2
 ### Passos de instalação
 
 1. **Obtenha o plugin**
-   - **Pacote da versão (recomendado)**: descarregue `vstore-2.0.0.zip` na [página de Releases](https://github.com/e107-Kanonimpresor/vstore/releases) e extraia-o para `e107_plugins/` (já inclui `vendor/`).
+   - **Pacote da versão (recomendado)**: descarregue `vstore-2.1.0.zip` na [página de Releases](https://github.com/e107-Kanonimpresor/vstore/releases) e extraia-o para `e107_plugins/` (já inclui `vendor/`).
    - **A partir do código-fonte**:
      ```bash
      cd e107_plugins
@@ -298,7 +307,7 @@ Este projeto é distribuído sob a **Licença Pública Geral GNU v3.0** - consul
 - [x] Mollie MB WAY e Multibanco, faturas PDF integradas, IVA da UE reescrito, novo design de e-mails
 
 ### 🚧 Em Desenvolvimento
-- [ ] Modo **orçamento** de produto: se deixar o preço vazio, o produto mostra um botão "Orçamento / Quote / Presupuesto" em vez de "Adicionar ao carrinho"
+- [x] Modo **orçamento** de produto (2.1.0): se deixar o preço vazio, o produto mostra um botão "Orçamento / Quote / Presupuesto" em vez de "Adicionar ao carrinho"; os orçamentos ficam guardados na administração para passar depois a uma app de faturação certificada
 - [ ] Mais melhorias nos e-mails
 - [ ] Mais idiomas (traduções da comunidade)
 - [ ] Integração com aplicação móvel

@@ -14,6 +14,9 @@ return array(
 	'LAN_VSTORE_MAIL_CANCELLED_REFUND' => 'Any payment we received from you on this order will be refunded.',
 	'LAN_VSTORE_MAIL_REFUNDED'         => 'The payment for your order #{REF} from {ORDER_DATA: order_date} has just been refunded.',
 	'LAN_VSTORE_MAIL_SUBJECT'          => 'Your Order #[x] at %s',
+	'LAN_VSTORE_MAIL_QUOTE_REF'        => 'Your quote request number is:',
+	'LAN_VSTORE_MAIL_QUOTE_INTRO'      => 'we have received your quote request #{REF} from {ORDER_DATA: order_date}. We will get back to you with a quote for the products below.',
+	'LAN_VSTORE_MAIL_SUBJECT_QUOTE'    => 'Your quote request #[x] at %s',
 
 	'LAN_VSTORE_INV_HTML_LANG'         => 'en',
 	'LAN_VSTORE_INV_TITLE'             => 'Invoice',

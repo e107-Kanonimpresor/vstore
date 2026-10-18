@@ -50,7 +50,7 @@ $vst = new vstore;
 
 
 $vstore_prefs = e107::pref('vstore');
-$category = vartrue($vstore_prefs['menu_cat'], 1);
+$category = isset($vstore_prefs['menu_cat']) && $vstore_prefs['menu_cat'] !== '' ? (int) $vstore_prefs['menu_cat'] : 1;
 $num_items = vartrue($vstore_prefs['menu_item_count'], 2);
 
 e107::lan('vstore', false, true);

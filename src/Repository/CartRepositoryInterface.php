@@ -10,8 +10,8 @@ namespace Vstore\Repository;
 
 interface CartRepositoryInterface
 {
-	/** @return array|null item_active, item_tax_class and item_name, null when the item does not exist */
-	public function getItem($itemId);
+/** @return array|null item_active, item_tax_class and item_name, null when the item does not exist */
+        public function getItem($itemId);
 
 	/**
 	 * @param string      $session  Cart id (cookie)

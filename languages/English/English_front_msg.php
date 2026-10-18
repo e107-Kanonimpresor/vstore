@@ -93,6 +93,8 @@ return array(
 	'LAN_VSTORE_MSG_PDF_PLUGIN'       => 'The PDF library (TCPDF) is not installed!<br/>Vstore needs it to create invoice pdf\'s. Run "composer install" in the folder e107_plugins/vstore.',
 	'LAN_VSTORE_MSG_PDF_FOLDER'       => 'Unable to create invoice user folder!',
 	'LAN_VSTORE_MSG_PDF_NOT_FOUND'    => 'Invoice pdf not found!',
+	'LAN_VSTORE_MSG_QUOTE_SENT'          => 'Your quote request %s has been sent. We have e-mailed you a copy.',
+	'LAN_VSTORE_MSG_LOG_QUOTE_CREATED'   => 'Quote request created.',
 
 	// Shortcodes
 	'LAN_VSTORE_SC_PAID'              => 'Paid',

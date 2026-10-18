@@ -6,6 +6,7 @@
  * @license GPL-3.0 https://www.gnu.org/licenses/gpl-3.0.html
  */
 e107::lan('vstore', 'admin_products', true);
+e107::lan('vstore', 'front_shop', true);
 
 
 	/**
@@ -242,7 +243,27 @@ e107::lan('vstore', 'admin_products', true);
 
 		public function afterCreate($new_data, $old_data, $id)
 		{
-			// do something
+			$this->storeQuotePrice($id);
+		}
+
+		/** An empty price field is a quote product: the number field would store 0, so the column is set to NULL. */
+		private function storeQuotePrice($id)
+		{
+			$blank = false;
+
+			if(isset($_POST['item_price']))
+			{
+				$blank = trim((string) $_POST['item_price']) === '';
+			}
+			elseif(isset($_POST['name'], $_POST['value']) && $_POST['name'] === 'item_price')
+			{
+				$blank = trim((string) $_POST['value']) === '';
+			}
+
+			if($blank)
+			{
+				e107::getDb()->gen('UPDATE `#vstore_items` SET item_price = NULL WHERE item_id = ' . (int) $id);
+			}
 		}
 
 		public function beforeUpdate($new_data, $old_data, $id)
@@ -342,7 +363,7 @@ e107::lan('vstore', 'admin_products', true);
 
 		public function afterUpdate($new_data, $old_data, $id)
 		{
-
+			$this->storeQuotePrice($id);
 		}
 
 		public function onCreateError($new_data, $old_data)
@@ -740,13 +761,14 @@ e107::lan('vstore', 'admin_products', true);
 			switch($mode)
 			{
 				case 'read': // List Page
-					return $curVal . ' ' . $currency;
-					break;
+							return \Vstore\Support\Catalog::isQuotePrice($curVal)
+								? '<span class="label label-info">' . LAN_VSTORE_QUOTE_BUTTON . '</span>'
+								: $curVal . ' ' . $currency;
+							break;
 
-				case 'write': // Edit Page
-					//return $this->text('item_price', $curVal);
-					return $this->number('item_price', $curVal, 10, array('decimals' => 2)) . ' ' . $currency;
-					break;
+						case 'write': // Edit Page
+							//return $this->text('item_price', $curVal);
+							return $this->number('item_price', \Vstore\Support\Catalog::isQuotePrice($curVal) ? '' : $curVal, 10, array('decimals' => 2)) . ' ' . $currency;
 
 				case 'filter':
 				case 'batch':

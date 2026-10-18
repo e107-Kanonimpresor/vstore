@@ -17,4 +17,7 @@ return array(
 	'LAN_VSTORE_003'           => 'Agotado',
 	'LAN_VSTORE_MENU_PRODUCTS'   => 'Productos',
 	'LAN_VSTORE_MENU_CATEGORIES' => 'Categorías de Vstore',
+	'LAN_VSTORE_FR_ADDED_SHORT' => 'Añadido',
+	'LAN_VSTORE_FR_ADDED_TO_CART' => 'Añadido a tu carrito',
+	'LAN_VSTORE_FR_VIEW_CART' => 'Ver carrito',
 );

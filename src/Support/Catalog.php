@@ -60,10 +60,32 @@ final class Catalog
 		'C' => 'Completed',
 		'X' => 'Cancelled',
 		'R' => 'Refunded',
+		'Q' => 'Quote',
+		'M' => 'Migrated',
+		'A' => 'Approved',
+		'F' => 'Invoiced',
 	);
+
+	/** Quote workflow: requested, sent to the external billing app, approved by the customer, invoiced there. */
+	const QUOTE_STATUSES = array('Q', 'M', 'A', 'F');
+
+	/** Gateway value stored in orders that are quote requests. */
+	const QUOTE_GATEWAY = 'quote';
+
+	/** A product without a price (empty, not 0) is offered as a quote request. */
+	public static function isQuotePrice($price)
+	{
+		return $price === null || (is_string($price) && trim($price) === '');
+	}
+
+	public static function isQuoteStatus($status)
+	{
+		return in_array(strtoupper((string) $status), self::QUOTE_STATUSES, true);
+	}
 
 	const EMAIL_TYPES = array(
 		'default'   => 'Order confirmation',
+		'quote'     => 'Quote request',
 		'completed' => 'Order completed',
 		'cancelled' => 'Order cancelled',
 		'refunded'  => 'Order refunded',

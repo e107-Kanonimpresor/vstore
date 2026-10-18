@@ -14,6 +14,9 @@ return array(
 	'LAN_VSTORE_MAIL_CANCELLED_REFUND' => 'Qualquer pagamento que tenhamos recebido por esta encomenda será reembolsado.',
 	'LAN_VSTORE_MAIL_REFUNDED'         => 'O pagamento da sua encomenda #{REF} de {ORDER_DATA: order_date} foi reembolsado.',
 	'LAN_VSTORE_MAIL_SUBJECT'          => 'A sua encomenda #[x] em %s',
+	'LAN_VSTORE_MAIL_QUOTE_REF'        => 'O número do seu pedido de orçamento é:',
+	'LAN_VSTORE_MAIL_QUOTE_INTRO'      => 'recebemos o seu pedido de orçamento #{REF} de {ORDER_DATA: order_date}. Responderemos com um orçamento dos produtos indicados abaixo.',
+	'LAN_VSTORE_MAIL_SUBJECT_QUOTE'    => 'O seu pedido de orçamento #[x] em %s',
 
 	'LAN_VSTORE_INV_HTML_LANG'         => 'pt',
 	'LAN_VSTORE_INV_TITLE'             => 'Fatura',

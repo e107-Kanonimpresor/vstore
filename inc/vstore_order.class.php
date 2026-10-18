@@ -768,6 +768,11 @@ class vstore_order
 
         $refId = $this->data['order_refcode'];
 
+        // Quote requests are followed up in the external billing app: the customer is not mailed on status changes
+        if (\Vstore\Support\Catalog::isQuoteStatus($this->data['order_status']) || varset($this->data['order_pay_gateway']) === \Vstore\Support\Catalog::QUOTE_GATEWAY) {
+            return;
+        }
+
         // Attach the invoice in case the order status is New, Complete or Processing
         $pdf_file = '';
 
@@ -913,7 +918,8 @@ class vstore_order
 
 		$cc = '';
 
-		if(!empty($templates[$templateKey]['cc']))
+		// A quote request goes to the customer and to the shop alike
+		if(!empty($templates[$templateKey]['cc']) || $templateKey === 'quote')
 		{
 			$cc = $sender_email;
 		}
@@ -929,7 +935,7 @@ $vars['is_business'] = vstore::isReverseChargeOrder($receiver, $this->data['orde
 		$this->sc->wrapper('vstore_email/default');
 
 		//todo add to template
-		$subject = sprintf(LAN_VSTORE_MAIL_SUBJECT, SITENAME);
+		$subject = sprintf($templateKey === 'quote' ? LAN_VSTORE_MAIL_SUBJECT_QUOTE : LAN_VSTORE_MAIL_SUBJECT, SITENAME);
 
 		$email = varset($receiver['email']);
 		$name = varset($receiver['firstname']) . " " . varset($receiver['lastname']);

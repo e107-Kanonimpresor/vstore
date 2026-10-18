@@ -125,7 +125,7 @@ class vstore_pref_ui extends e_admin_ui
 			);
 
 			// Get all active product categories 
-			$this->prefs['menu_cat']['writeParms']['optArray'] = array();
+			$this->prefs['menu_cat']['writeParms']['optArray'] = array(0 => LAN_VSTORE_ADMIN_PREF_MENU_ALL);
 			if ($data = e107::getDb()->retrieve('vstore_cat', 'cat_id,cat_name', 'ORDER BY cat_parent, cat_name', true))
 			{
 				foreach($data as $row)

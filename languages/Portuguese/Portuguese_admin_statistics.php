@@ -3,6 +3,7 @@ if (!defined('e107_INIT')) { exit; }
 
 return array(
 	'LAN_VSTORE_ADMIN_STAT_OPEN_ORDERS'   => 'Encomendas abertas',
+	'LAN_VSTORE_ADMIN_STAT_NEW_QUOTES'    => 'Orçamentos novos',
 	'LAN_VSTORE_ADMIN_STAT_ORDERS_7'      => 'Encomendas dos últimos 7 dias',
 	'LAN_VSTORE_ADMIN_STAT_GROSS_7'       => 'Vendas brutas dos últimos 7 dias',
 	'LAN_VSTORE_ADMIN_STAT_GROSS_31'      => 'Vendas brutas dos últimos 31 dias',

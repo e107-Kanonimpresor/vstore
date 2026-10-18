@@ -19,6 +19,12 @@ return array(
 	'LAN_VSTORE_ADMIN_ORD_PAYSTATUS_REFUNDED'   => 'Reembolsado',
 
 	'LAN_VSTORE_ADMIN_ORD_FILTER_OPEN'     => 'Abertas',
+	'LAN_VSTORE_ADMIN_ORD_PAYSTATUS_NONE'       => 'Nenhum',
+	'LAN_VSTORE_ADMIN_ORD_FILTER_QUOTES'   => 'Orçamentos',
+	'LAN_VSTORE_ADMIN_ORD_BTN_MIGRATED'    => 'Marcar como migrado para a app',
+	'LAN_VSTORE_ADMIN_ORD_BTN_APPROVED'    => 'Marcar como aprovado',
+	'LAN_VSTORE_ADMIN_ORD_BTN_INVOICED'    => 'Marcar como faturado',
+	'LAN_VSTORE_ADMIN_ORD_BTN_REOPEN'      => 'Reabrir como pedido de orçamento',
 	'LAN_VSTORE_ADMIN_ORD_INVOICE_TIP'     => 'Clique para abrir/gerar o PDF da fatura',
 	'LAN_VSTORE_ADMIN_ORD_INVOICE_FORCE'   => 'Marque para forçar a criação de um novo PDF de fatura ao guardar',
 

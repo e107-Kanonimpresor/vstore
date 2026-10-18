@@ -11,7 +11,7 @@ return array(
 	'LAN_VSTORE_ADMIN_PROD_CODE_PH'        => 'PROD001',
 	'LAN_VSTORE_ADMIN_PROD_INVENTORY'      => 'Inventario',
 	'LAN_VSTORE_ADMIN_PROD_INVENTORY_H'    => 'Introduce -1 si el artículo está siempre disponible o el número de unidades que tienes en stock.',
-	'LAN_VSTORE_ADMIN_PROD_PRICE_H'        => 'Introduce el precio del artículo en %s (sin impuestos).',
+	'LAN_VSTORE_ADMIN_PROD_PRICE_H'        => 'Introduce el precio del artículo en %s (sin impuestos). Déjalo vacío para ofrecer el producto como solicitud de presupuesto (sin precio, botón "Presupuesto"); 0 es un producto gratuito.',
 	'LAN_VSTORE_ADMIN_PROD_IMAGES_H'       => 'Arrastra y suelta aquí imágenes y vídeos para mostrarlos en la página del producto.',
 	'LAN_VSTORE_ADMIN_PROD_TAX_CLASS'      => 'Clase de impuesto',
 	'LAN_VSTORE_ADMIN_PROD_SHIPPING_H'     => 'El coste de envío de este artículo en %s. Ej.: 2.00',

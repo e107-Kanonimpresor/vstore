@@ -100,6 +100,7 @@ return array(
 
 	// Menu
 	'LAN_VSTORE_ADMIN_PREF_MENU_CAT'           => 'Product category',
+	'LAN_VSTORE_ADMIN_PREF_MENU_ALL'           => 'All categories (latest products)',
 	'LAN_VSTORE_ADMIN_PREF_MENU_COUNT'         => 'Product limit',
 	'LAN_VSTORE_ADMIN_PREF_MENU_COUNT_H'       => 'Enter the number of products to display in the menu.',
 );
